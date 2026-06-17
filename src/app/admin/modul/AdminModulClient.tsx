@@ -12,7 +12,7 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
 
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus modul ini secara permanen?")) return;
-    const res = await deleteAdminModule(id);
+    const res = await deleteAdminModule(id) as any;
     if (res.success) {
       setModules(modules.filter((m) => m.id !== id));
     } else if (res.error) {
