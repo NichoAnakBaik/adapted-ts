@@ -260,5 +260,53 @@ export async function getStudentAnalytics() {
     take: 5
   });
 
-  return { attempts, recommendations };
+  // Fetch Attendance for Attendance Rate
+  const attendances = await prisma.attendance.findMany({
+    where: { student_id: session.user.id }
+  });
+  
+  // Fetch Activity Logs for study patterns
+  const activities = await prisma.studentActivityLog.findMany({
+    where: { student_id: session.user.id },
+    orderBy: { created_at: 'desc' }
+  });
+
+  // Calculate learning patterns
+  const presentCount = attendances.filter(a => a.status === 'PRESENT' || a.status === 'LATE').length;
+  const attendanceRate = attendances.length > 0 ? Math.round((presentCount / attendances.length) * 100) : 0;
+
+  // Total Study Duration (from MODULE_ACCESS activities)
+  const totalDurationSeconds = activities.reduce((acc, curr) => acc + (curr.duration || 0), 0);
+  const totalDurationHours = (totalDurationSeconds / 3600).toFixed(1);
+
+  // Preferred Study Time
+  let timePreference = "Belum terdeteksi";
+  if (activities.length > 0) {
+    let morning = 0; // 5-12
+    let afternoon = 0; // 12-18
+    let evening = 0; // 18-24
+    let night = 0; // 0-5
+
+    activities.forEach(act => {
+      const hour = new Date(act.created_at).getHours();
+      if (hour >= 5 && hour < 12) morning++;
+      else if (hour >= 12 && hour < 18) afternoon++;
+      else if (hour >= 18 && hour <= 23) evening++;
+      else night++;
+    });
+
+    const max = Math.max(morning, afternoon, evening, night);
+    if (max === evening) timePreference = "Malam Hari (18:00 - 23:59)";
+    else if (max === morning) timePreference = "Pagi Hari (05:00 - 11:59)";
+    else if (max === afternoon) timePreference = "Siang/Sore (12:00 - 17:59)";
+    else if (max === night) timePreference = "Dini Hari (00:00 - 04:59)";
+  }
+
+  const patterns = {
+    attendanceRate,
+    totalDurationHours,
+    timePreference
+  };
+
+  return { attempts, recommendations, patterns };
 }

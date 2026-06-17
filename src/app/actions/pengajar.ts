@@ -71,6 +71,80 @@ export async function getModules() {
   });
 }
 
+export async function getTeacherAnalytics() {
+  const session = await checkPengajarAuth();
+
+  // Get all exams that belong to this teacher's classes
+  const attempts = await prisma.examAttempt.findMany({
+    where: {
+      exam: {
+        class: {
+          teacher_id: session.user.id
+        }
+      }
+    },
+    include: {
+      student: { select: { nama_lengkap: true, username: true } },
+      exam: { select: { title: true, class: { select: { name: true } } } }
+    },
+    orderBy: { end_time: 'desc' }
+  });
+
+  // Get ML recommendations for students in this teacher's classes
+  const recommendations = await prisma.recommendationHistory.findMany({
+    where: {
+      student: {
+        enrollments: {
+          some: {
+            class: {
+              teacher_id: session.user.id
+            }
+          }
+        }
+      }
+    },
+    include: {
+      student: { select: { nama_lengkap: true } }
+    },
+    orderBy: { created_at: 'desc' },
+    take: 20
+  });
+
+  // Group scores by student to find struggling students
+  const studentStats: Record<string, { id: string, name: string, totalScore: number, attemptsCount: number, class: string }> = {};
+  
+  attempts.forEach(attempt => {
+    if (!studentStats[attempt.student_id]) {
+      studentStats[attempt.student_id] = {
+        id: attempt.student_id,
+        name: attempt.student.nama_lengkap,
+        totalScore: 0,
+        attemptsCount: 0,
+        class: attempt.exam.class.name
+      };
+    }
+    studentStats[attempt.student_id].totalScore += (attempt.total_score || 0);
+    studentStats[attempt.student_id].attemptsCount += 1;
+  });
+
+  const performanceList = Object.values(studentStats).map(stat => ({
+    id: stat.id,
+    name: stat.name,
+    class: stat.class,
+    average: stat.attemptsCount > 0 ? Math.round(stat.totalScore / stat.attemptsCount) : 0,
+    attemptsCount: stat.attemptsCount
+  }));
+
+  // Sort by average score ascending (lowest first)
+  performanceList.sort((a, b) => a.average - b.average);
+
+  return { 
+    attempts, 
+    recommendations, 
+    performanceList 
+  };
+}
+
 export async function createModule(formData: FormData) {
   const session = await checkPengajarAuth();
   

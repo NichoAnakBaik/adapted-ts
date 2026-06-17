@@ -69,8 +69,31 @@ export default function SiswaAnalitikClient({ data }: { data: any }) {
           </div>
         </div>
 
-        {/* Right Col: AI Recommendations */}
+        {/* Right Col: AI Recommendations & Patterns */}
         <div className="lg:col-span-2 space-y-6">
+          
+          {/* Learning Patterns Board */}
+          <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100">
+            <div className="flex items-center gap-2 mb-6">
+              <Clock className="w-5 h-5 text-indigo-500" />
+              <h2 className="text-lg font-bold text-namsan-text">Pola Belajar Anda</h2>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                <span className="text-xs font-bold text-indigo-500 mb-1 block uppercase tracking-wider">Kehadiran</span>
+                <span className="text-2xl font-black text-namsan-text">{data.patterns?.attendanceRate || 0}%</span>
+              </div>
+              <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                <span className="text-xs font-bold text-indigo-500 mb-1 block uppercase tracking-wider">Durasi Modul</span>
+                <span className="text-2xl font-black text-namsan-text">{data.patterns?.totalDurationHours || 0} Jam</span>
+              </div>
+              <div className="p-4 bg-indigo-50/50 border border-indigo-100 rounded-xl">
+                <span className="text-xs font-bold text-indigo-500 mb-1 block uppercase tracking-wider">Waktu Favorit</span>
+                <span className="text-sm font-bold text-namsan-text block mt-1">{data.patterns?.timePreference || "Belum Terdeteksi"}</span>
+              </div>
+            </div>
+          </div>
           <div className="bg-namsan-dark rounded-2xl p-6 shadow-lg relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-bl-full -z-10"></div>
             
