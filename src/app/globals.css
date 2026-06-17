@@ -10,8 +10,11 @@
   
   --color-namsan-blue: #1f9fcf;
   
-  --color-namsan-bg: #fefcf0;
-  --color-namsan-bg-alt: #dfdbd8;
+  --color-namsan-bg: #fdfbf7;
+  --color-namsan-bg-alt: #ffffff;
+  
+  --color-namsan-dark: #1e2022;
+  --color-namsan-darker: #151718;
 
   --color-namsan-text: #1a1a1a;
   --color-namsan-text-muted: #6b7280;
