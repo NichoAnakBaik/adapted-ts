@@ -103,50 +103,58 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
           </div>
 
           {showForm && (
-            <div className="bg-white p-6 rounded-2xl shadow-sm border border-blue-100 mb-8 animate-in fade-in slide-in-from-top-2">
-              <h3 className="font-bold text-gray-800 mb-4 border-b pb-2">Buat Soal {tabs.find(t => t.id === activeTab)?.label} Baru</h3>
-              {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
-              
-              <form onSubmit={handleCreateQuestion} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-bold text-gray-700 mb-2">Teks Soal / Pertanyaan</label>
-                  <KoreanTextarea name="question_text" required rows={3} placeholder="Masukkan soal dalam bahasa Indonesia atau Korea..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
+            <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+              <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-blue-100">
+                <div className="flex justify-between items-center mb-4 border-b pb-3">
+                  <h3 className="text-xl font-bold text-gray-800">Buat Soal {tabs.find(t => t.id === activeTab)?.label} Baru</h3>
+                  <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
                 </div>
+                {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <form onSubmit={handleCreateQuestion} className="space-y-4">
                   <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Kunci Jawaban 
-                      {activeTab === "SPEAKING" || activeTab === "WRITING" ? " (Opsional/Panduan)" : " (Wajib)"}
-                    </label>
-                    <KoreanInput type="text" name="answer_key" required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Kunci jawaban persis..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                    <label className="block text-sm font-bold text-gray-700 mb-2">Teks Soal / Pertanyaan</label>
+                    <KoreanTextarea name="question_text" required rows={3} placeholder="Masukkan soal dalam bahasa Indonesia atau Korea..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
                   </div>
                   
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Tingkat Kesulitan (1-5)</label>
-                    <input type="number" name="difficulty" min="1" max="5" defaultValue="1" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">
+                        Kunci Jawaban 
+                        {activeTab === "SPEAKING" || activeTab === "WRITING" ? " (Opsional/Panduan)" : " (Wajib)"}
+                      </label>
+                      <KoreanInput type="text" name="answer_key" required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Kunci jawaban persis..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+                    
+                    <div>
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Tingkat Kesulitan (1-5)</label>
+                      <input type="number" name="difficulty" min="1" max="5" defaultValue="1" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                    </div>
+
+                    {activeTab === "LISTENING" && (
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Link Audio File (Wajib untuk Listening)</label>
+                        <input type="url" name="audio_reference" required placeholder="https://..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      </div>
+                    )}
+                    {activeTab === "SPEAKING" && (
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Link Audio Panduan (Opsional)</label>
+                        <input type="url" name="audio_reference" placeholder="https://..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      </div>
+                    )}
                   </div>
 
-                  {activeTab === "LISTENING" && (
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">Link Audio File (Wajib untuk Listening)</label>
-                      <input type="url" name="audio_reference" required placeholder="https://..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
-                    </div>
-                  )}
-                  {activeTab === "SPEAKING" && (
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-bold text-gray-700 mb-2">Link Audio Panduan (Opsional)</label>
-                      <input type="url" name="audio_reference" placeholder="https://..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-2">
-                  <button type="submit" className="w-full bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3.5 px-4 rounded-xl shadow-md transition-all">
-                    Simpan Soal ke {tabs.find(t => t.id === activeTab)?.label}
-                  </button>
-                </div>
-              </form>
+                  <div className="mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                    <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                      Batal
+                    </button>
+                    <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
+                      Simpan Soal ke {tabs.find(t => t.id === activeTab)?.label}
+                    </button>
+                  </div>
+                </form>
+              </div>
             </div>
           )}
 

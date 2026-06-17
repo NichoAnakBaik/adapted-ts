@@ -55,38 +55,46 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold mb-4">Tambah Modul Baru</h2>
-          {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
-          
-          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
-              <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
-                <option value="">-- Pilih Kelas --</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h2 className="text-xl font-bold text-gray-800">Tambah Modul Baru</h2>
+              <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Judul Modul</label>
-              <KoreanInput type="text" name="title" required placeholder="Contoh: Modul 1: Hangeul Dasar" className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Link Dokumen (PDF) *opsional</label>
-              <input type="url" name="pdf_url" placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Link Audio (Listening) *opsional</label>
-              <input type="url" name="audio_url" placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div className="md:col-span-2 mt-2">
-              <button type="submit" className="w-full bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-4 rounded-lg">
-                Simpan & Publikasi Modul
-              </button>
-            </div>
-          </form>
+            {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
+            
+            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
+                <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
+                  <option value="">-- Pilih Kelas --</option>
+                  {classes.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Modul</label>
+                <KoreanInput type="text" name="title" required placeholder="Contoh: Modul 1: Hangeul Dasar" className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link Dokumen (PDF) *opsional</label>
+                <input type="url" name="pdf_url" placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link Audio (Listening) *opsional</label>
+                <input type="url" name="audio_url" placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                  Batal
+                </button>
+                <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
+                  Simpan & Publikasi
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

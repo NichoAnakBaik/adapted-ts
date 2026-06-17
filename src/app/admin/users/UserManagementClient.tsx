@@ -53,37 +53,45 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold mb-4">Buat Pengguna Baru</h2>
-          {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
-          
-          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
-              <input type="text" name="nama_lengkap" required className="w-full p-2.5 border rounded-lg" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h2 className="text-xl font-bold text-gray-800">Buat Pengguna Baru</h2>
+              <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
-              <input type="text" name="username" required className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
-              <input type="password" name="password" required className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
-              <select name="role" required className="w-full p-2.5 border rounded-lg bg-white">
-                <option value="SISWA">Siswa</option>
-                <option value="PENGAJAR">Pengajar</option>
-                <option value="ADMIN">Admin</option>
-              </select>
-            </div>
-            <div className="md:col-span-2 mt-2">
-              <button type="submit" className="w-full bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-4 rounded-lg">
-                Simpan Pengguna
-              </button>
-            </div>
-          </form>
+            {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
+            
+            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                <input type="text" name="nama_lengkap" required className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+                <input type="text" name="username" required className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                <input type="password" name="password" required className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <select name="role" required className="w-full p-2.5 border rounded-lg bg-white">
+                  <option value="SISWA">Siswa</option>
+                  <option value="PENGAJAR">Pengajar</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                  Batal
+                </button>
+                <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
+                  Simpan Pengguna
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

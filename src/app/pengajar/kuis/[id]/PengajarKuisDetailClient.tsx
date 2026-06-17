@@ -69,62 +69,70 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold mb-4">Buat Soal Baru</h2>
-          {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
-          
-          <form onSubmit={handleCreateQuestion} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Soal</label>
-              <select name="type" value={questionType} onChange={(e) => setQuestionType(e.target.value)} required className="w-full p-2.5 border rounded-lg bg-white">
-                <option value="MULTIPLE_CHOICE">Pilihan Ganda (Otomatis Dinilai)</option>
-                <option value="LISTENING">Listening (Audio & Teks)</option>
-                <option value="SPEAKING">Speaking (AI Voice Analysis)</option>
-                <option value="WRITING">Writing (Esai)</option>
-              </select>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h2 className="text-xl font-bold text-gray-800">Buat Soal Baru</h2>
+              <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Tingkat Kesulitan (1-5)</label>
-              <input type="number" name="difficulty" min="1" max="5" defaultValue="1" required className="w-full p-2.5 border rounded-lg" />
-            </div>
-
-            <div className="md:col-span-2">
-              <label className="block text-sm font-bold text-gray-700 mb-2">Pertanyaan</label>
-              <KoreanTextarea 
-                name="question_text" 
-                required 
-                rows={3} 
-                placeholder="Ketik soal di sini..." 
-                className="w-full p-2.5 border rounded-lg" 
-              />
-            </div>
-
-            {questionType === "LISTENING" && (
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link Audio Reference (URL MP3)</label>
-                <input type="url" name="audio_reference" required placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
+            {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
+            
+            <form onSubmit={handleCreateQuestion} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Soal</label>
+                <select name="type" value={questionType} onChange={(e) => setQuestionType(e.target.value)} required className="w-full p-2.5 border rounded-lg bg-white">
+                  <option value="MULTIPLE_CHOICE">Pilihan Ganda (Otomatis Dinilai)</option>
+                  <option value="LISTENING">Listening (Audio & Teks)</option>
+                  <option value="SPEAKING">Speaking (AI Voice Analysis)</option>
+                  <option value="WRITING">Writing (Esai)</option>
+                </select>
               </div>
-            )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Tingkat Kesulitan (1-5)</label>
+                <input type="number" name="difficulty" min="1" max="5" defaultValue="1" required className="w-full p-2.5 border rounded-lg" />
+              </div>
 
-            <div className="md:col-span-2">
-              <label className="block text-sm font-bold text-gray-700 mb-2">Kunci Jawaban</label>
-              <KoreanInput 
-                type="text" 
-                name="answer_key" 
-                placeholder="A/B/C/D atau Teks Jawaban (Wajib untuk Pilihan Ganda)" 
-                className="w-full p-2.5 border rounded-lg" 
-              />
-              {questionType === "MULTIPLE_CHOICE" && (
-                <p className="text-xs text-gray-500 mt-1">*Jika Pilihan Ganda, format soal di atas bisa berupa teks soal beserta opsi A, B, C, D. Lalu isi Kunci Jawaban dengan 1 huruf saja (A/B/C/D).</p>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">Pertanyaan</label>
+                <KoreanTextarea 
+                  name="question_text" 
+                  required 
+                  rows={3} 
+                  placeholder="Ketik soal di sini..." 
+                  className="w-full p-2.5 border rounded-lg" 
+                />
+              </div>
+
+              {questionType === "LISTENING" && (
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Link Audio Reference (URL MP3)</label>
+                  <input type="url" name="audio_reference" required placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
+                </div>
               )}
-            </div>
 
-            <div className="md:col-span-2 mt-2">
-              <button type="submit" className="w-full bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-4 rounded-lg">
-                Simpan Soal
-              </button>
-            </div>
-          </form>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">Kunci Jawaban</label>
+                <KoreanInput 
+                  type="text" 
+                  name="answer_key" 
+                  placeholder="A/B/C/D atau Teks Jawaban (Wajib untuk Pilihan Ganda)" 
+                  className="w-full p-2.5 border rounded-lg" 
+                />
+                {questionType === "MULTIPLE_CHOICE" && (
+                  <p className="text-xs text-gray-500 mt-1">*Jika Pilihan Ganda, format soal di atas bisa berupa teks soal beserta opsi A, B, C, D. Lalu isi Kunci Jawaban dengan 1 huruf saja (A/B/C/D).</p>
+                )}
+              </div>
+
+              <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                  Batal
+                </button>
+                <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
+                  Simpan Soal
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 

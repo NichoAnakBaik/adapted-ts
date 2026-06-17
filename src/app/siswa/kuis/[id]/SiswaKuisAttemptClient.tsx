@@ -111,14 +111,27 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
               {/* Answer Input based on type */}
               <div className="mt-4">
                 {q.type === 'MULTIPLE_CHOICE' ? (
-                  <KoreanInput 
-                    type="text" 
-                    placeholder="Ketik A / B / C / D" 
-                    maxLength={1}
-                    value={answers[q.id] || ""}
-                    onValueChange={(val) => handleAnswerChange(q.id, val.toUpperCase())}
-                    className="w-32 p-3 border-2 focus:border-namsan-primary rounded-xl text-center text-xl font-bold uppercase outline-none transition-colors"
-                  />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {['A', 'B', 'C', 'D'].map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() => handleAnswerChange(q.id, option)}
+                        className={`p-4 rounded-xl border-2 text-left font-bold transition-all flex items-center gap-3 ${
+                          answers[q.id] === option 
+                            ? 'border-namsan-primary bg-blue-50 text-namsan-primary shadow-sm' 
+                            : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                          answers[q.id] === option ? 'border-namsan-primary bg-namsan-primary text-white' : 'border-gray-300'
+                        }`}>
+                          <span className="text-xs">{answers[q.id] === option ? '✓' : ''}</span>
+                        </div>
+                        Pilihan {option}
+                      </button>
+                    ))}
+                  </div>
                 ) : q.type === 'SPEAKING' ? (
                   <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
                     <p className="text-sm text-gray-500 mb-2">*(Fitur AI Voice Analysis akan diaktifkan di Tahap Akhir). Untuk saat ini, ketik "Selesai" jika Anda sudah mempraktikkan pengucapannya secara mandiri.*</p>

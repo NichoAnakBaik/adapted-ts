@@ -48,47 +48,55 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
           onClick={() => setShowForm(!showForm)}
           className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-colors"
         >
-          {showForm ? "Batal" : <><Plus className="w-5 h-5" /> Buat Kuis Baru</>}
+          <Plus className="w-5 h-5" /> Buat Kuis Baru
         </button>
       </div>
 
       {showForm && (
-        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold mb-4">Buat Kuis / Ujian Baru</h2>
-          {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
-          
-          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
-              <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
-                <option value="">-- Pilih Kelas --</option>
-                {classes.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 border-b pb-3">
+              <h2 className="text-xl font-bold text-gray-800">Buat Kuis / Ujian Baru</h2>
+              <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Judul Ujian</label>
-              <KoreanInput type="text" name="title" required placeholder="Contoh: Kuis Hangeul 1" className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Batas Waktu (Menit)</label>
-              <input type="number" name="time_limit" placeholder="Kosongkan jika tidak ada batas" className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Instruksi</label>
-              <KoreanTextarea name="description" rows={3} placeholder="Instruksi pengerjaan ujian..." className="w-full p-2.5 border rounded-lg" />
-            </div>
-            <div className="md:col-span-2 flex items-center gap-2 mt-2">
-              <input type="checkbox" id="is_final" name="is_final" value="true" className="w-4 h-4 text-namsan-primary rounded border-gray-300" />
-              <label htmlFor="is_final" className="text-sm font-bold text-namsan-text">Tandai sebagai Ujian Akhir (Sertifikasi)</label>
-            </div>
-            <div className="md:col-span-2 mt-2">
-              <button type="submit" className="w-full bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-4 rounded-lg">
-                Simpan Ujian (Draft)
-              </button>
-            </div>
-          </form>
+            {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
+            
+            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
+                <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
+                  <option value="">-- Pilih Kelas --</option>
+                  {classes.map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Ujian</label>
+                <KoreanInput type="text" name="title" required placeholder="Contoh: Kuis Hangeul 1" className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Batas Waktu (Menit)</label>
+                <input type="number" name="time_limit" placeholder="Kosongkan jika tidak ada batas" className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Instruksi</label>
+                <KoreanTextarea name="description" rows={3} placeholder="Instruksi pengerjaan ujian..." className="w-full p-2.5 border rounded-lg" />
+              </div>
+              <div className="md:col-span-2 flex items-center gap-2 mt-2">
+                <input type="checkbox" id="is_final" name="is_final" value="true" className="w-4 h-4 text-namsan-primary rounded border-gray-300" />
+                <label htmlFor="is_final" className="text-sm font-bold text-namsan-text">Tandai sebagai Ujian Akhir (Sertifikasi)</label>
+              </div>
+              <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
+                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                  Batal
+                </button>
+                <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
+                  Simpan Ujian (Draft)
+                </button>
+              </div>
+            </form>
+          </div>
         </div>
       )}
 
