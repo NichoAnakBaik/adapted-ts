@@ -110,7 +110,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
 
               {/* Answer Input based on type */}
               <div className="mt-4">
-                {q.type === 'MULTIPLE_CHOICE' ? (
+                {(q.format === 'MULTIPLE_CHOICE' || q.type === 'MULTIPLE_CHOICE') ? (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     {['A', 'B', 'C', 'D'].map((option) => (
                       <button

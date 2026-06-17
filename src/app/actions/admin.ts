@@ -286,15 +286,23 @@ export async function createAdminQuestion(formData: FormData) {
   await checkAdminAuth();
   const exam_id = formData.get("exam_id") as string;
   const type = formData.get("type") as "SPEAKING" | "LISTENING" | "WRITING" | "READING";
+  const format = formData.get("format") as string || "ESSAY";
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
   const audio_reference = formData.get("audio_reference") as string;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
+  const option_a = formData.get("option_a") as string | null;
+  const option_b = formData.get("option_b") as string | null;
+  const option_c = formData.get("option_c") as string | null;
+  const option_d = formData.get("option_d") as string | null;
 
   if (!exam_id || !type || !question_text) return { error: "Data soal tidak lengkap" };
 
   await prisma.question.create({
-    data: { exam_id, type, question_text, answer_key, audio_reference, difficulty }
+    data: { 
+      exam_id, type, format, question_text, answer_key, audio_reference, difficulty,
+      option_a, option_b, option_c, option_d
+    }
   });
   return { success: true };
 }

@@ -165,6 +165,10 @@ export async function createQuestion(formData: FormData) {
   const answer_key = formData.get("answer_key") as string;
   const audio_reference = formData.get("audio_reference") as string;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
+  const option_a = formData.get("option_a") as string | null;
+  const option_b = formData.get("option_b") as string | null;
+  const option_c = formData.get("option_c") as string | null;
+  const option_d = formData.get("option_d") as string | null;
 
   if (!exam_id || !type || !question_text) return { error: "Data soal tidak lengkap" };
 
@@ -172,7 +176,10 @@ export async function createQuestion(formData: FormData) {
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
   await prisma.question.create({
-    data: { exam_id, type, question_text, answer_key, audio_reference, difficulty }
+    data: { 
+      exam_id, type, question_text, answer_key, audio_reference, difficulty,
+      option_a, option_b, option_c, option_d
+    }
   });
 
   return { success: true };

@@ -129,7 +129,12 @@ model Question {
   question_text   String
   answer_key      String? // Optional for open-ended or subjective tests
   audio_reference String? // URL to audio for listening questions
-  difficulty      Int?         @default(1) // 1-5 scale
+  format          String   @default("ESSAY") // "MULTIPLE_CHOICE" or "ESSAY"
+  option_a        String?
+  option_b        String?
+  option_c        String?
+  option_d        String?
+  difficulty      Int?     @default(1) // 1-5 scale
   created_at      DateTime     @default(now())
   updated_at      DateTime     @updatedAt
 

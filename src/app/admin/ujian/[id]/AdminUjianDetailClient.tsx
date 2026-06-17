@@ -118,12 +118,20 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-bold text-gray-700 mb-2">Format Soal</label>
+                      <select name="format" required className="w-full p-3 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="MULTIPLE_CHOICE">Pilihan Ganda (A/B/C/D)</option>
+                        <option value="ESSAY">Isian (Esai / Text Panjang)</option>
+                      </select>
+                    </div>
+
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
                         Kunci Jawaban 
                         {activeTab === "SPEAKING" || activeTab === "WRITING" ? " (Opsional/Panduan)" : " (Wajib)"}
                       </label>
-                      <KoreanInput type="text" name="answer_key" required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Kunci jawaban persis..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      <KoreanInput type="text" name="answer_key" required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Jawaban (atau 1 huruf A/B/C/D jika pilihan ganda)..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
                     
                     <div>
