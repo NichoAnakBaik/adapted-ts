@@ -10,6 +10,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [showForm, setShowForm] = useState(false);
   const [questionType, setQuestionType] = useState("MULTIPLE_CHOICE");
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL">("SOAL");
 
   const handleCreateQuestion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,17 +57,41 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
         </div>
       </div>
 
-      <div className="flex items-center justify-between">
-        <h2 className="text-xl font-bold text-namsan-text flex items-center gap-2">
-          <FileQuestion className="w-6 h-6 text-namsan-primary" /> Daftar Soal ({exam.questions.length})
-        </h2>
+      <div className="flex gap-2 border-b border-gray-200">
         <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors text-sm"
+          onClick={() => setActiveTab("SOAL")}
+          className={`px-4 py-3 font-bold text-sm transition-colors border-b-2 ${
+            activeTab === "SOAL" ? "border-namsan-primary text-namsan-primary" : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
         >
-          {showForm ? "Batal" : <><Plus className="w-4 h-4" /> Tambah Soal</>}
+          <div className="flex items-center gap-2">
+            <FileQuestion className="w-4 h-4" />
+            Daftar Soal ({exam.questions.length})
+          </div>
+        </button>
+        <button
+          onClick={() => setActiveTab("HASIL")}
+          className={`px-4 py-3 font-bold text-sm transition-colors border-b-2 ${
+            activeTab === "HASIL" ? "border-namsan-primary text-namsan-primary" : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            Hasil Pengerjaan
+          </div>
         </button>
       </div>
+
+      {activeTab === "SOAL" && (
+        <>
+          <div className="flex justify-end">
+            <button
+              onClick={() => setShowForm(!showForm)}
+              className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors text-sm"
+            >
+              {showForm ? "Batal" : <><Plus className="w-4 h-4" /> Tambah Soal</>}
+            </button>
+          </div>
 
       {showForm && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
@@ -184,8 +209,9 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               )}
 
               {q.audio_reference && (
-                <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 flex items-center gap-2">
-                  <Clock className="w-4 h-4" /> File Audio Terlampir
+                <div className="mt-3">
+                  <span className="text-sm text-gray-500 block mb-1">Audio Listening:</span>
+                  <audio controls src={q.audio_reference} className="w-full max-w-md h-10" />
                 </div>
               )}
 
@@ -195,7 +221,6 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 </div>
               )}
             </div>
-            {/* Trash button can be implemented later */}
           </div>
         ))}
 
@@ -204,7 +229,43 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
             <p className="text-gray-500">Belum ada soal untuk kuis ini. Klik Tambah Soal di atas.</p>
           </div>
         )}
-      </div>
+        </div>
+        </>
+      )}
+
+      {activeTab === "HASIL" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <table className="w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100 text-sm">
+                <th className="p-4 font-bold text-namsan-text-muted">Nama Siswa</th>
+                <th className="p-4 font-bold text-namsan-text-muted text-center">Skor</th>
+                <th className="p-4 font-bold text-namsan-text-muted">Waktu Selesai</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {exam.exam_attempts?.map((attempt: any) => (
+                <tr key={attempt.id} className="hover:bg-gray-50 transition-colors">
+                  <td className="p-4 font-bold text-gray-900">{attempt.student.nama_lengkap || attempt.student.username}</td>
+                  <td className="p-4 text-center">
+                    <span className="inline-flex items-center justify-center px-3 py-1 rounded-full font-bold bg-blue-100 text-blue-700">
+                      {attempt.score !== null ? attempt.score : '-'} / 100
+                    </span>
+                  </td>
+                  <td className="p-4 text-sm text-gray-500">
+                    {new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}
+                  </td>
+                </tr>
+              ))}
+              {(!exam.exam_attempts || exam.exam_attempts.length === 0) && (
+                <tr>
+                  <td colSpan={3} className="p-8 text-center text-gray-500">Belum ada siswa yang mengerjakan kuis ini.</td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

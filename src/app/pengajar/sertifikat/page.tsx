@@ -59,7 +59,3 @@ export default async function PengajarSertifikat() {
     </div>
   );
 }
-      </div>
-    </div>
-  );
-}

@@ -72,7 +72,7 @@ export async function getDashboardStats() {
 
 // --- STUDENT EXAMS ---
 
-export async function getAvailableExams() {
+export async function getAvailableQuizzes() {
   const session = await checkSiswaAuth();
   
   const enrollments = await prisma.enrollment.findMany({
@@ -82,17 +82,46 @@ export async function getAvailableExams() {
 
   const classIds = enrollments.map(e => e.class_id);
 
-  // Fetch published exams for these classes
   return prisma.exam.findMany({
     where: {
       class_id: { in: classIds },
-      is_published: true
+      is_published: true,
+      is_final: false
     },
     include: {
       class: { select: { name: true, teacher: { select: { nama_lengkap: true } } } },
       _count: { select: { questions: true } },
       exam_attempts: {
-        where: { student_id: session.user.id }
+        where: { student_id: session.user.id },
+        include: { question_attempts: true }
+      }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function getAvailableFinalExams() {
+  const session = await checkSiswaAuth();
+  
+  const enrollments = await prisma.enrollment.findMany({
+    where: { student_id: session.user.id },
+    select: { class_id: true }
+  });
+
+  const classIds = enrollments.map(e => e.class_id);
+
+  return prisma.exam.findMany({
+    where: {
+      class_id: { in: classIds },
+      is_published: true,
+      is_final: true
+    },
+    include: {
+      class: { select: { name: true, teacher: { select: { nama_lengkap: true } } } },
+      _count: { select: { questions: true } },
+      exam_attempts: {
+        where: { student_id: session.user.id },
+        include: { question_attempts: true }
       }
     },
     orderBy: { created_at: 'desc' }

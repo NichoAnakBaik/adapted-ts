@@ -101,10 +101,9 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
               </div>
               
               {q.audio_reference && (
-                <div className="mb-6">
-                  <a href={q.audio_reference} target="_blank" rel="noreferrer" className="inline-flex items-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2 px-4 rounded-lg text-sm transition-colors">
-                    <PlayCircle className="w-5 h-5" /> Putar Audio Reference
-                  </a>
+                <div className="mb-6 bg-blue-50 p-4 rounded-xl">
+                  <span className="text-sm font-bold text-blue-800 flex items-center gap-2 mb-2"><PlayCircle className="w-5 h-5" /> Audio Listening</span>
+                  <audio controls src={q.audio_reference} className="w-full max-w-md h-12" />
                 </div>
               )}
 

@@ -5,7 +5,7 @@ import { Keyboard as KeyboardIcon } from "lucide-react";
 import * as Hangul from "hangul-js";
 import KoreanVirtualKeyboard from "./KoreanVirtualKeyboard";
 
-export function KoreanInput(props: React.InputHTMLAttributes<HTMLInputElement> & { onValueChange?: (val: string) => void }) {
+export function KoreanInput({ onValueChange, ...props }: React.InputHTMLAttributes<HTMLInputElement> & { onValueChange?: (val: string) => void }) {
   const [internalValue, setInternalValue] = useState(props.defaultValue || "");
   const [showKeyboard, setShowKeyboard] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -25,12 +25,12 @@ export function KoreanInput(props: React.InputHTMLAttributes<HTMLInputElement> &
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInternalValue(e.target.value);
     if (props.onChange) props.onChange(e);
-    if (props.onValueChange) props.onValueChange(e.target.value);
+    if (onValueChange) onValueChange(e.target.value);
   };
 
   const handleKeyboardChange = (val: string) => {
     setInternalValue(val);
-    if (props.onValueChange) props.onValueChange(val);
+    if (onValueChange) onValueChange(val);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -94,7 +94,7 @@ export function KoreanInput(props: React.InputHTMLAttributes<HTMLInputElement> &
   );
 }
 
-export function KoreanTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { onValueChange?: (val: string) => void }) {
+export function KoreanTextarea({ onValueChange, ...props }: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { onValueChange?: (val: string) => void }) {
   const [internalValue, setInternalValue] = useState(props.defaultValue || "");
   const [showKeyboard, setShowKeyboard] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -114,12 +114,12 @@ export function KoreanTextarea(props: React.TextareaHTMLAttributes<HTMLTextAreaE
   const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setInternalValue(e.target.value);
     if (props.onChange) props.onChange(e);
-    if (props.onValueChange) props.onValueChange(e.target.value);
+    if (onValueChange) onValueChange(e.target.value);
   };
 
   const handleKeyboardChange = (val: string) => {
     setInternalValue(val);
-    if (props.onValueChange) props.onValueChange(val);
+    if (onValueChange) onValueChange(val);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

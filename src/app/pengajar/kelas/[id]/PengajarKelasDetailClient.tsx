@@ -97,9 +97,10 @@ export default function PengajarKelasDetailClient({ classData }: { classData: an
                         ) : <span className="w-5 h-5 opacity-20"><FileText className="w-5 h-5" /></span>}
                         
                         {m.audio_url ? (
-                          <a href={m.audio_url} target="_blank" rel="noreferrer" className="text-blue-500 hover:bg-blue-50 p-1.5 rounded" title="Putar Audio">
-                            <Headphones className="w-5 h-5" />
-                          </a>
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Audio</span>
+                            <audio controls src={m.audio_url} className="w-48 h-10" />
+                          </div>
                         ) : <span className="w-5 h-5 opacity-20"><Headphones className="w-5 h-5" /></span>}
                       </div>
                     </td>

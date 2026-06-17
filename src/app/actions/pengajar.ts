@@ -195,7 +195,15 @@ export async function getExamDetails(id: string) {
     where: { id },
     include: {
       class: true,
-      questions: { orderBy: { created_at: 'asc' } }
+      questions: { orderBy: { created_at: 'asc' } },
+      exam_attempts: {
+        include: {
+          student: {
+            select: { id: true, nama_lengkap: true, username: true }
+          }
+        },
+        orderBy: { created_at: 'desc' }
+      }
     }
   });
 

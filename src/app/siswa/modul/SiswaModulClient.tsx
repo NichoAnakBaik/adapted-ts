@@ -32,29 +32,25 @@ export default function SiswaModulClient({ modules }: { modules: any[] }) {
               Oleh: {m.class.teacher?.nama_lengkap || "Pengajar Namsan"}
             </p>
 
-            <div className="flex gap-3 mt-auto">
+            <div className="flex flex-col gap-3 mt-auto">
               {m.pdf_url && (
                 <a 
                   href={m.pdf_url} 
                   target="_blank" 
                   rel="noreferrer" 
-                  className="flex-1 flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm"
+                  className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-600 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm"
                 >
-                  <FileText className="w-4 h-4" /> Baca PDF
+                  <FileText className="w-4 h-4" /> Baca Dokumen PDF
                 </a>
               )}
               {m.audio_url && (
-                <a 
-                  href={m.audio_url} 
-                  target="_blank" 
-                  rel="noreferrer" 
-                  className="flex-1 flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm"
-                >
-                  <Headphones className="w-4 h-4" /> Dengar Audio
-                </a>
+                <div className="w-full mt-1">
+                  <span className="text-xs text-gray-500 font-bold mb-1.5 flex items-center gap-1.5"><Headphones className="w-3.5 h-3.5" /> Audio Listening</span>
+                  <audio controls src={m.audio_url} className="w-full h-10 rounded-lg bg-gray-50" />
+                </div>
               )}
               {!m.pdf_url && !m.audio_url && (
-                <div className="flex-1 flex items-center justify-center gap-2 bg-gray-50 text-gray-400 font-bold py-2.5 px-4 rounded-xl text-sm">
+                <div className="w-full flex items-center justify-center gap-2 bg-gray-50 text-gray-400 font-bold py-2.5 px-4 rounded-xl text-sm">
                   Belum ada lampiran
                 </div>
               )}
