@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, Plus, Trash2, CheckCircle2, XCircle, Clock } from "lucide-react";
+import { Award, Plus, Trash2, CheckCircle2, XCircle, Clock, ArrowRight } from "lucide-react";
 import { createOrUpdateCertificate, deleteCertificate } from "@/app/actions/admin";
 
 export default function AdminSertifikatClient({ initialCertificates, students, classes }: { initialCertificates: any[], students: any[], classes: any[] }) {
