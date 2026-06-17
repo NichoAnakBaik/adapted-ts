@@ -25,14 +25,18 @@ export async function setSession(user: { id: string; role: string; username: str
   const session = await encrypt({ user, expires });
   
   const cookieStore = await cookies();
-  cookieStore.set("session", session, { expires, httpOnly: true, secure: process.env.NODE_ENV === "production" });
+  cookieStore.set("session", session, { expires, httpOnly: true, path: "/" });
 }
 
 export async function getSession() {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
   if (!session) return null;
-  return await decrypt(session);
+  try {
+    return await decrypt(session);
+  } catch (error) {
+    return null;
+  }
 }
 
 export async function clearSession() {

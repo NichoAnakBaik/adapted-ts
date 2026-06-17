@@ -2,12 +2,13 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { redirect } from "next/navigation";
 
 // Basic authorization check
 async function checkAdminAuth() {
   const session = await getSession();
   if (!session || session.user.role !== "ADMIN") {
-    throw new Error("Unauthorized");
+    redirect("/login");
   }
 }
 

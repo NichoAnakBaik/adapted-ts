@@ -1,11 +1,7 @@
-import { getSession } from '@/lib/session';
-import { logout } from '@/app/actions/auth';
 import { NextResponse } from 'next/server';
+import { clearSession } from '@/lib/auth';
 
 export async function POST() {
-  const session = await getSession();
-  if (session) {
-    await logout(session.user_id, session.role);
-  }
-  return NextResponse.redirect(new URL('/', process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'));
+  await clearSession();
+  return NextResponse.json({ success: true });
 }

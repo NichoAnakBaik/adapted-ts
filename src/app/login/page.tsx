@@ -4,22 +4,26 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { loginAction } from "@/app/actions/auth";
-import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   async function handleSubmit(formData: FormData) {
     setLoading(true);
     setError(null);
-    const result = await loginAction(formData);
-    if (result?.error) {
-      setError(result.error);
+    try {
+      const result = await loginAction(formData);
+      if (result?.error) {
+        setError(result.error);
+        setLoading(false);
+      } else if (result?.redirectUrl) {
+        window.location.href = result.redirectUrl;
+      }
+    } catch (e) {
+      console.error(e);
+      setError("Terjadi kesalahan pada server. Pastikan server dev sudah di-restart.");
       setLoading(false);
-    } else if (result?.redirectUrl) {
-      router.push(result.redirectUrl);
     }
   }
 
