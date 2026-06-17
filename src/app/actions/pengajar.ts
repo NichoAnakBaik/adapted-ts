@@ -91,3 +91,89 @@ export async function deleteModule(id: string) {
   await prisma.module.delete({ where: { id } });
   return { success: true };
 }
+
+// --- EXAM MANAGEMENT ---
+
+export async function getExams() {
+  const session = await checkPengajarAuth();
+  
+  return prisma.exam.findMany({
+    where: {
+      class: { teacher_id: session.user.id }
+    },
+    include: {
+      class: { select: { name: true } },
+      _count: { select: { questions: true, exam_attempts: true } }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function createExam(formData: FormData) {
+  const session = await checkPengajarAuth();
+  
+  const class_id = formData.get("class_id") as string;
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const time_limit = parseInt(formData.get("time_limit") as string) || null;
+  const is_final = formData.get("is_final") === "true";
+
+  if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
+
+  const classData = await prisma.class.findFirst({
+    where: { id: class_id, teacher_id: session.user.id }
+  });
+
+  if (!classData) return { error: "Akses ditolak" };
+
+  await prisma.exam.create({
+    data: { class_id, title, description, time_limit, is_final }
+  });
+
+  return { success: true };
+}
+
+export async function toggleExamPublish(id: string, is_published: boolean) {
+  const session = await checkPengajarAuth();
+  // verify ownership
+  const exam = await prisma.exam.findUnique({ where: { id }, include: { class: true } });
+  if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
+
+  await prisma.exam.update({ where: { id }, data: { is_published } });
+  return { success: true };
+}
+
+export async function getExamDetails(id: string) {
+  const session = await checkPengajarAuth();
+  const exam = await prisma.exam.findUnique({
+    where: { id },
+    include: {
+      class: true,
+      questions: { orderBy: { created_at: 'asc' } }
+    }
+  });
+
+  if (exam?.class?.teacher_id !== session.user.id) return null;
+  return exam;
+}
+
+export async function createQuestion(formData: FormData) {
+  const session = await checkPengajarAuth();
+  const exam_id = formData.get("exam_id") as string;
+  const type = formData.get("type") as any; // "SPEAKING" | "LISTENING" | "MULTIPLE_CHOICE"
+  const question_text = formData.get("question_text") as string;
+  const answer_key = formData.get("answer_key") as string;
+  const audio_reference = formData.get("audio_reference") as string;
+  const difficulty = parseInt(formData.get("difficulty") as string) || 1;
+
+  if (!exam_id || !type || !question_text) return { error: "Data soal tidak lengkap" };
+
+  const exam = await prisma.exam.findUnique({ where: { id: exam_id }, include: { class: true } });
+  if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
+
+  await prisma.question.create({
+    data: { exam_id, type, question_text, answer_key, audio_reference, difficulty }
+  });
+
+  return { success: true };
+}

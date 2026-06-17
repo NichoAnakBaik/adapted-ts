@@ -80,6 +80,19 @@ export async function getClasses() {
   });
 }
 
+export async function getClassDetails(id: string) {
+  await checkAdminAuth();
+  return prisma.class.findUnique({
+    where: { id },
+    include: {
+      teacher: true,
+      enrollments: {
+        include: { student: true }
+      }
+    }
+  });
+}
+
 export async function createClass(formData: FormData) {
   await checkAdminAuth();
   const name = formData.get("name") as string;
@@ -127,5 +140,48 @@ export async function enrollStudent(classId: string, studentId: string) {
 export async function unenrollStudent(enrollmentId: string) {
   await checkAdminAuth();
   await prisma.enrollment.delete({ where: { id: enrollmentId } });
+  return { success: true };
+}
+
+// --- CERTIFICATE MANAGEMENT ---
+
+export async function getCertificates() {
+  await checkAdminAuth();
+  return prisma.certificate.findMany({
+    include: {
+      student: { select: { nama_lengkap: true, username: true } },
+      class: { select: { name: true } }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function createOrUpdateCertificate(formData: FormData) {
+  await checkAdminAuth();
+  const id = formData.get("id") as string;
+  const student_id = formData.get("student_id") as string;
+  const class_id = formData.get("class_id") as string;
+  const file_url = formData.get("file_url") as string;
+  const status = formData.get("status") as "PENDING" | "APPROVED" | "REJECTED";
+
+  if (id) {
+    // Update existing
+    await prisma.certificate.update({
+      where: { id },
+      data: { file_url, status }
+    });
+  } else {
+    // Create new
+    if (!student_id || !class_id || !file_url) return { error: "Data tidak lengkap" };
+    await prisma.certificate.create({
+      data: { student_id, class_id, file_url, status }
+    });
+  }
+  return { success: true };
+}
+
+export async function deleteCertificate(id: string) {
+  await checkAdminAuth();
+  await prisma.certificate.delete({ where: { id } });
   return { success: true };
 }

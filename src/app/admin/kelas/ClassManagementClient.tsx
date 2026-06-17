@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { BookOpen, Trash2, Plus, Users, UserPlus } from "lucide-react";
-import { createClass, deleteClass, assignTeacher, enrollStudent } from "@/app/actions/admin";
+import { BookOpen, Trash2, Plus, Users, UserPlus, ArrowRight } from "lucide-react";
+import { createClass, deleteClass } from "@/app/actions/admin";
+import Link from "next/link";
 
 export default function ClassManagementClient({ initialClasses, teachers, students }: { initialClasses: any[], teachers: any[], students: any[] }) {
   const [classes, setClasses] = useState(initialClasses);
@@ -28,21 +29,6 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
       setError(res.error);
     } else {
       setShowForm(false);
-      window.location.reload();
-    }
-  };
-
-  const handleAssignTeacher = async (classId: string, teacherId: string) => {
-    await assignTeacher(classId, teacherId || null);
-    window.location.reload();
-  };
-
-  const handleEnrollStudent = async (classId: string, studentId: string) => {
-    if (!studentId) return;
-    const res = await enrollStudent(classId, studentId);
-    if (res.error) {
-      alert(res.error);
-    } else {
       window.location.reload();
     }
   };
@@ -128,39 +114,27 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
                   </span>
                 </td>
                 <td className="p-4">
-                  <select 
-                    value={c.teacher_id || ""}
-                    onChange={(e) => handleAssignTeacher(c.id, e.target.value)}
-                    className="p-1.5 border border-gray-200 rounded-md text-sm bg-white min-w-[150px]"
-                  >
-                    <option value="">-- Pilih Pengajar --</option>
-                    {teachers.map((t) => (
-                      <option key={t.id} value={t.id}>{t.nama_lengkap}</option>
-                    ))}
-                  </select>
+                  {c.teacher?.nama_lengkap ? (
+                    <span className="font-medium text-gray-700">{c.teacher.nama_lengkap}</span>
+                  ) : (
+                    <span className="text-gray-400 italic text-sm">Belum ada pengajar</span>
+                  )}
                 </td>
                 <td className="p-4 text-center">
-                  <div className="flex flex-col items-center justify-center gap-2">
-                    <div className="flex items-center gap-2 text-namsan-text-muted font-medium">
-                      <Users className="w-4 h-4" />
-                      {c._count?.enrollments || 0}
-                    </div>
-                    <select 
-                      onChange={(e) => handleEnrollStudent(c.id, e.target.value)}
-                      className="p-1 border border-gray-200 rounded-md text-xs bg-white mt-1 w-[120px]"
-                      defaultValue=""
-                    >
-                      <option value="" disabled>+ Tambah Siswa</option>
-                      {students.map(s => (
-                        <option key={s.id} value={s.id}>{s.nama_lengkap}</option>
-                      ))}
-                    </select>
+                  <div className="flex items-center justify-center gap-2 text-namsan-text-muted font-medium">
+                    <Users className="w-4 h-4" />
+                    {c._count?.enrollments || 0}
                   </div>
                 </td>
                 <td className="p-4 text-right">
-                  <button onClick={() => handleDelete(c.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
+                  <div className="flex justify-end gap-2">
+                    <Link href={`/admin/kelas/${c.id}`} className="bg-namsan-soft hover:bg-namsan-primary text-namsan-dark font-bold py-2 px-3 rounded-lg flex items-center gap-1 text-sm transition-colors">
+                      Kelola <ArrowRight className="w-4 h-4" />
+                    </Link>
+                    <button onClick={() => handleDelete(c.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                      <Trash2 className="w-5 h-5" />
+                    </button>
+                  </div>
                 </td>
               </tr>
             ))}
