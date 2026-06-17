@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { AdminSidebar } from "./AdminSidebar";
 import { AdminTopbar } from "./AdminTopbar";
+import DashboardLayoutClient from "@/components/DashboardLayoutClient";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -12,15 +13,11 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="h-screen flex bg-namsan-bg font-sans overflow-hidden">
-      <AdminSidebar user={session.user} />
-
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <AdminTopbar />
-        <main className="flex-1 overflow-y-auto p-8">
-          {children}
-        </main>
-      </div>
-    </div>
+    <DashboardLayoutClient
+      sidebar={<AdminSidebar user={session.user} />}
+      topbar={<AdminTopbar />}
+    >
+      {children}
+    </DashboardLayoutClient>
   );
 }

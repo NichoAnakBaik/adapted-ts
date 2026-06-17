@@ -3,7 +3,7 @@ import { Bell, GraduationCap } from "lucide-react";
 
 export function PengajarTopbar() {
   return (
-    <header className="h-16 bg-white border-b border-gray-200 flex items-center justify-end px-8 shrink-0 shadow-sm z-10">
+    <header className="flex items-center justify-end px-4 lg:px-8 shrink-0 w-full">
       <div className="flex items-center gap-6">
         <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-namsan-text hover:bg-gray-100 transition-colors">
           <Bell className="w-5 h-5" />

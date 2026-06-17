@@ -3,6 +3,7 @@ import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { PengajarSidebar } from "./PengajarSidebar";
 import { PengajarTopbar } from "./PengajarTopbar";
+import DashboardLayoutClient from "@/components/DashboardLayoutClient";
 
 export default async function PengajarLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
@@ -12,15 +13,11 @@ export default async function PengajarLayout({ children }: { children: React.Rea
   }
 
   return (
-    <div className="h-screen flex bg-namsan-bg font-sans overflow-hidden">
-      <PengajarSidebar user={session.user} />
-
-      <div className="flex-1 flex flex-col h-screen overflow-hidden">
-        <PengajarTopbar />
-        <main className="flex-1 overflow-y-auto p-8">
-          {children}
-        </main>
-      </div>
-    </div>
+    <DashboardLayoutClient
+      sidebar={<PengajarSidebar user={session.user} />}
+      topbar={<PengajarTopbar />}
+    >
+      {children}
+    </DashboardLayoutClient>
   );
 }
