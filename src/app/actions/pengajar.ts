@@ -36,11 +36,14 @@ export async function getClassDetails(id: string) {
     include: {
       enrollments: {
         include: {
-          user: {
-            select: { id: true, nama_lengkap: true, username: true, email: true, created_at: true }
+          student: {
+            select: { id: true, nama_lengkap: true, username: true, created_at: true }
           }
         },
         orderBy: { created_at: 'desc' }
+      },
+      modules: {
+        orderBy: { created_at: 'asc' }
       },
       _count: { select: { modules: true, exams: true } }
     }
