@@ -1,0 +1,177 @@
+"use client";
+
+import React, { useState } from "react";
+import { BookOpen, Trash2, Plus, Users, UserPlus } from "lucide-react";
+import { createClass, deleteClass, assignTeacher, enrollStudent } from "@/app/actions/admin";
+
+export default function ClassManagementClient({ initialClasses, teachers, students }: { initialClasses: any[], teachers: any[], students: any[] }) {
+  const [classes, setClasses] = useState(initialClasses);
+  const [showForm, setShowForm] = useState(false);
+  const [classType, setClassType] = useState("ONLINE");
+  const [error, setError] = useState("");
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Yakin ingin menghapus kelas ini? Semua data terkait modul dan nilai akan terhapus!")) return;
+    const res = await deleteClass(id);
+    if (res.success) {
+      setClasses(classes.filter((c) => c.id !== id));
+    }
+  };
+
+  const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setError("");
+    const formData = new FormData(e.currentTarget);
+    const res = await createClass(formData);
+    
+    if (res.error) {
+      setError(res.error);
+    } else {
+      setShowForm(false);
+      window.location.reload();
+    }
+  };
+
+  const handleAssignTeacher = async (classId: string, teacherId: string) => {
+    await assignTeacher(classId, teacherId || null);
+    window.location.reload();
+  };
+
+  const handleEnrollStudent = async (classId: string, studentId: string) => {
+    if (!studentId) return;
+    const res = await enrollStudent(classId, studentId);
+    if (res.error) {
+      alert(res.error);
+    } else {
+      window.location.reload();
+    }
+  };
+
+  return (
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-blue-50 rounded-xl">
+            <BookOpen className="w-8 h-8 text-namsan-blue" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Kelas</h1>
+            <p className="text-sm text-namsan-text-muted">Kelola kelas, tipe pembelajaran, dan pengajar.</p>
+          </div>
+        </div>
+        <button
+          onClick={() => setShowForm(!showForm)}
+          className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-colors"
+        >
+          {showForm ? "Batal" : <><Plus className="w-5 h-5" /> Buat Kelas Baru</>}
+        </button>
+      </div>
+
+      {showForm && (
+        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+          <h2 className="text-lg font-bold mb-4">Buat Kelas Baru</h2>
+          {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
+          
+          <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nama Kelas</label>
+              <input type="text" name="name" required placeholder="Contoh: Level 1 - Beginner A" className="w-full p-2.5 border rounded-lg" />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Pembelajaran</label>
+              <select name="type" required value={classType} onChange={(e) => setClassType(e.target.value)} className="w-full p-2.5 border rounded-lg bg-white">
+                <option value="ONLINE">Online (Daring)</option>
+                <option value="OFFLINE">Offline (Tatap Muka)</option>
+              </select>
+            </div>
+            
+            {classType === "ONLINE" && (
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link Meeting (Zoom/GMeet)</label>
+                <input type="url" name="meeting_link" placeholder="https://zoom.us/j/..." className="w-full p-2.5 border rounded-lg" />
+              </div>
+            )}
+            
+            <div className="md:col-span-2">
+              <label className="block text-sm font-medium text-gray-700 mb-1">Jadwal Kelas (Opsional)</label>
+              <input type="text" name="schedule" placeholder="Contoh: Senin & Rabu, 18:00 - 20:00" className="w-full p-2.5 border rounded-lg" />
+            </div>
+            <div className="md:col-span-2 mt-2">
+              <button type="submit" className="w-full bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-4 rounded-lg">
+                Simpan Kelas
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-gray-50 border-b border-gray-100 text-sm">
+              <th className="p-4 font-bold text-namsan-text-muted">Nama Kelas</th>
+              <th className="p-4 font-bold text-namsan-text-muted">Tipe</th>
+              <th className="p-4 font-bold text-namsan-text-muted">Pengajar</th>
+              <th className="p-4 font-bold text-namsan-text-muted text-center">Siswa Terdaftar</th>
+              <th className="p-4 font-bold text-namsan-text-muted text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody>
+            {classes.map((c) => (
+              <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                <td className="p-4 font-medium text-namsan-text">{c.name}</td>
+                <td className="p-4">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
+                    c.type === 'ONLINE' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+                  }`}>
+                    {c.type}
+                  </span>
+                </td>
+                <td className="p-4">
+                  <select 
+                    value={c.teacher_id || ""}
+                    onChange={(e) => handleAssignTeacher(c.id, e.target.value)}
+                    className="p-1.5 border border-gray-200 rounded-md text-sm bg-white min-w-[150px]"
+                  >
+                    <option value="">-- Pilih Pengajar --</option>
+                    {teachers.map((t) => (
+                      <option key={t.id} value={t.id}>{t.nama_lengkap}</option>
+                    ))}
+                  </select>
+                </td>
+                <td className="p-4 text-center">
+                  <div className="flex flex-col items-center justify-center gap-2">
+                    <div className="flex items-center gap-2 text-namsan-text-muted font-medium">
+                      <Users className="w-4 h-4" />
+                      {c._count?.enrollments || 0}
+                    </div>
+                    <select 
+                      onChange={(e) => handleEnrollStudent(c.id, e.target.value)}
+                      className="p-1 border border-gray-200 rounded-md text-xs bg-white mt-1 w-[120px]"
+                      defaultValue=""
+                    >
+                      <option value="" disabled>+ Tambah Siswa</option>
+                      {students.map(s => (
+                        <option key={s.id} value={s.id}>{s.nama_lengkap}</option>
+                      ))}
+                    </select>
+                  </div>
+                </td>
+                <td className="p-4 text-right">
+                  <button onClick={() => handleDelete(c.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                    <Trash2 className="w-5 h-5" />
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {classes.length === 0 && (
+              <tr>
+                <td colSpan={5} className="p-8 text-center text-gray-500">Belum ada kelas yang dibuat.</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}

@@ -1,7 +1,9 @@
 import React from "react";
-import { BookOpen, CheckCircle2, Clock, MapPin, PenTool, MessageSquare, CalendarCheck, Award, Bot, ChevronRight } from "lucide-react";
+import { BookOpen, CheckCircle2, Clock, MapPin, Video, PenTool, MessageSquare, CalendarCheck, Award, Bot, ChevronRight } from "lucide-react";
+import { getDashboardStats } from "@/app/actions/siswa";
 
-export default function SiswaDashboardPage() {
+export default async function SiswaDashboardPage() {
+  const stats = await getDashboardStats();
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       
@@ -11,7 +13,7 @@ export default function SiswaDashboardPage() {
           <BookOpen className="w-12 h-12 text-namsan-dark" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-3xl font-bold text-namsan-text mb-1">안녕하세요, Haksaeng!</h1>
+          <h1 className="text-3xl font-bold text-namsan-text mb-1">안녕하세요, {stats.nama_lengkap}!</h1>
           <p className="text-namsan-text/80 font-medium">
             Panel Belajar Siswa Namsan Korean Course. Pantau progres akademik dan rekomendasi AI kamu.
           </p>
@@ -25,7 +27,7 @@ export default function SiswaDashboardPage() {
             <CheckCircle2 className="w-6 h-6 text-namsan-primary" />
           </div>
           <p className="text-sm font-bold text-namsan-text-muted mb-1 tracking-wider">MODUL LULUS</p>
-          <p className="text-2xl font-bold text-namsan-text">-</p>
+          <p className="text-2xl font-bold text-namsan-text">{stats.completedModules}</p>
         </div>
         
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
@@ -33,15 +35,35 @@ export default function SiswaDashboardPage() {
             <Clock className="w-6 h-6 text-green-600" />
           </div>
           <p className="text-sm font-bold text-namsan-text-muted mb-1 tracking-wider">DURASI BELAJAR</p>
-          <p className="text-xl font-bold text-namsan-text">Min</p>
+          <p className="text-xl font-bold text-namsan-text">{stats.durationMinutes} Min</p>
         </div>
 
         <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-          <div className="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center mb-3">
-            <MapPin className="w-6 h-6 text-namsan-blue" />
+          <div className={`w-12 h-12 rounded-full flex items-center justify-center mb-3 ${stats.activeClass?.type === 'ONLINE' ? 'bg-purple-50' : 'bg-blue-50'}`}>
+            {stats.activeClass?.type === 'ONLINE' ? (
+              <Video className="w-6 h-6 text-purple-600" />
+            ) : (
+              <MapPin className="w-6 h-6 text-namsan-blue" />
+            )}
           </div>
-          <p className="text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Metode & Link Kelas</p>
-          <p className="text-sm font-medium text-namsan-text">Kelas Offline (Tatap Muka di Tempat)</p>
+          <p className="text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Metode Kelas Aktif</p>
+          
+          {stats.activeClass ? (
+            stats.activeClass.type === 'ONLINE' ? (
+              <div className="flex flex-col items-center">
+                <p className="text-sm font-medium text-namsan-text mb-1">Online (Daring)</p>
+                {stats.activeClass.meeting_link ? (
+                  <a href={stats.activeClass.meeting_link} target="_blank" rel="noreferrer" className="text-xs font-bold text-purple-600 hover:text-purple-800 underline">Buka Link Meeting</a>
+                ) : (
+                  <span className="text-xs text-gray-400">Link belum tersedia</span>
+                )}
+              </div>
+            ) : (
+              <p className="text-sm font-medium text-namsan-text">Offline (Tatap Muka di Tempat)</p>
+            )
+          ) : (
+            <p className="text-sm font-medium text-gray-400">Belum terdaftar di kelas</p>
+          )}
         </div>
       </div>
 

@@ -62,12 +62,13 @@ model User {
 }
 
 model Class {
-  id         String    @id @default(uuid())
-  name       String
-  type       ClassType @default(ONLINE)
-  schedule   String? // Could be a JSON string or simple text for now
-  teacher_id String?
-  teacher    User?     @relation("PengajarKelas", fields: [teacher_id], references: [id])
+  id           String    @id @default(uuid())
+  name         String
+  type         ClassType @default(ONLINE)
+  schedule     String? // Could be a JSON string or simple text for now
+  meeting_link String? // Zoom/GMeet link for online classes
+  teacher_id   String?
+  teacher      User?     @relation("PengajarKelas", fields: [teacher_id], references: [id])
   created_at DateTime  @default(now())
   updated_at DateTime  @updatedAt
 
