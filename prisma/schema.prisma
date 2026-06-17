@@ -1,0 +1,338 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id             Int               @id @default(autoincrement())
+  nama_lengkap   String
+  username       String            @unique
+  password       String
+  role           String            @default("siswa")
+  created_at     DateTime          @default(now())
+
+  kelas_diajar       Kelas[]           @relation("PengajarKelas")
+  enrollments        Enrollment[]
+  kelas_siswa        KelasSiswa[]
+  siswa_kelas        SiswaKelas[]
+  absensi_log        AbsensiLog[]
+  absensi_logbook    AbsensiLogbook[]
+  progres_materi     ProgresMateri[]
+  forum_diskusi      ForumDiskusi[]
+  forum_chat         ForumChat[]
+  log_aktivitas_kuis LogAktivitasKuis[]
+  jawaban_siswa      JawabanSiswa[]
+  nilai_kuis         NilaiKuis[]
+  sertifikat         Sertifikat[]
+  nilai_akhir_kuis   NilaiAkhirKuis[]
+  rekomendasi_ai     RekomendasiAi[]
+
+  @@map("users")
+}
+
+model Kelas {
+  id_kelas     Int             @id @default(autoincrement())
+  nama_kelas   String
+  id_pengajar  Int?
+  pengajar     User?           @relation("PengajarKelas", fields: [id_pengajar], references: [id])
+  level_bahasa String?
+  tipe_kelas   String?
+  link_kelas   String?
+  created_at   DateTime        @default(now())
+
+  jadwal_kelas  JadwalKelas[]
+  enrollments   Enrollment[]
+  kelas_siswa   KelasSiswa[]
+  siswa_kelas   SiswaKelas[]
+  materi        Materi[]
+  forum_topik   ForumTopik[]
+  forum_diskusi ForumDiskusi[]
+  forum_kelas   ForumKelas[]
+  kuis          Kuis[]
+  sertifikat    Sertifikat[]
+
+  @@map("kelas")
+}
+
+model JadwalKelas {
+  id_jadwal      Int       @id @default(autoincrement())
+  id_kelas       Int
+  kelas          Kelas     @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+  hari           String?
+  jam_mulai      DateTime? @db.Time
+  jam_selesai    DateTime? @db.Time
+  link_pertemuan String?
+  created_at     DateTime  @default(now())
+
+  @@map("jadwal_kelas")
+}
+
+model Enrollment {
+  id_enrollment  Int      @id @default(autoincrement())
+  id_siswa       Int
+  siswa          User     @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  id_kelas       Int
+  kelas          Kelas    @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+  status_aktif   Boolean  @default(true)
+  tanggal_daftar DateTime @default(now())
+
+  @@map("enrollment")
+}
+
+model KelasSiswa {
+  id_kelas_siswa Int   @id @default(autoincrement())
+  id_siswa       Int
+  siswa          User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  id_kelas       Int
+  kelas          Kelas @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+
+  @@map("kelas_siswa")
+}
+
+model SiswaKelas {
+  id_siswa_kelas Int   @id @default(autoincrement())
+  id_siswa       Int
+  siswa          User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  id_kelas       Int
+  kelas          Kelas @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+
+  @@map("siswa_kelas")
+}
+
+model AbsensiLog {
+  id_absensi            Int       @id @default(autoincrement())
+  id_siswa              Int
+  siswa                 User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  tanggal               DateTime? @db.Date
+  waktu_login           DateTime?
+  waktu_logout          DateTime?
+  durasi_belajar_menit  Int?
+
+  @@map("absensi_log")
+}
+
+model AbsensiLogbook {
+  id_absen       Int       @id @default(autoincrement())
+  id_siswa       Int
+  siswa          User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  waktu_masuk    DateTime?
+  waktu_keluar   DateTime?
+  durasi_menit   Int?
+  tanggal        DateTime? @db.Date
+
+  @@map("absensi_logbook")
+}
+
+model Materi {
+  id_materi    Int             @id @default(autoincrement())
+  id_kelas     Int
+  kelas        Kelas           @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+  judul_materi String?
+  file_pdf     String?
+  urutan       Int?
+  created_at   DateTime        @default(now())
+
+  materi_audio    MateriAudio[]
+  progres_materi  ProgresMateri[]
+  forum_chat      ForumChat[]
+
+  @@map("materi")
+}
+
+model MateriAudio {
+  id_audio   Int     @id @default(autoincrement())
+  id_materi  Int
+  materi     Materi  @relation(fields: [id_materi], references: [id_materi], onDelete: Cascade)
+  file_audio String?
+
+  @@map("materi_audio")
+}
+
+model ProgresMateri {
+  id_progres Int     @id @default(autoincrement())
+  id_siswa   Int
+  siswa      User    @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  id_materi  Int
+  materi     Materi  @relation(fields: [id_materi], references: [id_materi], onDelete: Cascade)
+  status     Boolean?
+
+  @@map("progres_materi")
+}
+
+model ForumTopik {
+  id_topik Int     @id @default(autoincrement())
+  id_kelas Int
+  kelas    Kelas   @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+  judul    String?
+
+  @@map("forum_topik")
+}
+
+model ForumDiskusi {
+  id_diskusi Int             @id @default(autoincrement())
+  id_kelas   Int
+  kelas      Kelas           @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+  id_penulis Int
+  penulis    User            @relation(fields: [id_penulis], references: [id], onDelete: Cascade)
+  judul      String?
+  pesan      String?
+  created_at DateTime        @default(now())
+
+  forum_komentar ForumKomentar[]
+
+  @@map("forum_diskusi")
+}
+
+model ForumKomentar {
+  id_komentar Int          @id @default(autoincrement())
+  id_diskusi  Int
+  diskusi     ForumDiskusi @relation(fields: [id_diskusi], references: [id_diskusi], onDelete: Cascade)
+  komentar    String?
+
+  @@map("forum_komentar")
+}
+
+model ForumKelas {
+  id_pesan Int     @id @default(autoincrement())
+  id_kelas Int
+  kelas    Kelas   @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+  pesan    String?
+
+  @@map("forum_kelas")
+}
+
+model ForumChat {
+  id_chat    Int          @id @default(autoincrement())
+  id_materi  Int
+  materi     Materi       @relation(fields: [id_materi], references: [id_materi], onDelete: Cascade)
+  id_user    Int
+  user       User         @relation(fields: [id_user], references: [id], onDelete: Cascade)
+  pesan      String?
+  created_at DateTime     @default(now())
+  parent_id  Int?
+  parent     ForumChat?   @relation("ChatReplies", fields: [parent_id], references: [id_chat])
+  replies    ForumChat[]  @relation("ChatReplies")
+
+  @@map("forum_chat")
+}
+
+model Kuis {
+  id_kuis        Int       @id @default(autoincrement())
+  id_kelas       Int
+  kelas          Kelas     @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+  judul_kuis     String?
+  deskripsi      String?
+  waktu_menit    Int?
+  tanggal_dibuat DateTime  @default(now())
+  is_published   Boolean?  @default(true)
+
+  log_aktivitas  LogAktivitasKuis[]
+  soal           SoalKuis[]
+  nilai_kuis     NilaiKuis[]
+
+  @@map("kuis")
+}
+
+model LogAktivitasKuis {
+  id_log   Int   @id @default(autoincrement())
+  id_siswa Int
+  siswa    User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  id_kuis  Int
+  kuis     Kuis  @relation(fields: [id_kuis], references: [id_kuis], onDelete: Cascade)
+
+  @@map("log_aktivitas_kuis")
+}
+
+model SoalKuis {
+  id_soal        Int             @id @default(autoincrement())
+  id_kuis        Int
+  kuis           Kuis            @relation(fields: [id_kuis], references: [id_kuis], onDelete: Cascade)
+  pertanyaan     String?
+  tipe_soal      String?
+  file_audio     String?
+  pilihan_a      String?
+  pilihan_b      String?
+  pilihan_c      String?
+  pilihan_d      String?
+  jawaban_benar  String?
+
+  opsi_pg        OpsiPg[]
+  jawaban_siswa  JawabanSiswa[]
+
+  @@map("soal_kuis")
+}
+
+model OpsiPg {
+  id_opsi   Int       @id @default(autoincrement())
+  id_soal   Int
+  soal      SoalKuis  @relation(fields: [id_soal], references: [id_soal], onDelete: Cascade)
+  teks_opsi String?
+  is_benar  Boolean?
+
+  @@map("opsi_pg")
+}
+
+model JawabanSiswa {
+  id_jawaban         Int       @id @default(autoincrement())
+  id_siswa           Int
+  siswa              User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  id_soal            Int
+  soal               SoalKuis  @relation(fields: [id_soal], references: [id_soal], onDelete: Cascade)
+  jawaban            String?
+  file_audio_jawaban String?
+  durasi_detik       Int?      @default(0)
+  skor_ai            Int?      @default(0)
+  feedback_ai        String?
+  waktu_submit       DateTime? @default(now())
+
+  @@map("jawaban_siswa")
+}
+
+model NilaiKuis {
+  id_nilai            Int       @id @default(autoincrement())
+  id_kuis             Int
+  kuis                Kuis      @relation(fields: [id_kuis], references: [id_kuis], onDelete: Cascade)
+  id_siswa            Int
+  siswa               User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  total_nilai         Int?
+  catatan_analitik_ai String?
+  waktu_selesai       DateTime?
+  skor                Int?
+  status              String?
+
+  @@map("nilai_kuis")
+}
+
+model NilaiAkhirKuis {
+  id_nilai Int   @id @default(autoincrement())
+  id_siswa Int
+  siswa    User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+
+  @@map("nilai_akhir_kuis")
+}
+
+model RekomendasiAi {
+  id_rekomendasi Int   @id @default(autoincrement())
+  id_siswa       Int
+  siswa          User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+
+  @@map("rekomendasi_ai")
+}
+
+model Sertifikat {
+  id_sertifikat   Int       @id @default(autoincrement())
+  id_siswa        Int
+  siswa           User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
+  nama_sertifikat String?
+  file_pdf        String?
+  tanggal_keluar  DateTime?
+  status_approve  Boolean?  @default(false)
+  id_kelas        Int?
+  kelas           Kelas?    @relation(fields: [id_kelas], references: [id_kelas], onDelete: SetNull)
+
+  @@map("sertifikat")
+}
