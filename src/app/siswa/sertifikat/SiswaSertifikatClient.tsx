@@ -31,7 +31,7 @@ export default function SiswaSertifikatClient({ certificates }: { certificates: 
               </div>
               
               <span className="px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-xs font-bold mb-3 tracking-wider uppercase">
-                {cert.class.level}
+                {cert.class.type}
               </span>
               
               <h3 className="text-lg font-bold text-namsan-text mb-1">{cert.class.name}</h3>

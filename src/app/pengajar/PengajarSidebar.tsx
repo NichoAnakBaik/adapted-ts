@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, BookOpen, PenTool, MessageSquare, Award, LineChart, Users, LogOut, ActivitySquare, Settings, FileQuestion } from "lucide-react";
+import { LayoutDashboard, BookOpen, PenTool, MessageSquare, Award, LineChart, Users, LogOut, ActivitySquare, Settings, FileQuestion, CalendarCheck } from "lucide-react";
 import ProfileSettingsModal from "@/components/ProfileSettingsModal";
 
 export function PengajarSidebar({ user }: { user: any }) {
@@ -15,6 +15,7 @@ export function PengajarSidebar({ user }: { user: any }) {
     { name: "Kelas Saya", href: "/pengajar/kelas", icon: Users },
     { name: "Kuis Kelas", href: "/pengajar/kuis", icon: PenTool },
     { name: "Pemantauan Ujian", href: "/pengajar/ujian", icon: FileQuestion },
+    { name: "Absensi Kelas", href: "/pengajar/absensi", icon: CalendarCheck },
     { name: "Penerbitan Sertifikat", href: "/pengajar/sertifikat", icon: Award },
     { name: "Analitik Siswa", href: "/pengajar/analitik", icon: LineChart, special: true },
     { name: "Aktivitas Kelas", href: "/pengajar/aktivitas", icon: ActivitySquare },

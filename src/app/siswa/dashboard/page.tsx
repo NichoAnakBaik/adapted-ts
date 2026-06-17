@@ -100,6 +100,11 @@ export default async function SiswaDashboardPage() {
               <span className="font-bold text-namsan-text">Riwayat Belajar</span>
             </a>
 
+            <a href="/siswa/absensi" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+              <CalendarCheck className="w-6 h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
+              <span className="font-bold text-namsan-text">Absensi Kelas</span>
+            </a>
+
             <a href="/siswa/sertifikat" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Award className="w-6 h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="font-bold text-namsan-text">Sertifikat Level</span>

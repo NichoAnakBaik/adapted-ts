@@ -16,6 +16,7 @@ export function SiswaSidebar({ user }: { user: any }) {
     { name: "Kuis Kelas", href: "/siswa/kuis", icon: PenTool },
     { name: "Ujian Akhir", href: "/siswa/ujian", icon: PenTool },
     { name: "Forum Kelas", href: "/siswa/forum", icon: MessageSquare },
+    { name: "Absensi Kelas", href: "/siswa/absensi", icon: CalendarCheck },
     { name: "Sertifikat Level", href: "/siswa/sertifikat", icon: Award },
     { name: "Analitik & AI", href: "/siswa/analitik", icon: LineChart, special: true },
     { name: "Riwayat Belajar", href: "/siswa/aktivitas", icon: History },

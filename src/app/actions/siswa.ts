@@ -239,7 +239,7 @@ export async function getStudentCertificates() {
       status: 'APPROVED'
     },
     include: {
-      class: { select: { name: true, level: true, teacher: { select: { nama_lengkap: true } } } }
+      class: { select: { name: true, type: true, teacher: { select: { nama_lengkap: true } } } }
     },
     orderBy: { created_at: 'desc' }
   });

@@ -32,6 +32,13 @@ enum CertificateStatus {
   REJECTED
 }
 
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  EXCUSED
+  LATE
+}
+
 enum ActivityType {
   LOGIN
   LOGOUT
@@ -59,6 +66,7 @@ model User {
   recommendation_history RecommendationHistory[]
   sertifikat_siswa       Certificate[]           @relation("SertifikatSiswa")
   forum_messages         ForumMessage[]
+  attendances            Attendance[]
 }
 
 model Class {
@@ -78,6 +86,7 @@ model Class {
   exams        Exam[]
   certificates Certificate[]
   forums       Forum[]
+  attendances  Attendance[]
 }
 
 model Enrollment {
@@ -245,4 +254,19 @@ model RecommendationHistory {
   recommendation_type String // e.g., 'MODULE_SUGGESTION', 'PACE_WARNING', 'STYLE_ADAPTATION'
   is_applied          Boolean  @default(false) // Did the student click/follow it?
   created_at          DateTime @default(now())
+}
+
+model Attendance {
+  id         String           @id @default(uuid())
+  student_id String
+  student    User             @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  class_id   String
+  class      Class            @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  date       DateTime         @default(now())
+  status     AttendanceStatus @default(PRESENT)
+  notes      String?
+  created_at DateTime         @default(now())
+  updated_at DateTime         @updatedAt
+
+  @@unique([student_id, class_id, date])
 }
