@@ -5,8 +5,15 @@ import { logoutAction } from "@/app/actions/auth";
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await getSession();
+  console.log("AdminLayout() -> session:", session);
   
-  if (!session || session.user.role !== "ADMIN") {
+  if (!session) {
+    console.log("AdminLayout() -> No session, redirecting to /login");
+    redirect("/login");
+  }
+  
+  if (session.user?.role !== "ADMIN") {
+    console.log("AdminLayout() -> Role mismatch, redirecting. Expected ADMIN, got:", session.user?.role);
     redirect("/login");
   }
 

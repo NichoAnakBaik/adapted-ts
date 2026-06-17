@@ -7,7 +7,13 @@ import { redirect } from "next/navigation";
 // Basic authorization check
 async function checkAdminAuth() {
   const session = await getSession();
-  if (!session || session.user.role !== "ADMIN") {
+  console.log("checkAdminAuth() -> session:", session);
+  if (!session) {
+    console.log("checkAdminAuth() -> No session, redirecting");
+    redirect("/login");
+  }
+  if (session.user?.role !== "ADMIN") {
+    console.log("checkAdminAuth() -> Role mismatch, redirecting. Expected ADMIN, got:", session.user?.role);
     redirect("/login");
   }
 }
