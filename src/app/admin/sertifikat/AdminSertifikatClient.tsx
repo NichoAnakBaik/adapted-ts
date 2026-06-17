@@ -90,8 +90,8 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link File Sertifikat (PDF/Image URL)</label>
-                <input type="url" name="file_url" required placeholder="https://drive.google.com/..." className="w-full p-2.5 border rounded-lg" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload File Sertifikat (PDF/Image)</label>
+                <input type="file" accept="application/pdf,image/*" name="file_url" required className="w-full p-2.5 border rounded-lg bg-white" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status Awal</label>

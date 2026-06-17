@@ -79,11 +79,11 @@ export default function PengajarModulClient({ initialModules, classes }: { initi
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Link Dokumen (PDF) *opsional</label>
-                <input type="url" name="pdf_url" placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
+                <input type="file" accept="application/pdf" name="pdf_url" className="w-full p-2.5 border rounded-lg bg-white" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Link Audio (Listening) *opsional</label>
-                <input type="url" name="audio_url" placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
+                <input type="file" accept="audio/*" name="audio_url" className="w-full p-2.5 border rounded-lg bg-white" />
               </div>
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">

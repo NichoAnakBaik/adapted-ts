@@ -105,8 +105,29 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
 
               {questionType === "LISTENING" && (
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Link Audio Reference (URL MP3)</label>
-                  <input type="url" name="audio_reference" required placeholder="https://..." className="w-full p-2.5 border rounded-lg" />
+                  <label className="block text-sm font-medium text-gray-700 mb-1">File Audio MP3</label>
+                  <input type="file" accept="audio/*" name="audio_reference" required className="w-full p-2.5 border rounded-lg bg-white" />
+                </div>
+              )}
+
+              {questionType === "MULTIPLE_CHOICE" && (
+                <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan A</label>
+                    <KoreanInput type="text" name="option_a" required placeholder="Teks Pilihan A..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan B</label>
+                    <KoreanInput type="text" name="option_b" required placeholder="Teks Pilihan B..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan C</label>
+                    <KoreanInput type="text" name="option_c" required placeholder="Teks Pilihan C..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan D</label>
+                    <KoreanInput type="text" name="option_d" required placeholder="Teks Pilihan D..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                  </div>
                 </div>
               )}
 
@@ -115,12 +136,9 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 <KoreanInput 
                   type="text" 
                   name="answer_key" 
-                  placeholder="A/B/C/D atau Teks Jawaban (Wajib untuk Pilihan Ganda)" 
+                  placeholder="Kunci Jawaban (contoh: A, atau teks isian)" 
                   className="w-full p-2.5 border rounded-lg" 
                 />
-                {questionType === "MULTIPLE_CHOICE" && (
-                  <p className="text-xs text-gray-500 mt-1">*Jika Pilihan Ganda, format soal di atas bisa berupa teks soal beserta opsi A, B, C, D. Lalu isi Kunci Jawaban dengan 1 huruf saja (A/B/C/D).</p>
-                )}
               </div>
 
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
@@ -156,6 +174,15 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               </div>
               <p className="text-namsan-text font-medium whitespace-pre-wrap">{q.question_text}</p>
               
+              {(q.option_a || q.option_b || q.option_c || q.option_d) && (
+                <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <div><span className="font-bold">A.</span> {q.option_a}</div>
+                  <div><span className="font-bold">B.</span> {q.option_b}</div>
+                  <div><span className="font-bold">C.</span> {q.option_c}</div>
+                  <div><span className="font-bold">D.</span> {q.option_d}</div>
+                </div>
+              )}
+
               {q.audio_reference && (
                 <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 flex items-center gap-2">
                   <Clock className="w-4 h-4" /> File Audio Terlampir

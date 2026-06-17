@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { saveUploadedFile } from "@/lib/upload";
 
 // Basic authorization check for Pengajar
 async function checkPengajarAuth() {
@@ -51,10 +52,13 @@ export async function createModule(formData: FormData) {
   
   const class_id = formData.get("class_id") as string;
   const title = formData.get("title") as string;
-  const pdf_url = formData.get("pdf_url") as string;
-  const audio_url = formData.get("audio_url") as string;
+  const pdf_file = formData.get("pdf_url") as File | null;
+  const audio_file = formData.get("audio_url") as File | null;
 
   if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
+
+  const pdf_url = pdf_file ? await saveUploadedFile(pdf_file, "modul_pdf") : null;
+  const audio_url = audio_file ? await saveUploadedFile(audio_file, "modul_audio") : null;
 
   // Verify the teacher owns this class
   const classData = await prisma.class.findFirst({
@@ -163,7 +167,7 @@ export async function createQuestion(formData: FormData) {
   const type = formData.get("type") as any; // "SPEAKING" | "LISTENING" | "MULTIPLE_CHOICE"
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
-  const audio_reference = formData.get("audio_reference") as string;
+  const audio_file = formData.get("audio_reference") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
@@ -174,6 +178,8 @@ export async function createQuestion(formData: FormData) {
 
   const exam = await prisma.exam.findUnique({ where: { id: exam_id }, include: { class: true } });
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
+
+  const audio_reference = audio_file ? await saveUploadedFile(audio_file, "kuis_audio") : null;
 
   await prisma.question.create({
     data: { 

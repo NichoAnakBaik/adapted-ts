@@ -128,7 +128,14 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
                         }`}>
                           <span className="text-xs">{answers[q.id] === option ? '✓' : ''}</span>
                         </div>
-                        Pilihan {option}
+                        <div className="flex flex-col text-left">
+                          <span className="font-bold">Pilihan {option}</span>
+                          {q[`option_${option.toLowerCase()}`] && (
+                            <span className="text-sm font-normal text-gray-600 mt-1">
+                              {q[`option_${option.toLowerCase()}`]}
+                            </span>
+                          )}
+                        </div>
                       </button>
                     ))}
                   </div>

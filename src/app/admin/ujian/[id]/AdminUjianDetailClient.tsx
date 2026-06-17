@@ -11,6 +11,7 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
   const [activeTab, setActiveTab] = useState<"SPEAKING" | "LISTENING" | "READING" | "WRITING">("READING");
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
+  const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
 
   const tabs = [
     { id: "READING", label: "Membaca (Reading)", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-50" },
@@ -120,11 +121,32 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-bold text-gray-700 mb-2">Format Soal</label>
-                      <select name="format" required className="w-full p-3 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none">
+                      <select name="format" value={questionFormat} onChange={(e) => setQuestionFormat(e.target.value)} required className="w-full p-3 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none">
                         <option value="MULTIPLE_CHOICE">Pilihan Ganda (A/B/C/D)</option>
                         <option value="ESSAY">Isian (Esai / Text Panjang)</option>
                       </select>
                     </div>
+
+                    {questionFormat === "MULTIPLE_CHOICE" && (
+                      <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan A</label>
+                          <KoreanInput type="text" name="option_a" required placeholder="Teks Pilihan A..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan B</label>
+                          <KoreanInput type="text" name="option_b" required placeholder="Teks Pilihan B..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan C</label>
+                          <KoreanInput type="text" name="option_c" required placeholder="Teks Pilihan C..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan D</label>
+                          <KoreanInput type="text" name="option_d" required placeholder="Teks Pilihan D..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                        </div>
+                      </div>
+                    )}
 
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">
@@ -141,14 +163,14 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
 
                     {activeTab === "LISTENING" && (
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Link Audio File (Wajib untuk Listening)</label>
-                        <input type="url" name="audio_reference" required placeholder="https://..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label className="block text-sm font-bold text-gray-700 mb-2">File Audio (Wajib untuk Listening)</label>
+                        <input type="file" accept="audio/*" name="audio_reference" required className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
                       </div>
                     )}
                     {activeTab === "SPEAKING" && (
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Link Audio Panduan (Opsional)</label>
-                        <input type="url" name="audio_reference" placeholder="https://..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                        <label className="block text-sm font-bold text-gray-700 mb-2">File Audio Panduan (Opsional)</label>
+                        <input type="file" accept="audio/*" name="audio_reference" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
                       </div>
                     )}
                   </div>
@@ -174,6 +196,15 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-gray-900 font-medium mb-3 whitespace-pre-wrap">{q.question_text}</p>
+
+                  {(q.option_a || q.option_b || q.option_c || q.option_d) && (
+                    <div className="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <div><span className="font-bold">A.</span> {q.option_a}</div>
+                      <div><span className="font-bold">B.</span> {q.option_b}</div>
+                      <div><span className="font-bold">C.</span> {q.option_c}</div>
+                      <div><span className="font-bold">D.</span> {q.option_d}</div>
+                    </div>
+                  )}
                   
                   <div className="flex flex-wrap items-center gap-4 text-sm">
                     {q.answer_key && (

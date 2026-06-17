@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { saveUploadedFile } from "@/lib/upload";
 
 // Basic authorization check
 async function checkAdminAuth() {
@@ -161,14 +162,22 @@ export async function createOrUpdateCertificate(formData: FormData) {
   const id = formData.get("id") as string;
   const student_id = formData.get("student_id") as string;
   const class_id = formData.get("class_id") as string;
-  const file_url = formData.get("file_url") as string;
+  const file_url_input = formData.get("file_url") as File | string | null;
   const status = formData.get("status") as "PENDING" | "APPROVED" | "REJECTED";
+
+  let file_url = "";
+  if (file_url_input instanceof File) {
+    const uploadedUrl = await saveUploadedFile(file_url_input, "certificates");
+    if (uploadedUrl) file_url = uploadedUrl;
+  } else if (typeof file_url_input === "string") {
+    file_url = file_url_input;
+  }
 
   if (id) {
     // Update existing
     await prisma.certificate.update({
       where: { id },
-      data: { file_url, status }
+      data: { file_url: file_url || undefined, status }
     });
   } else {
     // Create new
@@ -200,10 +209,13 @@ export async function createAdminModule(formData: FormData) {
   await checkAdminAuth();
   const class_id = formData.get("class_id") as string;
   const title = formData.get("title") as string;
-  const pdf_url = formData.get("pdf_url") as string;
-  const audio_url = formData.get("audio_url") as string;
+  const pdf_file = formData.get("pdf_url") as File | null;
+  const audio_file = formData.get("audio_url") as File | null;
 
   if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
+
+  const pdf_url = pdf_file ? await saveUploadedFile(pdf_file, "modul_pdf") : null;
+  const audio_url = audio_file ? await saveUploadedFile(audio_file, "modul_audio") : null;
 
   await prisma.module.create({
     data: { class_id, title, pdf_url: pdf_url || null, audio_url: audio_url || null }
@@ -289,7 +301,7 @@ export async function createAdminQuestion(formData: FormData) {
   const format = formData.get("format") as string || "ESSAY";
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
-  const audio_reference = formData.get("audio_reference") as string;
+  const audio_file = formData.get("audio_reference") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
@@ -297,6 +309,8 @@ export async function createAdminQuestion(formData: FormData) {
   const option_d = formData.get("option_d") as string | null;
 
   if (!exam_id || !type || !question_text) return { error: "Data soal tidak lengkap" };
+
+  const audio_reference = audio_file ? await saveUploadedFile(audio_file, "ujian_audio") : null;
 
   await prisma.question.create({
     data: { 
