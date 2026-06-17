@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { BookOpen, Trash2, Plus, Users, UserPlus, ArrowRight } from "lucide-react";
+import { BookOpen, Trash2, Plus, Users, UserPlus, ArrowRight, Link as LinkIcon, Calendar } from "lucide-react";
 import { createClass, deleteClass } from "@/app/actions/admin";
+import { KoreanInput } from "@/components/KoreanInput";
 import Link from "next/link";
 
 export default function ClassManagementClient({ initialClasses, teachers, students }: { initialClasses: any[], teachers: any[], students: any[] }) {
@@ -59,9 +60,9 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
           {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
           
           <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nama Kelas</label>
-              <input type="text" name="name" required placeholder="Contoh: Level 1 - Beginner A" className="w-full p-2.5 border rounded-lg" />
+            <div className="md:col-span-2">
+              <label className="block text-sm font-bold text-gray-700 mb-2">Nama Kelas</label>
+              <KoreanInput type="text" name="name" required placeholder="Contoh: Level 1 - Beginner A" className="w-full p-2.5 border rounded-lg" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Pembelajaran</label>

@@ -185,3 +185,122 @@ export async function deleteCertificate(id: string) {
   await prisma.certificate.delete({ where: { id } });
   return { success: true };
 }
+
+// --- MODULE MANAGEMENT (ADMIN) ---
+
+export async function getAdminModules() {
+  await checkAdminAuth();
+  return prisma.module.findMany({
+    include: { class: { select: { name: true } } },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function createAdminModule(formData: FormData) {
+  await checkAdminAuth();
+  const class_id = formData.get("class_id") as string;
+  const title = formData.get("title") as string;
+  const pdf_url = formData.get("pdf_url") as string;
+  const audio_url = formData.get("audio_url") as string;
+
+  if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
+
+  await prisma.module.create({
+    data: { class_id, title, pdf_url: pdf_url || null, audio_url: audio_url || null }
+  });
+  return { success: true };
+}
+
+export async function deleteAdminModule(id: string) {
+  await checkAdminAuth();
+  await prisma.module.delete({ where: { id } });
+  return { success: true };
+}
+
+// --- KUIS & UJIAN MANAGEMENT (ADMIN) ---
+
+export async function getAdminQuizzes() {
+  await checkAdminAuth();
+  return prisma.exam.findMany({
+    where: { is_final: false },
+    include: {
+      class: { select: { name: true, teacher: { select: { nama_lengkap: true } } } },
+      _count: { select: { questions: true, exam_attempts: true } }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function getAdminExams() {
+  await checkAdminAuth();
+  return prisma.exam.findMany({
+    where: { is_final: true },
+    include: {
+      class: { select: { name: true, teacher: { select: { nama_lengkap: true } } } },
+      _count: { select: { questions: true, exam_attempts: true } }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function createAdminExam(formData: FormData) {
+  await checkAdminAuth();
+  const class_id = formData.get("class_id") as string;
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const time_limit = parseInt(formData.get("time_limit") as string) || null;
+  const is_final = true;
+
+  if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
+
+  await prisma.exam.create({
+    data: { class_id, title, description, time_limit, is_final, is_published: false }
+  });
+  return { success: true };
+}
+
+export async function deleteAdminExam(id: string) {
+  await checkAdminAuth();
+  await prisma.exam.delete({ where: { id } });
+  return { success: true };
+}
+
+export async function toggleAdminExamPublish(id: string, is_published: boolean) {
+  await checkAdminAuth();
+  await prisma.exam.update({ where: { id }, data: { is_published } });
+  return { success: true };
+}
+
+export async function getAdminExamDetails(id: string) {
+  await checkAdminAuth();
+  return prisma.exam.findUnique({
+    where: { id },
+    include: {
+      class: true,
+      questions: { orderBy: { created_at: 'asc' } }
+    }
+  });
+}
+
+export async function createAdminQuestion(formData: FormData) {
+  await checkAdminAuth();
+  const exam_id = formData.get("exam_id") as string;
+  const type = formData.get("type") as "SPEAKING" | "LISTENING" | "WRITING" | "READING";
+  const question_text = formData.get("question_text") as string;
+  const answer_key = formData.get("answer_key") as string;
+  const audio_reference = formData.get("audio_reference") as string;
+  const difficulty = parseInt(formData.get("difficulty") as string) || 1;
+
+  if (!exam_id || !type || !question_text) return { error: "Data soal tidak lengkap" };
+
+  await prisma.question.create({
+    data: { exam_id, type, question_text, answer_key, audio_reference, difficulty }
+  });
+  return { success: true };
+}
+
+export async function deleteAdminQuestion(id: string) {
+  await checkAdminAuth();
+  await prisma.question.delete({ where: { id } });
+  return { success: true };
+}

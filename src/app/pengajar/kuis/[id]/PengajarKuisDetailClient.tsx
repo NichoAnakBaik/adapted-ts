@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Plus, FileQuestion, Trash2, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { createQuestion } from "@/app/actions/pengajar";
+import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 
 export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [showForm, setShowForm] = useState(false);
@@ -88,8 +89,14 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Teks Pertanyaan</label>
-              <textarea name="question_text" rows={3} required placeholder="Tulis soal di sini..." className="w-full p-2.5 border rounded-lg" />
+              <label className="block text-sm font-bold text-gray-700 mb-2">Pertanyaan</label>
+              <KoreanTextarea 
+                name="question_text" 
+                required 
+                rows={3} 
+                placeholder="Ketik soal di sini..." 
+                className="w-full p-2.5 border rounded-lg" 
+              />
             </div>
 
             {questionType === "LISTENING" && (
@@ -100,8 +107,13 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
             )}
 
             <div className="md:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Kunci Jawaban</label>
-              <input type="text" name="answer_key" placeholder="A/B/C/D atau Teks Jawaban (Wajib untuk Pilihan Ganda)" className="w-full p-2.5 border rounded-lg" />
+              <label className="block text-sm font-bold text-gray-700 mb-2">Kunci Jawaban</label>
+              <KoreanInput 
+                type="text" 
+                name="answer_key" 
+                placeholder="A/B/C/D atau Teks Jawaban (Wajib untuk Pilihan Ganda)" 
+                className="w-full p-2.5 border rounded-lg" 
+              />
               {questionType === "MULTIPLE_CHOICE" && (
                 <p className="text-xs text-gray-500 mt-1">*Jika Pilihan Ganda, format soal di atas bisa berupa teks soal beserta opsi A, B, C, D. Lalu isi Kunci Jawaban dengan 1 huruf saja (A/B/C/D).</p>
               )}

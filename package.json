@@ -12,11 +12,14 @@
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.3",
     "bcryptjs": "^3.0.3",
+    "hangul-js": "^0.2.6",
     "jose": "^6.2.3",
     "lucide-react": "^1.20.0",
     "next": "16.2.9",
     "react": "19.2.4",
     "react-dom": "19.2.4",
+    "react-simple-keyboard": "^3.8.221",
+    "simple-keyboard-layouts": "^3.4.222",
     "string-similarity": "^4.0.4"
   },
   "devDependencies": {

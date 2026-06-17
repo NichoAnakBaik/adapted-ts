@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ClipboardList, Plus, Clock, FileQuestion, ArrowRight } from "lucide-react";
 import Link from "next/link";
 import { createExam, toggleExamPublish } from "@/app/actions/pengajar";
+import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 
 export default function PengajarKuisClient({ initialExams, classes }: { initialExams: any[], classes: any[] }) {
   const [exams, setExams] = useState(initialExams);
@@ -68,7 +69,7 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Judul Ujian</label>
-              <input type="text" name="title" required placeholder="Contoh: Kuis Hangeul 1" className="w-full p-2.5 border rounded-lg" />
+              <KoreanInput type="text" name="title" required placeholder="Contoh: Kuis Hangeul 1" className="w-full p-2.5 border rounded-lg" />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Batas Waktu (Menit)</label>
@@ -76,7 +77,7 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
             </div>
             <div className="md:col-span-2">
               <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Instruksi</label>
-              <textarea name="description" rows={3} placeholder="Instruksi pengerjaan ujian..." className="w-full p-2.5 border rounded-lg" />
+              <KoreanTextarea name="description" rows={3} placeholder="Instruksi pengerjaan ujian..." className="w-full p-2.5 border rounded-lg" />
             </div>
             <div className="md:col-span-2 flex items-center gap-2 mt-2">
               <input type="checkbox" id="is_final" name="is_final" value="true" className="w-4 h-4 text-namsan-primary rounded border-gray-300" />

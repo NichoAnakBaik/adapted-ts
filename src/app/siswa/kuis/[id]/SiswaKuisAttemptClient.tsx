@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Clock, CheckCircle2, PlayCircle, AlertCircle } from "lucide-react";
 import Link from "next/link";
 import { submitExam } from "@/app/actions/siswa";
+import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 
 export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
@@ -110,31 +111,31 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
               {/* Answer Input based on type */}
               <div className="mt-4">
                 {q.type === 'MULTIPLE_CHOICE' ? (
-                  <input 
+                  <KoreanInput 
                     type="text" 
                     placeholder="Ketik A / B / C / D" 
                     maxLength={1}
                     value={answers[q.id] || ""}
-                    onChange={(e) => handleAnswerChange(q.id, e.target.value.toUpperCase())}
+                    onValueChange={(val) => handleAnswerChange(q.id, val.toUpperCase())}
                     className="w-32 p-3 border-2 focus:border-namsan-primary rounded-xl text-center text-xl font-bold uppercase outline-none transition-colors"
                   />
                 ) : q.type === 'SPEAKING' ? (
                   <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl">
                     <p className="text-sm text-gray-500 mb-2">*(Fitur AI Voice Analysis akan diaktifkan di Tahap Akhir). Untuk saat ini, ketik "Selesai" jika Anda sudah mempraktikkan pengucapannya secara mandiri.*</p>
-                    <input 
+                    <KoreanInput 
                       type="text" 
                       placeholder="Ketik Selesai" 
                       value={answers[q.id] || ""}
-                      onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                      onValueChange={(val) => handleAnswerChange(q.id, val)}
                       className="w-full p-3 border rounded-xl outline-none focus:border-namsan-primary transition-colors"
                     />
                   </div>
                 ) : (
-                  <textarea 
+                  <KoreanTextarea 
                     rows={3}
                     placeholder="Tulis jawaban Anda di sini..."
                     value={answers[q.id] || ""}
-                    onChange={(e) => handleAnswerChange(q.id, e.target.value)}
+                    onValueChange={(val) => handleAnswerChange(q.id, val)}
                     className="w-full p-4 border-2 focus:border-namsan-primary rounded-xl outline-none transition-colors"
                   />
                 )}

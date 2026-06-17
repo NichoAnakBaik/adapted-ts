@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, BookOpen, MessageSquare, Settings, Award, ShieldAlert, LogOut } from "lucide-react";
+import { LayoutDashboard, Users, BookOpen, MessageSquare, Settings, Award, ShieldAlert, LogOut, FileText, ClipboardList, PenTool } from "lucide-react";
 import ProfileSettingsModal from "@/components/ProfileSettingsModal";
 
 export function AdminSidebar({ user }: { user: any }) {
@@ -14,6 +14,9 @@ export function AdminSidebar({ user }: { user: any }) {
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
     { name: "Manajemen Pengguna", href: "/admin/users", icon: Users },
     { name: "Manajemen Kelas", href: "/admin/kelas", icon: BookOpen },
+    { name: "Modul Pembelajaran", href: "/admin/modul", icon: FileText },
+    { name: "Pantau Kuis", href: "/admin/kuis", icon: ClipboardList },
+    { name: "Ujian Bahasa", href: "/admin/ujian", icon: PenTool },
     { name: "Sertifikasi", href: "/admin/sertifikat", icon: Award },
     { name: "Forum Global", href: "/admin/forum", icon: MessageSquare },
     { name: "Log Sistem", href: "/admin/logs", icon: ShieldAlert, special: true },

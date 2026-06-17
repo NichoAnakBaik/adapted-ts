@@ -3,6 +3,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { Send, User } from "lucide-react";
 import { postMessage } from "@/app/actions/forum";
+import { KoreanInput } from "./KoreanInput";
 
 export default function ForumChatClient({ forumData, currentUserId, readOnly = false }: { forumData: any, currentUserId: string, readOnly?: boolean }) {
   const [messages, setMessages] = useState(forumData.messages || []);
@@ -98,10 +99,10 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
       {!readOnly && (
         <div className="p-4 bg-gray-50 border-t border-gray-100 rounded-b-2xl">
           <form onSubmit={handleSend} className="flex gap-2">
-            <input 
+            <KoreanInput 
               type="text" 
               value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
+              onValueChange={(val) => setNewMessage(val)}
               placeholder="Tulis pesan..." 
               className="flex-1 p-3 rounded-xl border border-gray-200 outline-none focus:border-namsan-primary transition-colors text-sm"
             />

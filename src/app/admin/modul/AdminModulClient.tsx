@@ -2,17 +2,17 @@
 
 import React, { useState } from "react";
 import { BookOpen, Trash2, Plus, FileText, Headphones } from "lucide-react";
-import { createModule, deleteModule } from "@/app/actions/pengajar";
+import { createAdminModule, deleteAdminModule } from "@/app/actions/admin";
 import { KoreanInput } from "@/components/KoreanInput";
 
-export default function PengajarModulClient({ initialModules, classes }: { initialModules: any[], classes: any[] }) {
+export default function AdminModulClient({ initialModules, classes }: { initialModules: any[], classes: any[] }) {
   const [modules, setModules] = useState(initialModules);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus modul ini?")) return;
-    const res = await deleteModule(id);
+    if (!confirm("Yakin ingin menghapus modul ini secara permanen?")) return;
+    const res = await deleteAdminModule(id);
     if (res.success) {
       setModules(modules.filter((m) => m.id !== id));
     } else if (res.error) {
@@ -24,7 +24,7 @@ export default function PengajarModulClient({ initialModules, classes }: { initi
     e.preventDefault();
     setError("");
     const formData = new FormData(e.currentTarget);
-    const res = await createModule(formData);
+    const res = await createAdminModule(formData);
     
     if (res.error) {
       setError(res.error);
@@ -38,25 +38,25 @@ export default function PengajarModulClient({ initialModules, classes }: { initi
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-blue-50 rounded-xl">
-            <BookOpen className="w-8 h-8 text-namsan-blue" />
+          <div className="p-3 bg-namsan-red-light rounded-xl">
+            <BookOpen className="w-8 h-8 text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Modul</h1>
-            <p className="text-sm text-namsan-text-muted">Unggah dan kelola materi pembelajaran PDF dan Audio.</p>
+            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Modul Global</h1>
+            <p className="text-sm text-namsan-text-muted">Admin dapat mengelola semua modul untuk semua kelas.</p>
           </div>
         </div>
         <button
           onClick={() => setShowForm(!showForm)}
           className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-colors"
         >
-          {showForm ? "Batal" : <><Plus className="w-5 h-5" /> Unggah Modul</>}
+          {showForm ? "Batal" : <><Plus className="w-5 h-5" /> Tambah Modul</>}
         </button>
       </div>
 
       {showForm && (
         <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-          <h2 className="text-lg font-bold mb-4">Unggah Modul Baru</h2>
+          <h2 className="text-lg font-bold mb-4">Tambah Modul Baru</h2>
           {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
           
           <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -121,7 +121,7 @@ export default function PengajarModulClient({ initialModules, classes }: { initi
                   </div>
                 </td>
                 <td className="p-4 text-right">
-                  <button onClick={() => handleDelete(m.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
+                  <button onClick={() => handleDelete(m.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Hapus Modul'">
                     <Trash2 className="w-5 h-5" />
                   </button>
                 </td>
