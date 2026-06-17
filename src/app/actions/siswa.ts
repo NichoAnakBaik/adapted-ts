@@ -208,3 +208,57 @@ export async function submitExam(examId: string, answers: Record<string, string>
 
   return { success: true, score: finalScorePercentage };
 }
+
+export async function getExamAttemptDetails(examId: string) {
+  const session = await checkSiswaAuth();
+  
+  const attempt = await prisma.examAttempt.findFirst({
+    where: { exam_id: examId, student_id: session.user.id },
+    include: {
+      exam: {
+        include: {
+          class: true,
+          questions: { orderBy: { created_at: 'asc' } }
+        }
+      },
+      question_attempts: {
+        include: { question: true }
+      }
+    }
+  });
+
+  if (!attempt) return null;
+  return attempt;
+}
+export async function getStudentCertificates() {
+  const session = await checkSiswaAuth();
+  
+  return prisma.certificate.findMany({
+    where: { 
+      student_id: session.user.id,
+      status: 'APPROVED'
+    },
+    include: {
+      class: { select: { name: true, level: true, teacher: { select: { nama_lengkap: true } } } }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
+export async function getStudentAnalytics() {
+  const session = await checkSiswaAuth();
+  
+  const attempts = await prisma.examAttempt.findMany({
+    where: { student_id: session.user.id },
+    include: { exam: { select: { title: true, is_final: true } } },
+    orderBy: { end_time: 'asc' }
+  });
+
+  const recommendations = await prisma.recommendationHistory.findMany({
+    where: { student_id: session.user.id },
+    orderBy: { created_at: 'desc' },
+    take: 5
+  });
+
+  return { attempts, recommendations };
+}

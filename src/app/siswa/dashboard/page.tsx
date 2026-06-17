@@ -82,7 +82,12 @@ export default async function SiswaDashboardPage() {
             
             <a href="/siswa/kuis" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <PenTool className="w-6 h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="font-bold text-namsan-text">Kuis & Ujian</span>
+              <span className="font-bold text-namsan-text">Kuis Kelas</span>
+            </a>
+            
+            <a href="/siswa/ujian" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+              <CheckCircle2 className="w-6 h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
+              <span className="font-bold text-namsan-text">Ujian Akhir</span>
             </a>
             
             <a href="/siswa/forum" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
@@ -90,12 +95,12 @@ export default async function SiswaDashboardPage() {
               <span className="font-bold text-namsan-text">Forum Kelas</span>
             </a>
             
-            <a href="/siswa/absensi" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <CalendarCheck className="w-6 h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="font-bold text-namsan-text">Absensi & Logbook</span>
+            <a href="/siswa/aktivitas" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+              <Clock className="w-6 h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
+              <span className="font-bold text-namsan-text">Riwayat Belajar</span>
             </a>
 
-            <a href="/siswa/sertifikat" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group col-span-1 sm:col-span-2">
+            <a href="/siswa/sertifikat" className="bg-white rounded-xl p-5 border border-namsan-primary/30 flex items-center justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Award className="w-6 h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="font-bold text-namsan-text">Sertifikat Level</span>
             </a>

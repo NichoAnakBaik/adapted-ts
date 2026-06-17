@@ -1,0 +1,127 @@
+"use client";
+
+import React from "react";
+import { ArrowLeft, CheckCircle2, XCircle, BrainCircuit, MessageSquareText, PlayCircle } from "lucide-react";
+import Link from "next/link";
+
+export default function SiswaHasilClient({ attempt }: { attempt: any }) {
+  const { exam, question_attempts } = attempt;
+
+  return (
+    <div className="max-w-4xl mx-auto space-y-6">
+      <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-namsan-soft rounded-bl-full -z-10 opacity-50"></div>
+        
+        <Link href={exam.is_final ? "/siswa/ujian" : "/siswa/kuis"} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-namsan-primary mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Kembali
+        </Link>
+        
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div>
+            <h1 className="text-3xl font-bold text-namsan-text mb-2">Hasil: {exam.title}</h1>
+            <p className="text-sm text-gray-500">Waktu penyelesaian: {new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}</p>
+          </div>
+          
+          <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-100 min-w-[120px]">
+            <span className="block text-xs font-bold text-gray-500 mb-1">SKOR AKHIR</span>
+            <span className={`text-4xl font-black ${attempt.total_score >= 70 ? 'text-green-500' : 'text-orange-500'}`}>
+              {attempt.total_score}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold text-namsan-text">Detail Pengerjaan</h2>
+        
+        {exam.questions.map((q: any, index: number) => {
+          const qa = question_attempts.find((a: any) => a.question_id === q.id);
+          const studentAnswer = qa?.student_answer || "-";
+          const isCorrect = q.answer_key ? studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase() : null;
+
+          return (
+            <div key={q.id} className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+              <div className="flex items-start gap-4">
+                <div className="flex-shrink-0 w-10 h-10 bg-namsan-soft rounded-full flex items-center justify-center font-bold text-namsan-text-muted">
+                  {index + 1}
+                </div>
+                <div className="flex-1">
+                  <div className="mb-4">
+                    <span className="text-xs font-bold text-namsan-text-muted uppercase tracking-wider">{q.type.replace('_', ' ')}</span>
+                    <p className="text-lg text-namsan-text font-medium mt-1 whitespace-pre-wrap">{q.question_text}</p>
+                  </div>
+
+                  {q.audio_reference && (
+                    <div className="mb-4 bg-blue-50 p-4 rounded-xl">
+                      <span className="text-sm font-bold text-blue-800 flex items-center gap-2 mb-2"><PlayCircle className="w-5 h-5" /> Audio Listening</span>
+                      <audio controls src={q.audio_reference} className="w-full max-w-md h-10" />
+                    </div>
+                  )}
+
+                  {q.type === 'MULTIPLE_CHOICE' && (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-4">
+                      {['A', 'B', 'C', 'D'].map((opt) => {
+                        const isStudentChoice = studentAnswer.toUpperCase() === opt;
+                        const isCorrectChoice = q.answer_key?.toUpperCase() === opt;
+                        
+                        let optStyle = "border-gray-200 text-gray-600";
+                        if (isCorrectChoice) optStyle = "border-green-500 bg-green-50 text-green-700 font-bold";
+                        else if (isStudentChoice && !isCorrectChoice) optStyle = "border-red-400 bg-red-50 text-red-600 line-through opacity-70";
+
+                        return (
+                          <div key={opt} className={`p-4 rounded-xl border-2 text-left transition-all flex flex-col ${optStyle}`}>
+                            <span className="font-bold">Pilihan {opt}</span>
+                            {q[`option_${opt.toLowerCase()}`] && (
+                              <span className="text-sm mt-1">
+                                {q[`option_${opt.toLowerCase()}`]}
+                              </span>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+
+                  {q.type !== 'MULTIPLE_CHOICE' && (
+                    <div className="space-y-3 mb-4">
+                      <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                        <span className="text-xs font-bold text-gray-500 block mb-1">JAWABAN KAMU</span>
+                        <p className="font-medium text-namsan-text">{studentAnswer}</p>
+                      </div>
+                      {q.answer_key && (
+                        <div className="p-4 bg-green-50 rounded-xl border border-green-100">
+                          <span className="text-xs font-bold text-green-700 block mb-1">KUNCI JAWABAN</span>
+                          <p className="font-medium text-green-800">{q.answer_key}</p>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {isCorrect !== null && q.type === 'MULTIPLE_CHOICE' && (
+                    <div className={`mt-2 flex items-center gap-2 font-bold text-sm ${isCorrect ? 'text-green-600' : 'text-red-500'}`}>
+                      {isCorrect ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
+                      {isCorrect ? 'Benar (+10)' : 'Salah (0)'}
+                    </div>
+                  )}
+
+                  {qa?.ai_feedback && (
+                    <div className="mt-6 p-5 bg-[#F8F9FA] rounded-xl border border-[#E9ECEF] flex gap-3 items-start relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-16 h-16 bg-[#E9ECEF] rounded-bl-full opacity-50 -z-10"></div>
+                      <div className="mt-1 flex-shrink-0 text-[#4C6EF5]">
+                        <BrainCircuit className="w-6 h-6" />
+                      </div>
+                      <div>
+                        <span className="text-sm font-bold text-[#4C6EF5] block mb-1">AI Feedback</span>
+                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{qa.ai_feedback}</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}

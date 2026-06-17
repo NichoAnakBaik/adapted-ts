@@ -4,17 +4,17 @@ import React from "react";
 import { ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
-export default function SiswaKuisClient({ exams }: { exams: any[] }) {
+export default function SiswaUjianClient({ exams }: { exams: any[] }) {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-red-50 rounded-xl">
-            <ClipboardList className="w-8 h-8 text-red-500" />
+          <div className="p-3 bg-yellow-50 rounded-xl">
+            <ClipboardList className="w-8 h-8 text-yellow-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-namsan-text">Kuis & Ujian</h1>
-            <p className="text-sm text-namsan-text-muted">Uji kemampuan bahasa Koreamu melalui kuis interaktif.</p>
+            <h1 className="text-2xl font-bold text-namsan-text">Ujian Akhir</h1>
+            <p className="text-sm text-namsan-text-muted">Selesaikan Ujian Akhir untuk melanjutkan ke level berikutnya.</p>
           </div>
         </div>
       </div>
@@ -28,6 +28,9 @@ export default function SiswaKuisClient({ exams }: { exams: any[] }) {
               <div className="flex justify-between items-start mb-4">
                 <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
                   {ex.class.name}
+                </span>
+                <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
+                  Ujian Akhir
                 </span>
               </div>
               
@@ -61,7 +64,7 @@ export default function SiswaKuisClient({ exams }: { exams: any[] }) {
                       <span className="text-lg font-bold text-green-600">{attempt.total_score}</span>
                     </div>
                     <Link 
-                      href={`/siswa/kuis/${ex.id}/hasil`}
+                      href={`/siswa/ujian/${ex.id}/hasil`}
                       className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2.5 rounded-lg transition-colors"
                     >
                       Lihat Hasil <ArrowRight className="w-4 h-4" />
@@ -72,7 +75,7 @@ export default function SiswaKuisClient({ exams }: { exams: any[] }) {
                     href={`/siswa/kuis/${ex.id}`} 
                     className="w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                   >
-                    Kerjakan Sekarang <ArrowRight className="w-4 h-4" />
+                    Kerjakan Ujian <ArrowRight className="w-4 h-4" />
                   </Link>
                 )}
               </div>
@@ -83,8 +86,8 @@ export default function SiswaKuisClient({ exams }: { exams: any[] }) {
         {exams.length === 0 && (
           <div className="col-span-full bg-white p-12 rounded-2xl text-center border border-gray-100 border-dashed">
             <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-namsan-text">Belum Ada Kuis</h3>
-            <p className="text-gray-500 mt-2">Pengajar belum mempublikasikan kuis untuk kelas yang Anda ikuti.</p>
+            <h3 className="text-lg font-bold text-namsan-text">Belum Ada Ujian Akhir</h3>
+            <p className="text-gray-500 mt-2">Pengajar belum mempublikasikan Ujian Akhir untuk kelas yang Anda ikuti.</p>
           </div>
         )}
       </div>
