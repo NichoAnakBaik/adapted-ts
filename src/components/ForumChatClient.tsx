@@ -4,7 +4,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { Send, User } from "lucide-react";
 import { postMessage } from "@/app/actions/forum";
 
-export default function ForumChatClient({ forumData, currentUserId }: { forumData: any, currentUserId: string }) {
+export default function ForumChatClient({ forumData, currentUserId, readOnly = false }: { forumData: any, currentUserId: string, readOnly?: boolean }) {
   const [messages, setMessages] = useState(forumData.messages || []);
   const [newMessage, setNewMessage] = useState("");
   const [isSending, setIsSending] = useState(false);
@@ -46,7 +46,7 @@ export default function ForumChatClient({ forumData, currentUserId }: { forumDat
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-[600px]">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
       {/* Header */}
       <div className="p-4 border-b border-gray-100 flex items-center gap-3">
         <div className="p-2 bg-blue-50 rounded-lg">
@@ -95,24 +95,26 @@ export default function ForumChatClient({ forumData, currentUserId }: { forumDat
       </div>
 
       {/* Input Area */}
-      <div className="p-4 bg-gray-50 border-t border-gray-100 rounded-b-2xl">
-        <form onSubmit={handleSend} className="flex gap-2">
-          <input 
-            type="text" 
-            value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)}
-            placeholder="Tulis pesan..." 
-            className="flex-1 p-3 rounded-xl border border-gray-200 outline-none focus:border-namsan-primary transition-colors text-sm"
-          />
-          <button 
-            type="submit"
-            disabled={!newMessage.trim() || isSending}
-            className="bg-namsan-text hover:bg-namsan-text/90 disabled:opacity-50 text-white p-3 rounded-xl transition-colors flex items-center justify-center"
-          >
-            <Send className="w-5 h-5" />
-          </button>
-        </form>
-      </div>
+      {!readOnly && (
+        <div className="p-4 bg-gray-50 border-t border-gray-100 rounded-b-2xl">
+          <form onSubmit={handleSend} className="flex gap-2">
+            <input 
+              type="text" 
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              placeholder="Tulis pesan..." 
+              className="flex-1 p-3 rounded-xl border border-gray-200 outline-none focus:border-namsan-primary transition-colors text-sm"
+            />
+            <button 
+              type="submit"
+              disabled={!newMessage.trim() || isSending}
+              className="bg-namsan-text hover:bg-namsan-text/90 disabled:opacity-50 text-white p-3 rounded-xl transition-colors flex items-center justify-center"
+            >
+              <Send className="w-5 h-5" />
+            </button>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
