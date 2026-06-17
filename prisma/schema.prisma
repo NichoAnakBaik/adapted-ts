@@ -7,332 +7,236 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum Role {
+  ADMIN
+  PENGAJAR
+  SISWA
+}
+
+enum ClassType {
+  ONLINE
+  OFFLINE
+}
+
+enum QuestionType {
+  SPEAKING
+  LISTENING
+  WRITING
+  READING
+  MULTIPLE_CHOICE // Adding standard multiple choice just in case
+}
+
+enum CertificateStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+enum ActivityType {
+  LOGIN
+  LOGOUT
+  MODULE_ACCESS
+  QUIZ_ATTEMPT
+  EXAM_ATTEMPT
+  FORUM_PARTICIPATION
+}
+
 model User {
-  id             Int               @id @default(autoincrement())
-  nama_lengkap   String
-  username       String            @unique
-  password       String
-  role           String            @default("siswa")
-  created_at     DateTime          @default(now())
+  id           String   @id @default(uuid())
+  nama_lengkap String
+  username     String   @unique
+  password     String
+  role         Role     @default(SISWA)
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
-  kelas_diajar       Kelas[]           @relation("PengajarKelas")
-  enrollments        Enrollment[]
-  kelas_siswa        KelasSiswa[]
-  siswa_kelas        SiswaKelas[]
-  absensi_log        AbsensiLog[]
-  absensi_logbook    AbsensiLogbook[]
-  progres_materi     ProgresMateri[]
-  forum_diskusi      ForumDiskusi[]
-  forum_chat         ForumChat[]
-  log_aktivitas_kuis LogAktivitasKuis[]
-  jawaban_siswa      JawabanSiswa[]
-  nilai_kuis         NilaiKuis[]
-  sertifikat         Sertifikat[]
-  nilai_akhir_kuis   NilaiAkhirKuis[]
-  rekomendasi_ai     RekomendasiAi[]
-
-  @@map("users")
+  // Relationships
+  kelas_diajar           Class[]                 @relation("PengajarKelas")
+  enrollments            Enrollment[]
+  student_activity_logs  StudentActivityLog[]
+  exam_attempts          ExamAttempt[]
+  learning_progresses    LearningProgress[]
+  recommendation_history RecommendationHistory[]
+  sertifikat_siswa       Certificate[]           @relation("SertifikatSiswa")
+  forum_messages         ForumMessage[]
 }
 
-model Kelas {
-  id_kelas     Int             @id @default(autoincrement())
-  nama_kelas   String
-  id_pengajar  Int?
-  pengajar     User?           @relation("PengajarKelas", fields: [id_pengajar], references: [id])
-  level_bahasa String?
-  tipe_kelas   String?
-  link_kelas   String?
-  created_at   DateTime        @default(now())
+model Class {
+  id         String    @id @default(uuid())
+  name       String
+  type       ClassType @default(ONLINE)
+  schedule   String? // Could be a JSON string or simple text for now
+  teacher_id String?
+  teacher    User?     @relation("PengajarKelas", fields: [teacher_id], references: [id])
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
 
-  jadwal_kelas  JadwalKelas[]
-  enrollments   Enrollment[]
-  kelas_siswa   KelasSiswa[]
-  siswa_kelas   SiswaKelas[]
-  materi        Materi[]
-  forum_topik   ForumTopik[]
-  forum_diskusi ForumDiskusi[]
-  forum_kelas   ForumKelas[]
-  kuis          Kuis[]
-  sertifikat    Sertifikat[]
-
-  @@map("kelas")
-}
-
-model JadwalKelas {
-  id_jadwal      Int       @id @default(autoincrement())
-  id_kelas       Int
-  kelas          Kelas     @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
-  hari           String?
-  jam_mulai      DateTime? @db.Time
-  jam_selesai    DateTime? @db.Time
-  link_pertemuan String?
-  created_at     DateTime  @default(now())
-
-  @@map("jadwal_kelas")
+  // Relationships
+  enrollments  Enrollment[]
+  modules      Module[]
+  exams        Exam[]
+  certificates Certificate[]
+  forums       Forum[]
 }
 
 model Enrollment {
-  id_enrollment  Int      @id @default(autoincrement())
-  id_siswa       Int
-  siswa          User     @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  id_kelas       Int
-  kelas          Kelas    @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
-  status_aktif   Boolean  @default(true)
-  tanggal_daftar DateTime @default(now())
+  id         String   @id @default(uuid())
+  student_id String
+  student    User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  class_id   String
+  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@map("enrollment")
+  @@unique([student_id, class_id])
 }
 
-model KelasSiswa {
-  id_kelas_siswa Int   @id @default(autoincrement())
-  id_siswa       Int
-  siswa          User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  id_kelas       Int
-  kelas          Kelas @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+model Module {
+  id         String   @id @default(uuid())
+  class_id   String
+  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  title      String
+  pdf_url    String?
+  audio_url  String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  @@map("kelas_siswa")
+  learning_progresses LearningProgress[]
 }
 
-model SiswaKelas {
-  id_siswa_kelas Int   @id @default(autoincrement())
-  id_siswa       Int
-  siswa          User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  id_kelas       Int
-  kelas          Kelas @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
+model Exam {
+  id           String   @id @default(uuid())
+  class_id     String
+  class        Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  title        String
+  description  String?
+  time_limit   Int? // in minutes
+  is_published Boolean  @default(false)
+  is_final     Boolean  @default(false) // Distinguish between Quiz and Final Exam
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
 
-  @@map("siswa_kelas")
+  questions     Question[]
+  exam_attempts ExamAttempt[]
 }
 
-model AbsensiLog {
-  id_absensi            Int       @id @default(autoincrement())
-  id_siswa              Int
-  siswa                 User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  tanggal               DateTime? @db.Date
-  waktu_login           DateTime?
-  waktu_logout          DateTime?
-  durasi_belajar_menit  Int?
+model Question {
+  id              String       @id @default(uuid())
+  exam_id         String
+  exam            Exam         @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  type            QuestionType
+  question_text   String
+  answer_key      String? // Optional for open-ended or subjective tests
+  audio_reference String? // URL to audio for listening questions
+  difficulty      Int?         @default(1) // 1-5 scale
+  created_at      DateTime     @default(now())
+  updated_at      DateTime     @updatedAt
 
-  @@map("absensi_log")
+  question_attempts QuestionAttempt[]
 }
 
-model AbsensiLogbook {
-  id_absen       Int       @id @default(autoincrement())
-  id_siswa       Int
-  siswa          User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  waktu_masuk    DateTime?
-  waktu_keluar   DateTime?
-  durasi_menit   Int?
-  tanggal        DateTime? @db.Date
-
-  @@map("absensi_logbook")
+model Certificate {
+  id         String            @id @default(uuid())
+  student_id String
+  student    User              @relation("SertifikatSiswa", fields: [student_id], references: [id], onDelete: Cascade)
+  class_id   String
+  class      Class             @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  file_url   String
+  status     CertificateStatus @default(PENDING)
+  created_at DateTime          @default(now())
+  updated_at DateTime          @updatedAt
 }
 
-model Materi {
-  id_materi    Int             @id @default(autoincrement())
-  id_kelas     Int
-  kelas        Kelas           @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
-  judul_materi String?
-  file_pdf     String?
-  urutan       Int?
-  created_at   DateTime        @default(now())
+model Forum {
+  id         String   @id @default(uuid())
+  class_id   String
+  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  title      String?
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 
-  materi_audio    MateriAudio[]
-  progres_materi  ProgresMateri[]
-  forum_chat      ForumChat[]
-
-  @@map("materi")
+  messages ForumMessage[]
 }
 
-model MateriAudio {
-  id_audio   Int     @id @default(autoincrement())
-  id_materi  Int
-  materi     Materi  @relation(fields: [id_materi], references: [id_materi], onDelete: Cascade)
-  file_audio String?
-
-  @@map("materi_audio")
+model ForumMessage {
+  id         String   @id @default(uuid())
+  forum_id   String
+  forum      Forum    @relation(fields: [forum_id], references: [id], onDelete: Cascade)
+  user_id    String
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  message    String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
-model ProgresMateri {
-  id_progres Int     @id @default(autoincrement())
-  id_siswa   Int
-  siswa      User    @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  id_materi  Int
-  materi     Materi  @relation(fields: [id_materi], references: [id_materi], onDelete: Cascade)
-  status     Boolean?
+// ============================================
+// MACHINE LEARNING PREPARATION & TRACKING DATA
+// ============================================
 
-  @@map("progres_materi")
+model StudentActivityLog {
+  id          String       @id @default(uuid())
+  student_id  String
+  student     User         @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  action_type ActivityType
+  duration    Int?         @default(0) // Duration in seconds (e.g. learning duration)
+  metadata    String? // JSON string for extra info (module_id, ip_address, etc.)
+  created_at  DateTime     @default(now())
 }
 
-model ForumTopik {
-  id_topik Int     @id @default(autoincrement())
-  id_kelas Int
-  kelas    Kelas   @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
-  judul    String?
+model ExamAttempt {
+  id          String    @id @default(uuid())
+  exam_id     String
+  exam        Exam      @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student_id  String
+  student     User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  start_time  DateTime  @default(now())
+  end_time    DateTime?
+  total_score Int?      @default(0)
+  created_at  DateTime  @default(now())
+  updated_at  DateTime  @updatedAt
 
-  @@map("forum_topik")
+  question_attempts QuestionAttempt[]
 }
 
-model ForumDiskusi {
-  id_diskusi Int             @id @default(autoincrement())
-  id_kelas   Int
-  kelas      Kelas           @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
-  id_penulis Int
-  penulis    User            @relation(fields: [id_penulis], references: [id], onDelete: Cascade)
-  judul      String?
-  pesan      String?
-  created_at DateTime        @default(now())
+model QuestionAttempt {
+  id              String      @id @default(uuid())
+  exam_attempt_id String
+  exam_attempt    ExamAttempt @relation(fields: [exam_attempt_id], references: [id], onDelete: Cascade)
+  question_id     String
+  question        Question    @relation(fields: [question_id], references: [id], onDelete: Cascade)
 
-  forum_komentar ForumKomentar[]
+  // ML Data Points
+  student_answer     String?
+  audio_url          String? // URL to recording if speaking test
+  transcript         String? // Speech-to-text transcript
+  time_spent_seconds Int?    @default(0)
+  score              Int?    @default(0)
+  ai_feedback        String?
 
-  @@map("forum_diskusi")
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
 }
 
-model ForumKomentar {
-  id_komentar Int          @id @default(autoincrement())
-  id_diskusi  Int
-  diskusi     ForumDiskusi @relation(fields: [id_diskusi], references: [id_diskusi], onDelete: Cascade)
-  komentar    String?
+model LearningProgress {
+  id            String    @id @default(uuid())
+  student_id    String
+  student       User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  module_id     String
+  module        Module    @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  is_completed  Boolean   @default(false)
+  last_accessed DateTime? @default(now())
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
 
-  @@map("forum_komentar")
+  @@unique([student_id, module_id])
 }
 
-model ForumKelas {
-  id_pesan Int     @id @default(autoincrement())
-  id_kelas Int
-  kelas    Kelas   @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
-  pesan    String?
-
-  @@map("forum_kelas")
-}
-
-model ForumChat {
-  id_chat    Int          @id @default(autoincrement())
-  id_materi  Int
-  materi     Materi       @relation(fields: [id_materi], references: [id_materi], onDelete: Cascade)
-  id_user    Int
-  user       User         @relation(fields: [id_user], references: [id], onDelete: Cascade)
-  pesan      String?
-  created_at DateTime     @default(now())
-  parent_id  Int?
-  parent     ForumChat?   @relation("ChatReplies", fields: [parent_id], references: [id_chat])
-  replies    ForumChat[]  @relation("ChatReplies")
-
-  @@map("forum_chat")
-}
-
-model Kuis {
-  id_kuis        Int       @id @default(autoincrement())
-  id_kelas       Int
-  kelas          Kelas     @relation(fields: [id_kelas], references: [id_kelas], onDelete: Cascade)
-  judul_kuis     String?
-  deskripsi      String?
-  waktu_menit    Int?
-  tanggal_dibuat DateTime  @default(now())
-  is_published   Boolean?  @default(true)
-
-  log_aktivitas  LogAktivitasKuis[]
-  soal           SoalKuis[]
-  nilai_kuis     NilaiKuis[]
-
-  @@map("kuis")
-}
-
-model LogAktivitasKuis {
-  id_log   Int   @id @default(autoincrement())
-  id_siswa Int
-  siswa    User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  id_kuis  Int
-  kuis     Kuis  @relation(fields: [id_kuis], references: [id_kuis], onDelete: Cascade)
-
-  @@map("log_aktivitas_kuis")
-}
-
-model SoalKuis {
-  id_soal        Int             @id @default(autoincrement())
-  id_kuis        Int
-  kuis           Kuis            @relation(fields: [id_kuis], references: [id_kuis], onDelete: Cascade)
-  pertanyaan     String?
-  tipe_soal      String?
-  file_audio     String?
-  pilihan_a      String?
-  pilihan_b      String?
-  pilihan_c      String?
-  pilihan_d      String?
-  jawaban_benar  String?
-
-  opsi_pg        OpsiPg[]
-  jawaban_siswa  JawabanSiswa[]
-
-  @@map("soal_kuis")
-}
-
-model OpsiPg {
-  id_opsi   Int       @id @default(autoincrement())
-  id_soal   Int
-  soal      SoalKuis  @relation(fields: [id_soal], references: [id_soal], onDelete: Cascade)
-  teks_opsi String?
-  is_benar  Boolean?
-
-  @@map("opsi_pg")
-}
-
-model JawabanSiswa {
-  id_jawaban         Int       @id @default(autoincrement())
-  id_siswa           Int
-  siswa              User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  id_soal            Int
-  soal               SoalKuis  @relation(fields: [id_soal], references: [id_soal], onDelete: Cascade)
-  jawaban            String?
-  file_audio_jawaban String?
-  durasi_detik       Int?      @default(0)
-  skor_ai            Int?      @default(0)
-  feedback_ai        String?
-  waktu_submit       DateTime? @default(now())
-
-  @@map("jawaban_siswa")
-}
-
-model NilaiKuis {
-  id_nilai            Int       @id @default(autoincrement())
-  id_kuis             Int
-  kuis                Kuis      @relation(fields: [id_kuis], references: [id_kuis], onDelete: Cascade)
-  id_siswa            Int
-  siswa               User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  total_nilai         Int?
-  catatan_analitik_ai String?
-  waktu_selesai       DateTime?
-  skor                Int?
-  status              String?
-
-  @@map("nilai_kuis")
-}
-
-model NilaiAkhirKuis {
-  id_nilai Int   @id @default(autoincrement())
-  id_siswa Int
-  siswa    User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-
-  @@map("nilai_akhir_kuis")
-}
-
-model RekomendasiAi {
-  id_rekomendasi Int   @id @default(autoincrement())
-  id_siswa       Int
-  siswa          User  @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-
-  @@map("rekomendasi_ai")
-}
-
-model Sertifikat {
-  id_sertifikat   Int       @id @default(autoincrement())
-  id_siswa        Int
-  siswa           User      @relation(fields: [id_siswa], references: [id], onDelete: Cascade)
-  nama_sertifikat String?
-  file_pdf        String?
-  tanggal_keluar  DateTime?
-  status_approve  Boolean?  @default(false)
-  id_kelas        Int?
-  kelas           Kelas?    @relation(fields: [id_kelas], references: [id_kelas], onDelete: SetNull)
-
-  @@map("sertifikat")
+model RecommendationHistory {
+  id                  String   @id @default(uuid())
+  student_id          String
+  student             User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  recommendation_text String
+  recommendation_type String // e.g., 'MODULE_SUGGESTION', 'PACE_WARNING', 'STYLE_ADAPTATION'
+  is_applied          Boolean  @default(false) // Did the student click/follow it?
+  created_at          DateTime @default(now())
 }
