@@ -28,6 +28,27 @@ export async function getTeacherClasses() {
   });
 }
 
+export async function getClassDetails(id: string) {
+  const session = await checkPengajarAuth();
+  
+  const classData = await prisma.class.findUnique({
+    where: { id, teacher_id: session.user.id },
+    include: {
+      enrollments: {
+        include: {
+          user: {
+            select: { id: true, nama_lengkap: true, username: true, email: true, created_at: true }
+          }
+        },
+        orderBy: { created_at: 'desc' }
+      },
+      _count: { select: { modules: true, exams: true } }
+    }
+  });
+
+  return classData;
+}
+
 // --- MODULE MANAGEMENT ---
 
 export async function getModules() {
@@ -98,12 +119,13 @@ export async function deleteModule(id: string) {
 
 // --- EXAM MANAGEMENT ---
 
-export async function getExams() {
+export async function getQuizzes() {
   const session = await checkPengajarAuth();
   
   return prisma.exam.findMany({
     where: {
-      class: { teacher_id: session.user.id }
+      class: { teacher_id: session.user.id },
+      is_final: false
     },
     include: {
       class: { select: { name: true } },
@@ -112,6 +134,23 @@ export async function getExams() {
     orderBy: { created_at: 'desc' }
   });
 }
+
+export async function getFinalExams() {
+  const session = await checkPengajarAuth();
+  
+  return prisma.exam.findMany({
+    where: {
+      class: { teacher_id: session.user.id },
+      is_final: true
+    },
+    include: {
+      class: { select: { name: true } },
+      _count: { select: { questions: true, exam_attempts: true } }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
 
 export async function createExam(formData: FormData) {
   const session = await checkPengajarAuth();

@@ -2,6 +2,7 @@
 
 import React from "react";
 import { Users, BookOpen, GraduationCap } from "lucide-react";
+import Link from "next/link";
 
 export default function PengajarKelasClient({ classes }: { classes: any[] }) {
   return (
@@ -20,10 +21,10 @@ export default function PengajarKelasClient({ classes }: { classes: any[] }) {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {classes.map((c) => (
-          <div key={c.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:shadow-md transition-shadow">
+          <Link key={c.id} href={`/pengajar/kelas/${c.id}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:shadow-md hover:border-namsan-primary transition-all group">
             <div className="flex justify-between items-start mb-4">
-              <div className="p-3 bg-namsan-soft rounded-lg">
-                <GraduationCap className="w-6 h-6 text-namsan-dark" />
+              <div className="p-3 bg-namsan-soft rounded-lg group-hover:bg-blue-100 transition-colors">
+                <GraduationCap className="w-6 h-6 text-namsan-dark group-hover:text-namsan-primary transition-colors" />
               </div>
               <span className={`px-3 py-1 rounded-full text-xs font-bold ${
                 c.type === 'ONLINE' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
@@ -32,7 +33,7 @@ export default function PengajarKelasClient({ classes }: { classes: any[] }) {
               </span>
             </div>
             
-            <h3 className="text-xl font-bold text-namsan-text mb-2 line-clamp-1">{c.name}</h3>
+            <h3 className="text-xl font-bold text-namsan-text mb-2 line-clamp-1 group-hover:text-namsan-primary transition-colors">{c.name}</h3>
             
             {c.schedule && (
               <p className="text-sm text-gray-500 mb-6 flex-1">
@@ -56,7 +57,7 @@ export default function PengajarKelasClient({ classes }: { classes: any[] }) {
                 </div>
               </div>
             </div>
-          </div>
+          </Link>
         ))}
         
         {classes.length === 0 && (

@@ -40,13 +40,13 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
             <ClipboardList className="w-8 h-8 text-namsan-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-namsan-text">Kuis & Ujian</h1>
-            <p className="text-sm text-namsan-text-muted">Buat kuis latihan atau ujian akhir untuk kelas Anda.</p>
+            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Kuis Kelas</h1>
+            <p className="text-sm text-namsan-text-muted">Buat dan pantau kuis khusus untuk kelas yang Anda ampu.</p>
           </div>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-colors"
+          onClick={() => setShowForm(true)}
+          className="bg-namsan-primary hover:bg-namsan-primary/90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
         >
           <Plus className="w-5 h-5" /> Buat Kuis Baru
         </button>
@@ -56,7 +56,7 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h2 className="text-xl font-bold text-gray-800">Buat Kuis / Ujian Baru</h2>
+              <h2 className="text-xl font-bold text-gray-800">Buat Kuis Baru</h2>
               <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
             {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
@@ -72,7 +72,7 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Ujian</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Judul Kuis</label>
                 <KoreanInput type="text" name="title" required placeholder="Contoh: Kuis Hangeul 1" className="w-full p-2.5 border rounded-lg" />
               </div>
               <div>
@@ -83,16 +83,13 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
                 <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Instruksi</label>
                 <KoreanTextarea name="description" rows={3} placeholder="Instruksi pengerjaan ujian..." className="w-full p-2.5 border rounded-lg" />
               </div>
-              <div className="md:col-span-2 flex items-center gap-2 mt-2">
-                <input type="checkbox" id="is_final" name="is_final" value="true" className="w-4 h-4 text-namsan-primary rounded border-gray-300" />
-                <label htmlFor="is_final" className="text-sm font-bold text-namsan-text">Tandai sebagai Ujian Akhir (Sertifikasi)</label>
-              </div>
+                <input type="hidden" name="is_final" value="false" />
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
                   Batal
                 </button>
                 <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                  Simpan Ujian (Draft)
+                  Simpan Kuis (Draft)
                 </button>
               </div>
             </form>
@@ -107,11 +104,6 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
                 {ex.class.name}
               </span>
-              {ex.is_final && (
-                <span className="px-3 py-1 rounded-full text-xs font-bold bg-yellow-100 text-yellow-700">
-                  Ujian Akhir
-                </span>
-              )}
             </div>
             
             <h3 className="text-xl font-bold text-namsan-text mb-2 group-hover:text-namsan-primary transition-colors">{ex.title}</h3>

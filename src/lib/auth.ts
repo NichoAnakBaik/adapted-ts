@@ -31,11 +31,9 @@ export async function setSession(user: { id: string; role: string; username: str
 export async function getSession() {
   const cookieStore = await cookies();
   const session = cookieStore.get("session")?.value;
-  console.log("getSession() -> Cookie value:", session ? "Exists" : "Null");
   if (!session) return null;
   try {
     const payload = await decrypt(session);
-    console.log("getSession() -> Decrypted payload:", payload);
     return payload;
   } catch (error) {
     console.error("getSession() -> Decrypt error:", error);
