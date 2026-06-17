@@ -37,3 +37,13 @@ export async function updateProfile(formData: FormData) {
 
   return { success: true };
 }
+
+export async function getUserProfile() {
+  const session = await getSession();
+  if (!session) return null;
+
+  return await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { nama_lengkap: true, username: true }
+  });
+}

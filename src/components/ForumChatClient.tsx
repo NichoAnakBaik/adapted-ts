@@ -46,7 +46,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col h-full">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col flex-1 min-h-0">
       {/* Header */}
       <div className="p-4 border-b border-gray-100 flex items-center gap-3">
         <div className="p-2 bg-blue-50 rounded-lg">
