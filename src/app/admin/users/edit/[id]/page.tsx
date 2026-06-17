@@ -3,9 +3,8 @@ import { redirect } from 'next/navigation';
 
 export default async function EditUser({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const userId = parseInt(id);
 
-  const user = await prisma.user.findUnique({ where: { id: userId } });
+  const user = await prisma.user.findUnique({ where: { id } });
   if (!user) redirect('/admin/users');
 
   return (
