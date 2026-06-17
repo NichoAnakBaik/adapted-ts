@@ -22,57 +22,61 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      <table className="w-full text-left border-collapse">
-        <thead>
-          <tr className="bg-gray-50 border-b border-gray-100 text-sm">
-            <th className="p-4 font-bold text-namsan-text-muted">Tanggal & Waktu</th>
-            {role !== "SISWA" && <th className="p-4 font-bold text-namsan-text-muted">Siswa</th>}
-            <th className="p-4 font-bold text-namsan-text-muted">Kelas</th>
-            <th className="p-4 font-bold text-namsan-text-muted">Aksi</th>
-            <th className="p-4 font-bold text-namsan-text-muted">Modul / Detail</th>
-            <th className="p-4 font-bold text-namsan-text-muted">Durasi</th>
-          </tr>
-        </thead>
-        <tbody>
-          {logs.map((log) => {
-            let metadataObj: any = {};
-            try {
-              metadataObj = log.metadata ? JSON.parse(log.metadata) : {};
-            } catch (e) {}
-
-            return (
-              <tr key={log.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td className="p-4 text-sm text-gray-500 whitespace-nowrap">
-                  {new Date(log.created_at).toLocaleString("id-ID")}
-                </td>
-                {role !== "SISWA" && (
-                  <td className="p-4 font-medium text-namsan-text">
-                    {log.student?.nama_lengkap} <span className="text-xs text-gray-400 font-normal">@{log.student?.username}</span>
-                  </td>
-                )}
-                <td className="p-4 text-sm font-medium text-gray-700">{metadataObj.className || "-"}</td>
-                <td className="p-4">{formatAction(log.action_type)}</td>
-                <td className="p-4 text-sm text-gray-600 flex items-center gap-2">
-                  <FileText className="w-4 h-4 text-gray-400" /> {metadataObj.targetName || "Umum"}
-                </td>
-                <td className="p-4 text-sm font-bold text-gray-700 flex items-center gap-1">
-                  <Clock className="w-4 h-4 text-orange-400" /> {formatDuration(log.duration || 0)}
-                </td>
+      <div className="overflow-x-auto -mx-4 md:mx-0">
+        <div className="min-w-full inline-block align-middle">
+          <table className="min-w-full text-left border-collapse">
+            <thead>
+              <tr className="bg-gray-50 border-b border-gray-100 text-sm">
+                <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Tanggal & Waktu</th>
+                {role !== "SISWA" && <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Siswa</th>}
+                <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Kelas</th>
+                <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Aksi</th>
+                <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Modul / Detail</th>
+                <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Durasi</th>
               </tr>
-            );
-          })}
-          {logs.length === 0 && (
-            <tr>
-              <td colSpan={role === "SISWA" ? 5 : 6} className="p-8 text-center text-gray-500">
-                <div className="flex flex-col items-center gap-2">
-                  <Activity className="w-8 h-8 text-gray-300" />
-                  <p>Belum ada data riwayat aktivitas.</p>
-                </div>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {logs.map((log) => {
+                let metadataObj: any = {};
+                try {
+                  metadataObj = log.metadata ? JSON.parse(log.metadata) : {};
+                } catch (e) {}
+
+                return (
+                  <tr key={log.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                    <td className="py-3 md:py-4 px-4 text-xs md:text-sm text-gray-500 whitespace-nowrap">
+                      {new Date(log.created_at).toLocaleString("id-ID")}
+                    </td>
+                    {role !== "SISWA" && (
+                      <td className="py-3 md:py-4 px-4 font-medium text-namsan-text text-xs md:text-sm whitespace-nowrap">
+                        {log.student?.nama_lengkap} <span className="text-[10px] md:text-xs text-gray-400 font-normal block md:inline">@{log.student?.username}</span>
+                      </td>
+                    )}
+                    <td className="py-3 md:py-4 px-4 text-xs md:text-sm font-medium text-gray-700 whitespace-nowrap">{metadataObj.className || "-"}</td>
+                    <td className="py-3 md:py-4 px-4 whitespace-nowrap">{formatAction(log.action_type)}</td>
+                    <td className="py-3 md:py-4 px-4 text-xs md:text-sm text-gray-600 flex items-center gap-2 min-w-[200px]">
+                      <FileText className="w-4 h-4 md:w-5 md:h-5 text-gray-400 shrink-0" /> <span className="truncate">{metadataObj.targetName || "Umum"}</span>
+                    </td>
+                    <td className="py-3 md:py-4 px-4 text-xs md:text-sm font-bold text-gray-700 flex items-center gap-1 whitespace-nowrap">
+                      <Clock className="w-4 h-4 text-orange-400 shrink-0" /> {formatDuration(log.duration || 0)}
+                    </td>
+                  </tr>
+                );
+              })}
+              {logs.length === 0 && (
+                <tr>
+                  <td colSpan={role === "SISWA" ? 5 : 6} className="p-6 md:p-8 text-center text-gray-500">
+                    <div className="flex flex-col items-center gap-2">
+                      <Activity className="w-6 h-6 md:w-8 md:h-8 text-gray-300" />
+                      <p className="text-xs md:text-sm">Belum ada data riwayat aktivitas.</p>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }
