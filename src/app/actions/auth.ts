@@ -13,19 +13,29 @@ export async function loginAction(formData: FormData) {
     return { error: "Username and password are required" };
   }
 
-  // Mock checking for dev environment if DB is empty
-  let role = "SISWA";
-  let userId = "mock-id-123";
+  // Find user in DB
+  const user = await prisma.user.findUnique({
+    where: { username },
+  });
 
-  // Temporary DEV bypass based on username prefix to test dashboards
-  if (username.startsWith("admin")) role = "ADMIN";
-  if (username.startsWith("pengajar")) role = "PENGAJAR";
+  if (!user) {
+    return { error: "Username tidak ditemukan" };
+  }
 
-  await setSession({ id: userId, role, username });
+  // Validate password
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  
+  if (!isValidPassword) {
+    return { error: "Password salah" };
+  }
 
-  if (role === "ADMIN") redirect("/admin/dashboard");
-  if (role === "PENGAJAR") redirect("/pengajar/dashboard");
-  redirect("/siswa/dashboard");
+  // Set session
+  await setSession({ id: user.id, role: user.role, username: user.username });
+
+  // Return redirect url
+  if (user.role === "ADMIN") return { redirectUrl: "/admin/dashboard" };
+  if (user.role === "PENGAJAR") return { redirectUrl: "/pengajar/dashboard" };
+  return { redirectUrl: "/siswa/dashboard" };
 }
 
 export async function logoutAction() {

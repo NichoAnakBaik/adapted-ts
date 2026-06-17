@@ -1,7 +1,10 @@
 import React from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
+import { getDashboardStats } from "@/app/actions/admin";
 
-export default function AdminDashboardPage() {
+export default async function AdminDashboardPage() {
+  const { totalSiswa, totalPengajar, totalKelas } = await getDashboardStats();
+
   return (
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-namsan-text">Admin Dashboard</h1>
@@ -13,7 +16,7 @@ export default function AdminDashboardPage() {
             <CardTitle>Total Siswa</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-namsan-primary">1,204</p>
+            <p className="text-4xl font-bold text-namsan-primary">{totalSiswa}</p>
           </CardContent>
         </Card>
 
@@ -22,7 +25,7 @@ export default function AdminDashboardPage() {
             <CardTitle>Total Pengajar</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-namsan-blue">45</p>
+            <p className="text-4xl font-bold text-namsan-blue">{totalPengajar}</p>
           </CardContent>
         </Card>
 
@@ -31,7 +34,7 @@ export default function AdminDashboardPage() {
             <CardTitle>Total Kelas Aktif</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-4xl font-bold text-namsan-text">32</p>
+            <p className="text-4xl font-bold text-namsan-text">{totalKelas}</p>
           </CardContent>
         </Card>
       </div>
@@ -42,9 +45,7 @@ export default function AdminDashboardPage() {
         </CardHeader>
         <CardContent>
           <div className="text-sm text-namsan-text-muted">
-            <p>Siswa A login pada 08:00 KST</p>
-            <p>Pengajar B mengunggah Modul pada 07:45 KST</p>
-            <p>Siswa C menyelesaikan ujian pada 07:30 KST</p>
+            <p>Fitur integrasi Logbook segera hadir...</p>
           </div>
         </CardContent>
       </Card>
