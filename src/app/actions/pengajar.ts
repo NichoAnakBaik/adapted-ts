@@ -289,6 +289,7 @@ export async function createQuestion(formData: FormData) {
   const session = await checkPengajarAuth();
   const exam_id = formData.get("exam_id") as string;
   const type = formData.get("type") as any; // "SPEAKING" | "LISTENING" | "WRITING" | "READING"
+  const format = formData.get("format") as string || "ESSAY";
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
   const audio_file = formData.get("audio_reference") as File | null;
@@ -309,7 +310,7 @@ export async function createQuestion(formData: FormData) {
 
   await prisma.question.create({
     data: { 
-      exam_id, type, question_text, answer_key, audio_reference, image_url, difficulty,
+      exam_id, type, format, question_text, answer_key, audio_reference, image_url, difficulty,
       option_a, option_b, option_c, option_d
     }
   });

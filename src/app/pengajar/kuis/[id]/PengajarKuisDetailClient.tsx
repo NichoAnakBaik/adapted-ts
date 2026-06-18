@@ -8,7 +8,8 @@ import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 
 export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [showForm, setShowForm] = useState(false);
-  const [questionType, setQuestionType] = useState("MULTIPLE_CHOICE");
+  const [questionType, setQuestionType] = useState("READING");
+  const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL">("SOAL");
 
@@ -104,16 +105,30 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
             
             <form onSubmit={handleCreateQuestion} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Soal</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Kemahiran</label>
                 <select name="type" value={questionType} onChange={(e) => setQuestionType(e.target.value)} required className="w-full p-2.5 border rounded-lg bg-white">
-                  <option value="MULTIPLE_CHOICE">Pilihan Ganda (Otomatis Dinilai)</option>
-                  <option value="READING">Reading (Teks/Gambar)</option>
-                  <option value="LISTENING">Listening (Audio & Teks)</option>
-                  <option value="SPEAKING">Speaking (AI Voice Analysis)</option>
-                  <option value="WRITING">Writing (Esai)</option>
+                  <option value="READING">Reading (Membaca/Teks)</option>
+                  <option value="LISTENING">Listening (Mendengarkan Audio)</option>
+                  <option value="SPEAKING">Speaking (Pelafalan/Voice)</option>
+                  <option value="WRITING">Writing (Menulis)</option>
                 </select>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Format Jawaban</label>
+                <select 
+                  name="format" 
+                  value={questionFormat} 
+                  onChange={(e) => setQuestionFormat(e.target.value)} 
+                  required 
+                  className="w-full p-2.5 border rounded-lg bg-white"
+                >
+                  {(questionType === "READING" || questionType === "LISTENING") && (
+                    <option value="MULTIPLE_CHOICE">Pilihan Ganda (A, B, C, D)</option>
+                  )}
+                  <option value="ESSAY">Isian Bebas / Esai / Perekaman</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tingkat Kesulitan (1-5)</label>
                 <input type="number" name="difficulty" min="1" max="5" defaultValue="1" required className="w-full p-2.5 border rounded-lg" />
               </div>
@@ -141,7 +156,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={questionType === "LISTENING"} />
               </div>
 
-              {questionType === "MULTIPLE_CHOICE" && (
+              {questionFormat === "MULTIPLE_CHOICE" && (
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan A</label>
@@ -205,7 +220,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               </div>
               <p className="text-namsan-text font-medium whitespace-pre-wrap">{q.question_text}</p>
               
-              {(q.option_a || q.option_b || q.option_c || q.option_d) && (
+              {(q.format === 'MULTIPLE_CHOICE' || q.type === 'MULTIPLE_CHOICE') && (q.option_a || q.option_b || q.option_c || q.option_d) && (
                 <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
                   <div><span className="font-bold">A.</span> {q.option_a}</div>
                   <div><span className="font-bold">B.</span> {q.option_b}</div>
