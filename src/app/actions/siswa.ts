@@ -211,7 +211,7 @@ export async function submitExam(formData: FormData) {
         score = 0;
         ai_feedback = "Suara tidak terdeteksi. AI memberikan skor 0 karena tidak ada input audio.";
       }
-    } else if (q.type === "WRITING" || q.type === "ESSAY") {
+    } else if (q.type === "WRITING") {
       if (studentAnswer.length > 30) {
         score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
         ai_feedback = "Struktur tata bahasa (Grammar) dan kosakata sangat baik (Level B1). Susunan kalimat sudah rapi.";
