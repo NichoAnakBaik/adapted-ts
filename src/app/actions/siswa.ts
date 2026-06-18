@@ -184,7 +184,7 @@ export async function submitExam(formData: FormData) {
   });
 
   let totalScore = 0;
-  const maxScore = questions.length * 10; // Simple scoring: 10 points per question
+  let autoGradedQuestions = 0;
 
   const questionAttemptData = await Promise.all(questions.map(async (q) => {
     const data = answersData[q.id] || { student_answer: "", time_spent_seconds: 0 };
@@ -192,13 +192,16 @@ export async function submitExam(formData: FormData) {
     const timeSpent = data.time_spent_seconds;
     let score = 0;
 
-    // Auto grading for MULTIPLE_CHOICE or exact match
-    if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
-      score = 10;
-      totalScore += score;
+    // Auto grading ONLY for MULTIPLE_CHOICE format
+    if (q.format === "MULTIPLE_CHOICE") {
+      autoGradedQuestions++;
+      if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
+        score = 10;
+        totalScore += score;
+      }
     }
 
-    // Handle audio upload for SPEAKING
+    // Handle audio upload for SPEAKING or ESSAY audio responses
     let audio_url = null;
     const audioBlob = formData.get(`audio_${q.id}`) as File | null;
     if (audioBlob) {
@@ -214,7 +217,8 @@ export async function submitExam(formData: FormData) {
     };
   }));
 
-  // Calculate percentage
+  // Calculate percentage based only on auto-graded questions if there are any
+  const maxScore = autoGradedQuestions > 0 ? autoGradedQuestions * 10 : questions.length * 10;
   const finalScorePercentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
 
   await prisma.examAttempt.create({
