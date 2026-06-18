@@ -196,22 +196,32 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         </div>
       )}
 
-      {/* Progress */}
-      <div className="flex items-center justify-between px-2 text-sm font-bold text-namsan-text-muted">
-        <span>Soal {currentQIndex + 1} dari {exam.questions.length}</span>
-        <span>
-          Terjawab: {Object.keys(answers).filter(k => answers[k] !== "").length} / {exam.questions.length}
-        </span>
+      {/* Progress Bar & Header Stats */}
+      <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4">
+        <div className="flex items-center justify-between text-sm font-bold text-namsan-text-muted">
+          <span>Soal {currentQIndex + 1} dari {exam.questions.length}</span>
+          <span>Terjawab: {Object.keys(answers).filter(k => answers[k] !== "").length}</span>
+        </div>
+        {/* Visual Progress Bar */}
+        <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
+          <div 
+            className="h-full bg-gradient-to-r from-namsan-primary to-blue-500 transition-all duration-500 ease-out"
+            style={{ width: `${((currentQIndex + 1) / exam.questions.length) * 100}%` }}
+          />
+        </div>
       </div>
 
-      {/* Question Card */}
-      <div className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100">
+      {/* Question Card with Animation */}
+      <div 
+        key={currentQ.id} // Re-render triggers animation
+        className="bg-white p-6 md:p-8 rounded-3xl shadow-sm border border-gray-100 animate-in slide-in-from-bottom-4 fade-in duration-500"
+      >
         <div className="mb-6">
-          <span className={`inline-block px-3 py-1 rounded-full text-xs font-bold mb-4 uppercase tracking-wider ${
-            currentQ.type === 'READING' ? 'bg-blue-100 text-blue-700' :
-            currentQ.type === 'LISTENING' ? 'bg-purple-100 text-purple-700' :
-            currentQ.type === 'SPEAKING' ? 'bg-green-100 text-green-700' :
-            'bg-orange-100 text-orange-700'
+          <span className={`inline-block px-4 py-1.5 rounded-full text-xs font-bold mb-4 uppercase tracking-wider shadow-sm ${
+            currentQ.type === 'READING' ? 'bg-blue-50 text-blue-700 border border-blue-100' :
+            currentQ.type === 'LISTENING' ? 'bg-purple-50 text-purple-700 border border-purple-100' :
+            currentQ.type === 'SPEAKING' ? 'bg-green-50 text-green-700 border border-green-100' :
+            'bg-orange-50 text-orange-700 border border-orange-100'
           }`}>
             {currentQ.type}
           </span>
@@ -222,15 +232,17 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
 
         {/* Media Attachments */}
         {currentQ.image_url && (
-          <div className="mb-6">
-            <img src={currentQ.image_url} alt="Ilustrasi Soal" className="max-w-full md:max-w-lg rounded-xl border border-gray-200" />
+          <div className="mb-8 overflow-hidden rounded-2xl border border-gray-200 shadow-sm transition-transform hover:scale-[1.01] duration-300">
+            <img src={currentQ.image_url} alt="Ilustrasi Soal" className="w-full object-cover max-h-[400px]" />
           </div>
         )}
 
         {currentQ.audio_reference && (
-          <div className="mb-8 bg-purple-50 p-4 rounded-xl border border-purple-100">
-            <span className="text-sm font-bold text-purple-800 flex items-center gap-2 mb-2"><PlayCircle className="w-5 h-5" /> Putar Audio</span>
-            <audio controls src={currentQ.audio_reference} className="w-full h-12" />
+          <div className="mb-8 bg-gradient-to-br from-purple-50 to-blue-50 p-5 rounded-2xl border border-purple-100 shadow-inner">
+            <span className="text-sm font-bold text-purple-800 flex items-center gap-2 mb-3">
+              <PlayCircle className="w-5 h-5 animate-pulse" /> Putar Audio Pendengaran
+            </span>
+            <audio controls src={currentQ.audio_reference} className="w-full h-12 outline-none" />
           </div>
         )}
 
@@ -243,21 +255,21 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
                   key={option}
                   type="button"
                   onClick={() => handleAnswerChange(currentQ.id, option)}
-                  className={`p-4 rounded-xl border-2 text-left font-bold transition-all flex items-start gap-3 ${
+                  className={`relative p-5 rounded-2xl border-2 text-left font-bold transition-all duration-200 flex items-start gap-4 overflow-hidden group ${
                     answers[currentQ.id] === option 
-                      ? 'border-namsan-primary bg-namsan-soft text-namsan-primary shadow-sm' 
-                      : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50'
+                      ? 'border-namsan-primary bg-namsan-soft text-namsan-primary shadow-md scale-[1.02]' 
+                      : 'border-gray-200 text-gray-600 hover:border-gray-300 hover:bg-gray-50 hover:shadow-sm'
                   }`}
                 >
-                  <div className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center mt-0.5 ${
-                    answers[currentQ.id] === option ? 'border-namsan-primary bg-namsan-primary text-white' : 'border-gray-300'
+                  <div className={`flex-shrink-0 w-7 h-7 rounded-full border-2 flex items-center justify-center mt-0.5 transition-colors ${
+                    answers[currentQ.id] === option ? 'border-namsan-primary bg-namsan-primary text-white' : 'border-gray-300 group-hover:border-gray-400'
                   }`}>
-                    <span className="text-xs">{answers[currentQ.id] === option ? '✓' : ''}</span>
+                    <span className="text-sm">{answers[currentQ.id] === option ? '✓' : ''}</span>
                   </div>
-                  <div className="flex flex-col text-left">
+                  <div className="flex flex-col text-left relative z-10">
                     <span className="font-bold mb-1">Pilihan {option}</span>
                     {currentQ[`option_${option.toLowerCase()}`] && (
-                      <span className="text-sm font-normal text-gray-700">
+                      <span className={`text-sm font-normal ${answers[currentQ.id] === option ? 'text-namsan-primary/80' : 'text-gray-500'}`}>
                         {currentQ[`option_${option.toLowerCase()}`]}
                       </span>
                     )}
@@ -266,59 +278,75 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
               ))}
             </div>
           ) : currentQ.type === 'SPEAKING' ? (
-            <div className="p-6 bg-green-50 border border-green-100 rounded-2xl flex flex-col items-center text-center space-y-4">
-              <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center shadow-sm">
-                <Mic className={`w-8 h-8 ${isRecording ? 'text-red-500 animate-pulse' : 'text-green-600'}`} />
+            <div className="p-8 bg-gradient-to-b from-green-50 to-white border border-green-100 rounded-3xl flex flex-col items-center text-center shadow-inner relative overflow-hidden">
+              {/* Decorative background circle */}
+              {isRecording && (
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                  <div className="w-48 h-48 bg-red-400 rounded-full animate-ping"></div>
+                </div>
+              )}
+              
+              <div className="relative z-10 w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-lg mb-6 transition-transform hover:scale-105">
+                <Mic className={`w-10 h-10 transition-colors duration-300 ${isRecording ? 'text-red-500 animate-pulse' : 'text-green-600'}`} />
               </div>
-              <div>
-                <p className="font-bold text-green-900 mb-1">Perekam Suara</p>
-                <p className="text-sm text-green-700 mb-4">Tekan tombol di bawah untuk mulai merekam jawaban Anda.</p>
+              <div className="relative z-10">
+                <p className="font-bold text-xl text-green-900 mb-2">
+                  {isRecording ? "Sedang Merekam..." : "Perekam Suara AI"}
+                </p>
+                <p className="text-sm text-green-700 mb-6 max-w-sm mx-auto">
+                  {isRecording ? "Berbicaralah dengan jelas. Tekan hentikan jika sudah selesai." : "Tekan tombol di bawah untuk mulai merekam pelafalan Anda."}
+                </p>
                 
                 {isRecording ? (
-                  <button onClick={stopRecording} className="bg-red-500 hover:bg-red-600 text-white font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 transition-colors mx-auto">
+                  <button onClick={stopRecording} className="bg-red-500 hover:bg-red-600 text-white font-bold py-3 px-8 rounded-2xl flex items-center gap-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 mx-auto">
                     <Square className="w-5 h-5 fill-current" /> Hentikan Rekaman
                   </button>
                 ) : (
-                  <button onClick={startRecording} className="bg-green-600 hover:bg-green-700 text-white font-bold py-2.5 px-6 rounded-xl flex items-center gap-2 transition-colors mx-auto">
-                    <Mic className="w-5 h-5" /> Mulai Rekam
+                  <button onClick={startRecording} className="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white font-bold py-3 px-8 rounded-2xl flex items-center gap-3 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 mx-auto">
+                    <Mic className="w-5 h-5" /> Mulai Rekam Sekarang
                   </button>
                 )}
               </div>
 
               {audioBlobs[currentQ.id] && !isRecording && (
-                <div className="mt-4 p-4 bg-white rounded-xl shadow-sm w-full max-w-md">
-                  <p className="text-sm font-bold text-gray-700 mb-2">Hasil Rekaman:</p>
-                  <audio controls src={URL.createObjectURL(audioBlobs[currentQ.id])} className="w-full h-10" />
+                <div className="mt-8 p-5 bg-white rounded-2xl shadow-md w-full max-w-md border border-gray-100 relative z-10 animate-in zoom-in-95 duration-300">
+                  <div className="flex items-center gap-2 mb-3">
+                    <CheckCircle2 className="w-5 h-5 text-green-500" />
+                    <p className="text-sm font-bold text-gray-800">Rekaman Tersimpan</p>
+                  </div>
+                  <audio controls src={URL.createObjectURL(audioBlobs[currentQ.id])} className="w-full h-10 outline-none" />
                 </div>
               )}
             </div>
           ) : (
-            <KoreanTextarea 
-              rows={4}
-              placeholder="Ketik teks atau esai jawaban Anda di sini..."
-              value={answers[currentQ.id] || ""}
-              onValueChange={(val) => handleAnswerChange(currentQ.id, val)}
-              className="w-full p-4 border-2 border-gray-200 focus:border-namsan-primary rounded-xl outline-none transition-colors text-lg"
-            />
+            <div className="relative group">
+              <KoreanTextarea 
+                rows={5}
+                placeholder="Ketik teks atau esai jawaban Anda di sini..."
+                value={answers[currentQ.id] || ""}
+                onValueChange={(val) => handleAnswerChange(currentQ.id, val)}
+                className="w-full p-5 bg-gray-50/50 border-2 border-gray-200 focus:border-namsan-primary focus:bg-white rounded-2xl outline-none transition-all duration-300 text-lg shadow-sm"
+              />
+            </div>
           )}
         </div>
       </div>
 
       {/* Navigation Buttons */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between pt-4">
         <button 
           onClick={handlePrev}
           disabled={currentQIndex === 0 || isSubmitting}
-          className="bg-white hover:bg-gray-50 text-gray-700 font-bold py-3 px-6 rounded-xl border border-gray-200 flex items-center gap-2 transition-colors disabled:opacity-50"
+          className="bg-white hover:bg-gray-50 text-gray-700 font-bold py-3.5 px-6 md:px-8 rounded-2xl border border-gray-200 flex items-center gap-2 transition-all duration-200 disabled:opacity-50 hover:shadow-sm"
         >
-          <ArrowLeft className="w-5 h-5" /> Sebelumnya
+          <ArrowLeft className="w-5 h-5" /> <span className="hidden sm:inline">Sebelumnya</span>
         </button>
 
         {currentQIndex === exam.questions.length - 1 ? (
           <button 
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-8 rounded-xl flex items-center gap-2 transition-colors disabled:opacity-50 shadow-sm"
+            className="bg-gradient-to-r from-namsan-text to-gray-800 hover:from-gray-800 hover:to-black text-white font-bold py-3.5 px-8 md:px-10 rounded-2xl flex items-center gap-2 transition-all duration-300 disabled:opacity-50 shadow-md hover:shadow-xl hover:-translate-y-0.5"
           >
             {isSubmitting ? "Memproses..." : "Kumpulkan Ujian"} <CheckCircle2 className="w-5 h-5" />
           </button>
@@ -326,9 +354,9 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
           <button 
             onClick={handleNext}
             disabled={isSubmitting}
-            className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-3 px-6 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
+            className="bg-gradient-to-r from-namsan-primary to-[#ffcf6b] hover:from-[#ffcf6b] hover:to-[#ffb732] text-namsan-dark font-bold py-3.5 px-6 md:px-8 rounded-2xl flex items-center gap-2 transition-all duration-300 shadow-md hover:shadow-lg hover:-translate-y-0.5"
           >
-            Selanjutnya <ArrowRight className="w-5 h-5" />
+            <span className="hidden sm:inline">Selanjutnya</span> <ArrowRight className="w-5 h-5" />
           </button>
         )}
       </div>
