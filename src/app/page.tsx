@@ -45,9 +45,9 @@ export default function Home() {
               <div className="w-20 h-20 bg-blue-50 text-blue-500 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-inner">
                 <Brain className="w-10 h-10" />
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">Rekomendasi AI</h4>
+              <h4 className="text-2xl font-bold text-gray-900 mb-4">Pengajar Berpengalaman</h4>
               <p className="text-gray-500 leading-relaxed">
-                Sistem kami menganalisis kelemahanmu dan memberikan materi yang paling kamu butuhkan.
+                Pengajar ahli kami pernah tinggal di Korea Selatan dan sangat berpengalaman dalam mengajar bahasa Korea.
               </p>
             </div>
 
@@ -56,9 +56,9 @@ export default function Home() {
               <div className="w-20 h-20 bg-purple-50 text-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:-rotate-3 transition-transform duration-300 shadow-inner">
                 <Layers className="w-10 h-10" />
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">Kurikulum Level 1-5</h4>
+              <h4 className="text-2xl font-bold text-gray-900 mb-4">Kurikulum Standar TOPIK</h4>
               <p className="text-gray-500 leading-relaxed">
-                Materi terstruktur dari Beginner hingga Master yang disusun secara sistematis.
+                Materi terstruktur yang diadaptasi dari Yonsei University & Korean Foundation, mencakup 5 kompetensi bahasa secara utuh.
               </p>
             </div>
 
@@ -67,9 +67,9 @@ export default function Home() {
               <div className="w-20 h-20 bg-orange-50 text-orange-500 rounded-3xl flex items-center justify-center mx-auto mb-8 group-hover:scale-110 group-hover:rotate-3 transition-transform duration-300 shadow-inner">
                 <Award className="w-10 h-10" />
               </div>
-              <h4 className="text-2xl font-bold text-gray-900 mb-4">Sertifikat Resmi</h4>
+              <h4 className="text-2xl font-bold text-gray-900 mb-4">Fleksibilitas Kelas</h4>
               <p className="text-gray-500 leading-relaxed">
-                Dapatkan sertifikat kelulusan yang di-approve langsung oleh administrator.
+                Tersedia kelas Offline dan Online dengan beragam pilihan jadwal Reguler maupun Privat sesuai kebutuhanmu.
               </p>
             </div>
           </div>
@@ -87,7 +87,7 @@ export default function Home() {
                     src="/namsan_logo.png" 
                     alt="Namsan Course Logo" 
                     fill
-                    className="object-contain p-6"
+                    className="object-cover scale-150"
                   />
                 </div>
               </div>
