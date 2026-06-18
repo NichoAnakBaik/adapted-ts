@@ -277,7 +277,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                   <td className="p-4 font-bold text-gray-900">{attempt.student.nama_lengkap || attempt.student.username}</td>
                   <td className="p-4 text-center">
                     <span className="inline-flex items-center justify-center px-3 py-1 rounded-full font-bold bg-blue-100 text-blue-700">
-                      {attempt.score !== null ? attempt.score : '-'} / 100
+                      {attempt.total_score !== null ? attempt.total_score : '-'} / 100
                     </span>
                   </td>
                   <td className="p-4 text-sm text-gray-500">

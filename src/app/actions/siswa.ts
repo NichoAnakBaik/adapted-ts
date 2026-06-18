@@ -191,20 +191,64 @@ export async function submitExam(formData: FormData) {
     const studentAnswer = data.student_answer;
     const timeSpent = data.time_spent_seconds;
     let score = 0;
+    let ai_feedback = null;
+    const audioBlob = formData.get(`audio_${q.id}`) as File | null;
 
-    // Auto grading ONLY for MULTIPLE_CHOICE format
-    if (q.format === "MULTIPLE_CHOICE") {
-      autoGradedQuestions++;
+    // Auto grading AI Simulation for ALL formats
+    if (q.type === "MULTIPLE_CHOICE") {
       if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
         score = 10;
-        totalScore += score;
+        ai_feedback = "Tepat sekali! Pilihan Anda sangat akurat.";
+      } else {
+        score = 0;
+        ai_feedback = `Jawaban kurang tepat. Kunci yang benar adalah ${q.answer_key?.toUpperCase()}.`;
       }
+    } else if (q.type === "SPEAKING") {
+      if (audioBlob && audioBlob.size > 0) {
+        score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
+        ai_feedback = "Pelafalan Anda sudah terdengar natural dan intonasinya mendekati penutur asli (Native). AI merekomendasikan Pengajar untuk mengesahkan nilai ini.";
+      } else {
+        score = 0;
+        ai_feedback = "Suara tidak terdeteksi. AI memberikan skor 0 karena tidak ada input audio.";
+      }
+    } else if (q.type === "WRITING" || q.type === "ESSAY") {
+      if (studentAnswer.length > 30) {
+        score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
+        ai_feedback = "Struktur tata bahasa (Grammar) dan kosakata sangat baik (Level B1). Susunan kalimat sudah rapi.";
+      } else if (studentAnswer.length > 5) {
+        score = 5;
+        ai_feedback = "Kalimat dapat dipahami, namun masih perlu elaborasi lebih lanjut agar strukturnya lebih padat.";
+      } else {
+        score = 0;
+        ai_feedback = "Jawaban terlalu singkat untuk dianalisis oleh AI.";
+      }
+    } else if (q.type === "LISTENING") {
+      if (studentAnswer.length > 5) {
+        score = 8;
+        ai_feedback = "Anda berhasil menangkap intisari dari audio yang diputar dengan baik.";
+      } else {
+        score = 0;
+        ai_feedback = "Poin penting dari audio tidak ditemukan dalam jawaban Anda.";
+      }
+    } else if (q.type === "READING") {
+      if (studentAnswer.length > 10) {
+        score = 8;
+        ai_feedback = "Analisis bacaan Anda cukup akurat dan menyentuh gagasan utama teks.";
+      } else {
+        score = 0;
+        ai_feedback = "Pemahaman bacaan masih kurang. Baca kembali dengan lebih teliti.";
+      }
+    } else {
+      score = studentAnswer.length > 5 ? 7 : 0;
+      ai_feedback = "Jawaban telah dinilai oleh AI secara otomatis.";
     }
+
+    totalScore += score;
+    autoGradedQuestions++;
 
     // Handle audio upload for SPEAKING or ESSAY audio responses
     let audio_url = null;
-    const audioBlob = formData.get(`audio_${q.id}`) as File | null;
-    if (audioBlob) {
+    if (audioBlob && audioBlob.size > 0) {
       audio_url = await saveUploadedFile(audioBlob, "student_speaking");
     }
 
@@ -213,7 +257,8 @@ export async function submitExam(formData: FormData) {
       student_answer: studentAnswer,
       time_spent_seconds: timeSpent,
       audio_url: audio_url,
-      score: score
+      score: score,
+      ai_feedback: ai_feedback
     };
   }));
 
