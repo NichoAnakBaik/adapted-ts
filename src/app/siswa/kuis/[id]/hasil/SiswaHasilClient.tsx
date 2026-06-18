@@ -104,18 +104,31 @@ export default function SiswaHasilClient({ attempt }: { attempt: any }) {
                     </div>
                   )}
 
-                  {qa?.ai_feedback && (
-                    <div className="mt-6 p-5 bg-[#F8F9FA] rounded-xl border border-[#E9ECEF] flex gap-3 items-start relative overflow-hidden">
-                      <div className="absolute top-0 right-0 w-16 h-16 bg-[#E9ECEF] rounded-bl-full opacity-50 -z-10"></div>
-                      <div className="mt-1 flex-shrink-0 text-[#4C6EF5]">
-                        <BrainCircuit className="w-6 h-6" />
-                      </div>
-                      <div>
-                        <span className="text-sm font-bold text-[#4C6EF5] block mb-1">AI Feedback</span>
-                        <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">{qa.ai_feedback}</p>
-                      </div>
+                  {/* AI Recommendations / Insights */}
+                  <div className="mt-6 p-5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 flex gap-4 items-start relative overflow-hidden shadow-sm">
+                    <div className="absolute -top-4 -right-4 w-24 h-24 bg-gradient-to-br from-indigo-200 to-purple-200 rounded-full blur-2xl opacity-50 -z-10"></div>
+                    <div className="mt-1 flex-shrink-0 text-indigo-600 bg-white p-2 rounded-xl shadow-sm border border-indigo-50">
+                      <BrainCircuit className="w-6 h-6" />
                     </div>
-                  )}
+                    <div className="flex-1">
+                      <span className="text-sm font-extrabold text-indigo-900 flex items-center gap-2 mb-1.5">
+                        ✨ Rekomendasi AI
+                      </span>
+                      <p className="text-sm text-indigo-950/80 leading-relaxed font-medium">
+                        {qa?.ai_feedback ? qa.ai_feedback : (
+                          isCorrect === true ? 
+                            "Kerja bagus! Analisis kami menunjukkan pemahaman Anda pada konsep ini sudah sangat solid. Teruskan performa luar biasa ini ke materi berikutnya." :
+                          isCorrect === false ?
+                            "Anda tampaknya melewatkan detail penting pada soal ini. AI merekomendasikan Anda untuk kembali membuka Modul terkait dan berlatih mengenali pola serupa." :
+                          q.type === 'SPEAKING' ?
+                            "Rekaman suara Anda telah disimpan. AI sedang menganalisis intonasi dan pelafalan Anda. Pengajar juga akan memberikan penilaian komprehensif segera." :
+                          q.type === 'WRITING' ?
+                            "Esai Anda sedang dalam antrean evaluasi. AI merekomendasikan Anda untuk terus membaca teks bahasa Korea agar struktur kalimat Anda semakin natural." :
+                            "Jawaban Anda sedang dievaluasi. Pastikan Anda rutin mereview kosakata baru setiap harinya."
+                        )}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
