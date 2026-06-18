@@ -138,6 +138,7 @@ model Question {
   question_text   String
   answer_key      String? // Optional for open-ended or subjective tests
   audio_reference String? // URL to audio for listening questions
+  image_url       String? // URL to image for any questions
   format          String   @default("ESSAY") // "MULTIPLE_CHOICE" or "ESSAY"
   option_a        String?
   option_b        String?

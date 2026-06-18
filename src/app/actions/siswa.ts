@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { saveUploadedFile } from "@/lib/upload";
 
 // Basic authorization check for Siswa
 async function checkSiswaAuth() {
@@ -141,7 +142,12 @@ export async function getExamToTake(id: string) {
           type: true,
           question_text: true,
           audio_reference: true,
-          difficulty: true
+          image_url: true,
+          difficulty: true,
+          option_a: true,
+          option_b: true,
+          option_c: true,
+          option_d: true
           // Purposefully NOT selecting answer_key!
         },
         orderBy: { created_at: 'asc' }
@@ -154,9 +160,15 @@ export async function getExamToTake(id: string) {
   return exam;
 }
 
-export async function submitExam(examId: string, answers: Record<string, string>) {
+export async function submitExam(formData: FormData) {
   const session = await checkSiswaAuth();
   
+  const examId = formData.get("exam_id") as string;
+  const answersJsonString = formData.get("answers_json") as string;
+  if (!examId || !answersJsonString) return { error: "Data tidak lengkap." };
+
+  const answersData: Record<string, { student_answer: string, time_spent_seconds: number }> = JSON.parse(answersJsonString);
+
   // Prevent duplicate submissions
   const existingAttempt = await prisma.examAttempt.findFirst({
     where: { exam_id: examId, student_id: session.user.id }
@@ -174,22 +186,33 @@ export async function submitExam(examId: string, answers: Record<string, string>
   let totalScore = 0;
   const maxScore = questions.length * 10; // Simple scoring: 10 points per question
 
-  const questionAttemptData = questions.map(q => {
-    const studentAnswer = answers[q.id] || "";
+  const questionAttemptData = await Promise.all(questions.map(async (q) => {
+    const data = answersData[q.id] || { student_answer: "", time_spent_seconds: 0 };
+    const studentAnswer = data.student_answer;
+    const timeSpent = data.time_spent_seconds;
     let score = 0;
 
-    // Auto grading if answer_key exists
+    // Auto grading for MULTIPLE_CHOICE or exact match
     if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
       score = 10;
       totalScore += score;
     }
 
+    // Handle audio upload for SPEAKING
+    let audio_url = null;
+    const audioBlob = formData.get(`audio_${q.id}`) as File | null;
+    if (audioBlob) {
+      audio_url = await saveUploadedFile(audioBlob, "student_speaking");
+    }
+
     return {
       question_id: q.id,
       student_answer: studentAnswer,
+      time_spent_seconds: timeSpent,
+      audio_url: audio_url,
       score: score
     };
-  });
+  }));
 
   // Calculate percentage
   const finalScorePercentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;

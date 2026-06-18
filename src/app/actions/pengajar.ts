@@ -288,10 +288,11 @@ export async function getExamDetails(id: string) {
 export async function createQuestion(formData: FormData) {
   const session = await checkPengajarAuth();
   const exam_id = formData.get("exam_id") as string;
-  const type = formData.get("type") as any; // "SPEAKING" | "LISTENING" | "MULTIPLE_CHOICE"
+  const type = formData.get("type") as any; // "SPEAKING" | "LISTENING" | "WRITING" | "READING"
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
   const audio_file = formData.get("audio_reference") as File | null;
+  const image_file = formData.get("image_url") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
@@ -304,10 +305,11 @@ export async function createQuestion(formData: FormData) {
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
   const audio_reference = audio_file ? await saveUploadedFile(audio_file, "kuis_audio") : null;
+  const image_url = image_file ? await saveUploadedFile(image_file, "kuis_image") : null;
 
   await prisma.question.create({
     data: { 
-      exam_id, type, question_text, answer_key, audio_reference, difficulty,
+      exam_id, type, question_text, answer_key, audio_reference, image_url, difficulty,
       option_a, option_b, option_c, option_d
     }
   });

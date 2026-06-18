@@ -107,6 +107,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Soal</label>
                 <select name="type" value={questionType} onChange={(e) => setQuestionType(e.target.value)} required className="w-full p-2.5 border rounded-lg bg-white">
                   <option value="MULTIPLE_CHOICE">Pilihan Ganda (Otomatis Dinilai)</option>
+                  <option value="READING">Reading (Teks/Gambar)</option>
                   <option value="LISTENING">Listening (Audio & Teks)</option>
                   <option value="SPEAKING">Speaking (AI Voice Analysis)</option>
                   <option value="WRITING">Writing (Esai)</option>
@@ -128,12 +129,17 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 />
               </div>
 
-              {questionType === "LISTENING" && (
-                <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">File Audio MP3</label>
-                  <input type="file" accept="audio/*" name="audio_reference" required className="w-full p-2.5 border rounded-lg bg-white" />
-                </div>
-              )}
+              {/* All types can have optional image */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Soal (Opsional)</label>
+                <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
+              </div>
+
+              {/* All types can optionally have audio, but LISTENING might require it */}
+              <div className="md:col-span-2">
+                <label className="block text-sm font-medium text-gray-700 mb-1">File Audio MP3 (Opsional / Wajib untuk Listening)</label>
+                <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={questionType === "LISTENING"} />
+              </div>
 
               {questionType === "MULTIPLE_CHOICE" && (
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
@@ -208,9 +214,16 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 </div>
               )}
 
+              {q.image_url && (
+                <div className="mt-3">
+                  <span className="text-sm text-gray-500 block mb-1">Gambar:</span>
+                  <img src={q.image_url} alt="Gambar Soal" className="max-w-md rounded-xl border border-gray-200" />
+                </div>
+              )}
+
               {q.audio_reference && (
                 <div className="mt-3">
-                  <span className="text-sm text-gray-500 block mb-1">Audio Listening:</span>
+                  <span className="text-sm text-gray-500 block mb-1">Audio:</span>
                   <audio controls src={q.audio_reference} className="w-full max-w-md h-10" />
                 </div>
               )}
