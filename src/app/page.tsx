@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import Image from 'next/image';
 import { Brain, Layers, Award, ExternalLink, LogIn } from 'lucide-react';
 
 export default function Home() {
@@ -81,10 +82,13 @@ export default function Home() {
           <div className="bg-white rounded-[2.5rem] shadow-lg border border-gray-100 overflow-hidden transform hover:shadow-xl transition-shadow duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
               <div className="p-12 lg:p-20 bg-gradient-to-br from-red-50 via-red-50/50 to-white flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-red-100/50">
-                <div className="w-48 h-48 md:w-64 md:h-64 bg-white rounded-full flex flex-col items-center justify-center text-red-600 font-extrabold text-2xl md:text-3xl shadow-xl border-8 border-red-50 transform hover:scale-105 transition-transform duration-500 text-center">
-                  <span className="text-red-400 text-sm md:text-base font-medium tracking-widest mb-1">OFFICIAL</span>
-                  NAMSAN
-                  <br/>COURSE
+                <div className="w-48 h-48 md:w-64 md:h-64 bg-white rounded-full flex flex-col items-center justify-center shadow-xl border-8 border-white transform hover:scale-105 transition-transform duration-500 text-center overflow-hidden relative">
+                  <Image 
+                    src="/namsan_logo.png" 
+                    alt="Namsan Course Logo" 
+                    fill
+                    className="object-contain p-6"
+                  />
                 </div>
               </div>
               <div className="p-12 lg:p-20 flex flex-col justify-center">
