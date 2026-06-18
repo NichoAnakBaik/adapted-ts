@@ -1,10 +1,10 @@
 import React from "react";
 import SiswaAbsensiClient from "./SiswaAbsensiClient";
-import { getStudentAttendanceHistory, getStudentActiveClass } from "@/app/actions/absensi";
+import { getStudentAttendanceHistory, getStudentClasses } from "@/app/actions/absensi";
 
 export default async function SiswaAbsensiPage() {
   const history = await getStudentAttendanceHistory();
-  const activeClass = await getStudentActiveClass();
+  const classes = await getStudentClasses();
 
-  return <SiswaAbsensiClient history={history} activeClass={activeClass} />;
+  return <SiswaAbsensiClient history={history} classes={classes} />;
 }

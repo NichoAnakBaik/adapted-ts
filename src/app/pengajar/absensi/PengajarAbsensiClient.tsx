@@ -100,7 +100,9 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
                   <thead>
                     <tr className="border-b border-gray-200">
                       <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Nama Siswa</th>
-                      <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Waktu Check-In</th>
+                      <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap text-center">Check-In</th>
+                      <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap text-center">Check-Out</th>
+                      <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap text-center">Durasi Sesi</th>
                       <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Status</th>
                       <th className="py-3 md:py-4 px-4 text-[10px] md:text-xs font-bold text-namsan-text-muted tracking-wider uppercase whitespace-nowrap">Catatan</th>
                     </tr>
@@ -112,7 +114,15 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
                           <p className="font-bold text-sm md:text-base text-namsan-text">{a.student.nama_lengkap}</p>
                           <p className="text-[10px] md:text-xs text-gray-500">@{a.student.username}</p>
                         </td>
-                        <td className="py-3 md:py-4 px-4 font-medium text-xs md:text-sm text-gray-600 whitespace-nowrap">{new Date(a.date).toLocaleTimeString('id-ID')}</td>
+                        <td className="py-3 md:py-4 px-4 font-medium text-xs md:text-sm text-gray-600 whitespace-nowrap text-center">
+                          {a.check_in_time ? new Date(a.check_in_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : new Date(a.date).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                        </td>
+                        <td className="py-3 md:py-4 px-4 font-medium text-xs md:text-sm text-gray-600 whitespace-nowrap text-center">
+                          {a.check_out_time ? new Date(a.check_out_time).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) : '-'}
+                        </td>
+                        <td className="py-3 md:py-4 px-4 font-bold text-xs md:text-sm text-namsan-text whitespace-nowrap text-center">
+                          {a.check_in_time && a.check_out_time ? `${Math.round((new Date(a.check_out_time).getTime() - new Date(a.check_in_time).getTime()) / 60000)} Menit` : '-'}
+                        </td>
                         <td className="py-3 md:py-4 px-4 whitespace-nowrap">
                           {a.status === 'PRESENT' && <span className="bg-green-50 text-green-700 px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold">Hadir</span>}
                           {a.status === 'LATE' && <span className="bg-orange-50 text-orange-700 px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold">Terlambat</span>}

@@ -258,16 +258,18 @@ model RecommendationHistory {
 }
 
 model Attendance {
-  id         String           @id @default(uuid())
-  student_id String
-  student    User             @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  class_id   String
-  class      Class            @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  date       DateTime         @default(now())
-  status     AttendanceStatus @default(PRESENT)
-  notes      String?
-  created_at DateTime         @default(now())
-  updated_at DateTime         @updatedAt
+  id             String           @id @default(uuid())
+  student_id     String
+  student        User             @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  class_id       String
+  class          Class            @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  date           DateTime         @default(now())
+  status         AttendanceStatus @default(PRESENT)
+  check_in_time  DateTime?
+  check_out_time DateTime?
+  notes          String?
+  created_at     DateTime         @default(now())
+  updated_at     DateTime         @updatedAt
 
   @@unique([student_id, class_id, date])
 }
