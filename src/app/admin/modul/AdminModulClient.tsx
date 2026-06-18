@@ -99,7 +99,8 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
       )}
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="w-full text-left border-collapse">
+        <div className="overflow-x-auto -mx-4 md:mx-0">
+          <table className="w-full min-w-[600px] text-left border-collapse">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-100 text-sm">
               <th className="p-4 font-bold text-namsan-text-muted">Judul Modul</th>
@@ -142,6 +143,7 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

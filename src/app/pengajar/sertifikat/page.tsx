@@ -22,8 +22,9 @@ export default async function PengajarSertifikat() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-gray-50">
+        <div className="overflow-x-auto -mx-4 md:mx-0">
+          <table className="min-w-full min-w-[600px] divide-y divide-gray-200">
+            <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Siswa</th>
               <th className="px-6 py-4 text-left text-xs font-bold text-gray-500 uppercase">Kelas</th>
@@ -55,6 +56,7 @@ export default async function PengajarSertifikat() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
