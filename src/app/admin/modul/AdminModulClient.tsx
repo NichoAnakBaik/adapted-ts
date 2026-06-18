@@ -9,6 +9,7 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
   const [modules, setModules] = useState(initialModules);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus modul ini secara permanen?")) return;
@@ -23,11 +24,13 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     const res = await createAdminModule(formData);
     
     if (res.error) {
       setError(res.error);
+      setIsSubmitting(false);
     } else {
       setShowForm(false);
       window.location.reload();
@@ -63,7 +66,7 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
             </div>
             {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
             
-            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleCreate} encType="multipart/form-data" className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
                 <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
@@ -78,19 +81,19 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
                 <KoreanInput type="text" name="title" required placeholder="Contoh: Modul 1: Hangeul Dasar" className="w-full p-2.5 border rounded-lg" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link Dokumen (PDF) *opsional</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">File Dokumen (PDF) *opsional</label>
                 <input type="file" accept="application/pdf" name="pdf_url" className="w-full p-2.5 border rounded-lg bg-white" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">Link Audio (Listening) *opsional</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">File Audio (Listening) *opsional</label>
                 <input type="file" accept="audio/*" name="audio_url" className="w-full p-2.5 border rounded-lg bg-white" />
               </div>
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                <button type="button" onClick={() => setShowForm(false)} disabled={isSubmitting} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors disabled:opacity-50">
                   Batal
                 </button>
-                <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                  Simpan & Publikasi
+                <button type="submit" disabled={isSubmitting} className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50 flex items-center gap-2">
+                  {isSubmitting ? "Mengunggah..." : "Simpan & Publikasi"}
                 </button>
               </div>
             </form>
