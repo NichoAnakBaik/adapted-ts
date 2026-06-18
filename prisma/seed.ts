@@ -181,7 +181,7 @@ async function main() {
 
   // 7. Generate ML Activity Logs (to make charts look good)
   // We'll generate random activities over the past 7 days for all students
-  const activityTypes = ['LOGIN', 'MODULE_ACCESS', 'EXAM_ATTEMPT', 'FORUM_POST'];
+  const activityTypes = ['LOGIN', 'MODULE_ACCESS', 'EXAM_ATTEMPT', 'FORUM_PARTICIPATION'];
   const now = new Date();
   
   for (const s of allStudents) {
@@ -196,7 +196,7 @@ async function main() {
         await prisma.studentActivityLog.create({
           data: {
             student_id: s.id,
-            action_type: activityTypes[Math.floor(Math.random() * activityTypes.length)],
+            action_type: activityTypes[Math.floor(Math.random() * activityTypes.length)] as any,
             duration: duration,
             created_at: randomDate
           }
@@ -221,8 +221,8 @@ async function main() {
       await prisma.recommendationHistory.create({
         data: {
           student_id: s.id,
-          model_version: 'v1.0',
-          recommendation: 'Tingkatkan latihan Speaking. Nilai pelafalan (pronunciation) Anda cenderung lebih rendah pada sesi pagi.',
+          recommendation_type: 'MODULE_SUGGESTION',
+          recommendation_text: 'Tingkatkan latihan Speaking. Nilai pelafalan (pronunciation) Anda cenderung lebih rendah pada sesi pagi.',
           is_applied: false
         }
       });
