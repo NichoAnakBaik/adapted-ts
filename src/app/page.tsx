@@ -1,8 +1,34 @@
+"use client";
+
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Brain, Layers, Award, ExternalLink, LogIn } from 'lucide-react';
+import { Brain, Layers, Award, ExternalLink, LogIn, X } from 'lucide-react';
+import { loginAction } from "@/app/actions/auth";
 
 export default function Home() {
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [loginError, setLoginError] = useState<string | null>(null);
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+
+  async function handleLoginSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginError(null);
+    const formData = new FormData(e.currentTarget);
+    try {
+      const result = await loginAction(formData);
+      if (result?.error) {
+        setLoginError(result.error);
+        setIsLoggingIn(false);
+      } else if (result?.redirectUrl) {
+        window.location.href = result.redirectUrl;
+      }
+    } catch (err) {
+      setLoginError("Terjadi kesalahan pada server.");
+      setIsLoggingIn(false);
+    }
+  }
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       {/* Hero Section */}
@@ -19,12 +45,12 @@ export default function Home() {
             Platform Pembelajaran Bahasa Korea Adaptif Berbasis AI Case Study: Namsan Course.
           </p>
           <div className="flex justify-center">
-            <Link 
-              href="/login" 
-              className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold text-lg px-10 py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-3"
+            <button 
+              onClick={() => setShowLoginModal(true)}
+              className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold text-base md:text-lg px-8 md:px-10 py-3 md:py-4 rounded-full shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex items-center gap-3 w-full sm:w-auto justify-center"
             >
-              Masuk Belajar <LogIn className="w-6 h-6" />
-            </Link>
+              Masuk Belajar <LogIn className="w-5 h-5 md:w-6 md:h-6" />
+            </button>
           </div>
         </div>
       </section>
@@ -115,13 +141,82 @@ export default function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="mt-auto py-8 text-center bg-white border-t border-gray-100">
+      <footer className="mt-auto py-8 text-center bg-white border-t border-gray-100 relative z-10">
         <div className="container mx-auto px-4">
           <p className="text-gray-500 font-bold text-sm md:text-base">
             &copy; 2026 AdaptEd x Namsan Korean Course. All Rights Reserved.
           </p>
         </div>
       </footer>
+
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/60 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="bg-white rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+            {/* Close Button */}
+            <button 
+              onClick={() => setShowLoginModal(false)}
+              className="absolute top-4 right-4 p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors z-10"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="p-8 md:p-10">
+              <div className="text-center mb-8">
+                <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 mb-2">
+                  Masuk ke <span className="text-red-500">AdaptEd</span>
+                </h2>
+                <p className="text-sm text-gray-500">
+                  Platform Pembelajaran Bahasa Korea Interaktif
+                </p>
+              </div>
+
+              <form onSubmit={handleLoginSubmit} className="space-y-5">
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    name="username"
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-namsan-primary focus:border-namsan-primary transition-all text-sm"
+                    placeholder="Gunakan admin, pengajar, atau siswa"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-bold text-gray-700 mb-2">
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    name="password"
+                    required
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-namsan-primary focus:border-namsan-primary transition-all text-sm"
+                    placeholder="••••••••"
+                  />
+                </div>
+                
+                {loginError && (
+                  <p className="text-red-500 text-sm font-bold text-center bg-red-50 py-2 rounded-lg">{loginError}</p>
+                )}
+
+                <button 
+                  type="submit" 
+                  disabled={isLoggingIn}
+                  className="w-full bg-gray-900 hover:bg-black text-white font-bold py-3.5 px-4 rounded-xl shadow-lg hover:shadow-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed text-base mt-2"
+                >
+                  {isLoggingIn ? "Memproses..." : "Masuk"}
+                </button>
+                
+                <p className="text-xs text-center text-gray-400 mt-6 leading-relaxed">
+                  Tip Dev: Login dengan username awalan <b className="text-gray-600">admin</b>, <b className="text-gray-600">pengajar</b>, atau <b className="text-gray-600">siswa</b>.
+                </p>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
