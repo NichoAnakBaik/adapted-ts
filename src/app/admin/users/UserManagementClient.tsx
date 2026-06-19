@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, Trash2, Plus, UserPlus, Edit } from "lucide-react";
+import { Users, Trash2, Plus, UserPlus, Edit, Key } from "lucide-react";
 import { adminCreateUser, adminUpdateUser, deleteUser } from "@/app/actions/admin";
 
 export default function UserManagementPage({ initialUsers }: { initialUsers: any[] }) {
@@ -16,6 +16,15 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
     const res = await deleteUser(id);
     if (res.success) {
       setUsers(users.filter((u) => u.id !== id));
+    }
+  };
+
+  const handleResetPassword = async (id: string) => {
+    if (!confirm("Yakin ingin mereset password pengguna ini menjadi '123456'?")) return;
+    const { resetUserPassword } = await import("@/app/actions/admin");
+    const res = await resetUserPassword(id);
+    if (res.success) {
+      alert(res.message);
     }
   };
 
@@ -144,6 +153,9 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
                       </span>
                     </td>
                     <td className="p-3 md:p-4 text-right whitespace-nowrap flex justify-end gap-1 md:gap-2">
+                      <button onClick={() => handleResetPassword(u.id)} className="p-1 md:p-2 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors title='Reset Password (123456)'">
+                        <Key className="w-4 h-4 md:w-5 md:h-5" />
+                      </button>
                       <button onClick={() => handleEditClick(u)} className="p-1 md:p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors title='Edit Pengguna'">
                         <Edit className="w-4 h-4 md:w-5 md:h-5" />
                       </button>

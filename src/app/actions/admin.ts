@@ -98,6 +98,19 @@ export async function adminUpdateUser(formData: FormData) {
 
   return { success: true };
 }
+
+export async function resetUserPassword(id: string) {
+  await checkAdminAuth();
+  const bcrypt = await import("bcryptjs");
+  const defaultPassword = await bcrypt.default.hash("123456", 10);
+  
+  await prisma.user.update({
+    where: { id },
+    data: { password: defaultPassword }
+  });
+  
+  return { success: true, message: "Password berhasil direset menjadi: 123456" };
+}
 // --- CLASS MANAGEMENT ---
 
 export async function getClasses() {
