@@ -32,14 +32,14 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-red-50/50 via-white to-gray-50 py-24 md:py-32 px-4 flex flex-col justify-center items-center text-center">
+      <section className="relative overflow-hidden bg-[#FCCC24] py-24 md:py-32 px-4 flex flex-col justify-center items-center text-center">
         {/* Background decorative blobs */}
-        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-red-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
-        <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-yellow-100 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
+        <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
+        <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
         
         <div className="relative z-10 max-w-4xl mx-auto">
           <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-6 tracking-tight">
-            Selamat Datang di <span className="text-red-500">AdaptEd</span>
+            Selamat Datang di <span className="text-gray-900">AdaptEd</span>
           </h1>
           <p className="text-xl md:text-2xl text-gray-600 font-medium mb-12 max-w-3xl mx-auto leading-relaxed">
             Platform Pembelajaran Bahasa Korea Adaptif Berbasis AI Case Study: Namsan Course.
