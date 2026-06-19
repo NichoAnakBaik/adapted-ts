@@ -275,16 +275,18 @@ export async function createAdminModule(formData: FormData) {
   await checkAdminAuth();
   const class_id = formData.get("class_id") as string;
   const title = formData.get("title") as string;
-  const pdf_file = formData.get("pdf_url") as File | null;
-  const audio_file = formData.get("audio_url") as File | null;
+  const pdf_url = formData.get("pdf_url") as string;
+  const audio_url = formData.get("audio_url") as string;
 
   if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
 
-  const pdf_url = pdf_file ? await saveUploadedFile(pdf_file, "modul_pdf") : null;
-  const audio_url = audio_file ? await saveUploadedFile(audio_file, "modul_audio") : null;
-
   await prisma.module.create({
-    data: { class_id, title, pdf_url: pdf_url || null, audio_url: audio_url || null }
+    data: { 
+      class_id, 
+      title, 
+      pdf_url: pdf_url?.trim() || null, 
+      audio_url: audio_url?.trim() || null 
+    }
   });
   return { success: true };
 }

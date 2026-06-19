@@ -66,7 +66,7 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
             </div>
             {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
             
-            <form onSubmit={handleCreate} encType="multipart/form-data" className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
                 <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
@@ -81,12 +81,12 @@ export default function AdminModulClient({ initialModules, classes }: { initialM
                 <KoreanInput type="text" name="title" required placeholder="Contoh: Modul 1: Hangeul Dasar" className="w-full p-2.5 border rounded-lg" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">File Dokumen (PDF) *opsional</label>
-                <input type="file" accept="application/pdf" name="pdf_url" className="w-full p-2.5 border rounded-lg bg-white" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link GDrive Dokumen (PDF) *opsional</label>
+                <input type="url" name="pdf_url" placeholder="https://drive.google.com/..." className="w-full p-2.5 border rounded-lg bg-white" />
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">File Audio (Listening) *opsional</label>
-                <input type="file" accept="audio/*" name="audio_url" className="w-full p-2.5 border rounded-lg bg-white" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Link GDrive Audio (Listening) *opsional</label>
+                <input type="url" name="audio_url" placeholder="https://drive.google.com/..." className="w-full p-2.5 border rounded-lg bg-white" />
               </div>
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
                 <button type="button" onClick={() => setShowForm(false)} disabled={isSubmitting} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors disabled:opacity-50">
