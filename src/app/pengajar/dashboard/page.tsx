@@ -1,5 +1,6 @@
 import React from "react";
 import { BookOpen, CheckCircle2, Clock, Users, PenTool, MessageSquare, Award, Bot, GraduationCap } from "lucide-react";
+import Link from "next/link";
 
 export default function PengajarDashboardPage() {
   return (
@@ -53,25 +54,25 @@ export default function PengajarDashboardPage() {
           <h2 className="text-lg md:text-xl font-bold text-namsan-text mb-3 md:mb-4">Akses Cepat Pengajar</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             
-            <a href="/pengajar/kelas" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/pengajar/kelas" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Users className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Kelas Saya</span>
-            </a>
+            </Link>
             
-            <a href="/pengajar/modul" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/pengajar/modul" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Manajemen Modul</span>
-            </a>
+            </Link>
             
-            <a href="/pengajar/kuis" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/pengajar/kuis" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <PenTool className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Kuis & Evaluasi</span>
-            </a>
+            </Link>
             
-            <a href="/pengajar/forum" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="text-sm md:text-base font-bold text-namsan-text">Forum Kelas</span>
-            </a>
+            <Link href="/pengajar/ujian" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+              <Award className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
+              <span className="text-sm md:text-base font-bold text-namsan-text">Pemantauan Ujian</span>
+            </Link>
 
           </div>
         </div>
@@ -92,10 +93,10 @@ export default function PengajarDashboardPage() {
             </p>
           </div>
 
-          <a href="/pengajar/analitik" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
+          <Link href="/pengajar/analitik" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
             <Bot className="w-4 h-4 md:w-5 md:h-5" />
             Buka Analitik Kelas
-          </a>
+          </Link>
         </div>
 
       </div>
