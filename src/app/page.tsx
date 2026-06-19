@@ -42,7 +42,10 @@ export default function Home() {
             Selamat Datang di <span className="text-red-500">AdaptEd</span>
           </h1>
       */}
-      <section className="relative overflow-hidden bg-[#FCCC24] py-24 md:py-32 px-4 flex flex-col justify-center items-center text-center">
+      <section 
+        className="relative overflow-hidden py-24 md:py-32 px-4 flex flex-col justify-center items-center text-center"
+        style={{ background: 'radial-gradient(circle at center, #ffe797 0%, #ffdd6f 50%, #ffc714 100%)' }}
+      >
         {/* Background decorative blobs */}
         <div className="absolute top-[-10%] left-[-10%] w-96 h-96 bg-yellow-300 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob"></div>
         <div className="absolute top-[20%] right-[-10%] w-96 h-96 bg-yellow-200 rounded-full mix-blend-multiply filter blur-3xl opacity-50 animate-blob animation-delay-2000"></div>
@@ -117,7 +120,10 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-[2.5rem] shadow-lg border border-gray-100 overflow-hidden transform hover:shadow-xl transition-shadow duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
-              <div className="p-12 lg:p-20 bg-gradient-to-br from-[#ffc714] via-[#ffdd6f] to-[#ffe797] flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-yellow-400/50">
+              <div 
+                className="p-12 lg:p-20 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-yellow-400/50"
+                style={{ background: 'radial-gradient(circle at center, #ffe797 0%, #ffdd6f 50%, #ffc714 100%)' }}
+              >
                 <div className="w-48 h-48 md:w-64 md:h-64 bg-white rounded-full flex flex-col items-center justify-center shadow-xl border-8 border-white transform hover:scale-105 transition-transform duration-500 text-center overflow-hidden relative">
                   <Image 
                     src="/namsan_logo.png" 
