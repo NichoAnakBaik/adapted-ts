@@ -151,8 +151,25 @@ export default function ClassDetailClient({ classData, teachers, allStudents }: 
                         <td className="p-4">
                           <p className="font-bold text-namsan-text">{e.student.nama_lengkap}</p>
                           <p className="text-xs text-gray-500">@{e.student.username}</p>
+                          {e.status === 'PENDING' && (
+                            <span className="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold rounded-full">
+                              MENUNGGU PERSETUJUAN
+                            </span>
+                          )}
                         </td>
-                        <td className="p-4 text-right">
+                        <td className="p-4 text-right flex items-center justify-end gap-2">
+                          {e.status === 'PENDING' && (
+                            <button 
+                              onClick={async () => {
+                                const { updateEnrollmentStatus } = await import("@/app/actions/admin");
+                                const res = await updateEnrollmentStatus(e.id, 'APPROVED');
+                                if (res.success) window.location.reload();
+                              }}
+                              className="px-3 py-1.5 text-xs font-bold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                            >
+                              Terima
+                            </button>
+                          )}
                           <button 
                             onClick={() => handleUnenroll(e.id)}
                             className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Keluarkan'"

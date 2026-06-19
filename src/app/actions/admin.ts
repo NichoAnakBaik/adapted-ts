@@ -68,6 +68,36 @@ export async function adminCreateUser(formData: FormData) {
 
   return { success: true };
 }
+
+export async function adminUpdateUser(formData: FormData) {
+  await checkAdminAuth();
+  const id = formData.get("id") as string;
+  const nama_lengkap = formData.get("nama_lengkap") as string;
+  const username = formData.get("username") as string;
+  const password = formData.get("password") as string;
+  const role = formData.get("role") as "ADMIN" | "PENGAJAR" | "SISWA";
+
+  if (!id || !nama_lengkap || !username || !role) {
+    return { error: "Semua kolom wajib diisi kecuali password" };
+  }
+
+  const existingUser = await prisma.user.findUnique({ where: { username } });
+  if (existingUser && existingUser.id !== id) return { error: "Username sudah digunakan oleh akun lain" };
+
+  const updateData: any = { nama_lengkap, username, role };
+
+  if (password && password.trim() !== "") {
+    const bcrypt = await import("bcryptjs");
+    updateData.password = await bcrypt.default.hash(password, 10);
+  }
+
+  await prisma.user.update({
+    where: { id },
+    data: updateData,
+  });
+
+  return { success: true };
+}
 // --- CLASS MANAGEMENT ---
 
 export async function getClasses() {
@@ -97,6 +127,8 @@ export async function getClassDetails(id: string) {
 export async function createClass(formData: FormData) {
   await checkAdminAuth();
   const name = formData.get("name") as string;
+  const levelStr = formData.get("level") as string;
+  const level = levelStr ? parseInt(levelStr) : 1;
   const type = formData.get("type") as "ONLINE" | "OFFLINE";
   const schedule = formData.get("schedule") as string;
   const meeting_link = formData.get("meeting_link") as string;
@@ -104,7 +136,7 @@ export async function createClass(formData: FormData) {
   if (!name || !type) return { error: "Nama kelas dan tipe wajib diisi" };
 
   await prisma.class.create({
-    data: { name, type, schedule, meeting_link: meeting_link || null }
+    data: { name, level, type, schedule, meeting_link: meeting_link || null }
   });
   return { success: true };
 }
@@ -141,6 +173,15 @@ export async function enrollStudent(classId: string, studentId: string) {
 export async function unenrollStudent(enrollmentId: string) {
   await checkAdminAuth();
   await prisma.enrollment.delete({ where: { id: enrollmentId } });
+  return { success: true };
+}
+
+export async function updateEnrollmentStatus(enrollmentId: string, status: string) {
+  await checkAdminAuth();
+  await prisma.enrollment.update({
+    where: { id: enrollmentId },
+    data: { status }
+  });
   return { success: true };
 }
 

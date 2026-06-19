@@ -69,6 +69,10 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
                 <KoreanInput type="text" name="name" required placeholder="Contoh: Level 1 - Beginner A" className="w-full p-2.5 border rounded-lg" />
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Level Kelas</label>
+                <input type="number" name="level" min="1" max="12" defaultValue="1" required className="w-full p-2.5 border rounded-lg bg-white" />
+              </div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tipe Pembelajaran</label>
                 <select name="type" required value={classType} onChange={(e) => setClassType(e.target.value)} className="w-full p-2.5 border rounded-lg bg-white">
                   <option value="ONLINE">Online (Daring)</option>

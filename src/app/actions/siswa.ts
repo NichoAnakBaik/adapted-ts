@@ -183,6 +183,8 @@ export async function submitExam(formData: FormData) {
     where: { exam_id: examId }
   });
 
+  const exam = await prisma.exam.findUnique({ where: { id: examId } });
+
   let totalScore = 0;
   let autoGradedQuestions = 0;
 
@@ -277,6 +279,29 @@ export async function submitExam(formData: FormData) {
       }
     }
   });
+
+  // Auto Enrollment Logic: if it's a final exam, request next level class
+  if (exam && exam.is_final) {
+    const currentClass = await prisma.class.findUnique({ where: { id: exam.class_id } });
+    if (currentClass) {
+      const nextLevel = currentClass.level + 1;
+      const nextClass = await prisma.class.findFirst({ where: { level: nextLevel } });
+      if (nextClass) {
+        // Enqueue auto enrollment with PENDING status
+        try {
+          await prisma.enrollment.create({
+            data: {
+              student_id: session.user.id,
+              class_id: nextClass.id,
+              status: "PENDING"
+            }
+          });
+        } catch(e) {
+          // If already pending/enrolled, it throws unique constraint. Ignore it safely.
+        }
+      }
+    }
+  }
 
   return { success: true, score: finalScorePercentage };
 }

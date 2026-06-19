@@ -72,13 +72,14 @@ model User {
 model Class {
   id           String    @id @default(uuid())
   name         String
+  level        Int       @default(1) // Level kelas (1-12)
   type         ClassType @default(ONLINE)
   schedule     String? // Could be a JSON string or simple text for now
   meeting_link String? // Zoom/GMeet link for online classes
   teacher_id   String?
   teacher      User?     @relation("PengajarKelas", fields: [teacher_id], references: [id])
-  created_at DateTime  @default(now())
-  updated_at DateTime  @updatedAt
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
 
   // Relationships
   enrollments  Enrollment[]
@@ -95,6 +96,7 @@ model Enrollment {
   student    User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
   class_id   String
   class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  status     String   @default("APPROVED") // "PENDING", "APPROVED", "REJECTED"
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
 
