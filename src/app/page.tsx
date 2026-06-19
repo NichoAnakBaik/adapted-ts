@@ -117,7 +117,7 @@ export default function Home() {
         <div className="max-w-6xl mx-auto">
           <div className="bg-white rounded-[2.5rem] shadow-lg border border-gray-100 overflow-hidden transform hover:shadow-xl transition-shadow duration-300">
             <div className="grid grid-cols-1 lg:grid-cols-2 items-stretch">
-              <div className="p-12 lg:p-20 bg-gradient-to-br from-[#FCCC24] via-yellow-300 to-yellow-100 flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-yellow-400/50">
+              <div className="p-12 lg:p-20 bg-gradient-to-br from-[#ffc714] via-[#ffdd6f] to-[#ffe797] flex flex-col items-center justify-center border-b lg:border-b-0 lg:border-r border-yellow-400/50">
                 <div className="w-48 h-48 md:w-64 md:h-64 bg-white rounded-full flex flex-col items-center justify-center shadow-xl border-8 border-white transform hover:scale-105 transition-transform duration-500 text-center overflow-hidden relative">
                   <Image 
                     src="/namsan_logo.png" 
