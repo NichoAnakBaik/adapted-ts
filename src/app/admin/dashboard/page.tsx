@@ -1,6 +1,7 @@
 import React from "react";
 import { Users, BookOpen, ShieldAlert, Award, Database, Settings, ShieldCheck, BarChart4 } from "lucide-react";
 import { getDashboardStats } from "@/app/actions/admin";
+import Link from "next/link";
 
 export default async function AdminDashboardPage() {
   const { totalSiswa, totalPengajar, totalKelas } = await getDashboardStats();
@@ -56,25 +57,25 @@ export default async function AdminDashboardPage() {
           <h2 className="text-lg md:text-xl font-bold text-namsan-text mb-3 md:mb-4">Akses Cepat</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             
-            <a href="/admin/users" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/admin/users" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Users className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Manajemen Pengguna</span>
-            </a>
+            </Link>
             
-            <a href="/admin/kelas" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/admin/kelas" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Manajemen Kelas</span>
-            </a>
+            </Link>
             
-            <a href="/admin/sertifikat" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/admin/sertifikat" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Award className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Sertifikasi & Leveling</span>
-            </a>
+            </Link>
             
-            <a href="/admin/settings" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/admin/logs" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Settings className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Pengaturan Sistem</span>
-            </a>
+            </Link>
 
           </div>
         </div>
@@ -101,10 +102,10 @@ export default async function AdminDashboardPage() {
             </div>
           </div>
 
-          <a href="/admin/logs" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
+          <Link href="/admin/logs" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
             <ShieldAlert className="w-4 h-4 md:w-5 md:h-5" />
             Cek Keamanan Log
-          </a>
+          </Link>
         </div>
 
       </div>

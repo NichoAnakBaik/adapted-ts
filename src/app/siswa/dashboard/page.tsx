@@ -1,6 +1,7 @@
 import React from "react";
 import { BookOpen, CheckCircle2, Clock, MapPin, Video, PenTool, MessageSquare, CalendarCheck, Award, Bot, ChevronRight } from "lucide-react";
 import { getDashboardStats } from "@/app/actions/siswa";
+import Link from "next/link";
 
 export default async function SiswaDashboardPage() {
   const stats = await getDashboardStats();
@@ -75,40 +76,40 @@ export default async function SiswaDashboardPage() {
           <h2 className="text-lg md:text-xl font-bold text-namsan-text mb-3 md:mb-4">Menu Pembelajaran</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
             
-            <a href="/siswa/modul" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/siswa/modul" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Modul Belajar</span>
-            </a>
+            </Link>
             
-            <a href="/siswa/kuis" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/siswa/kuis" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <PenTool className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Kuis Kelas</span>
-            </a>
+            </Link>
             
-            <a href="/siswa/ujian" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/siswa/ujian" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Ujian Akhir</span>
-            </a>
+            </Link>
             
-            <a href="/siswa/forum" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/siswa/forum" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Forum Kelas</span>
-            </a>
+            </Link>
             
-            <a href="/siswa/aktivitas" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/siswa/aktivitas" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Clock className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Riwayat Belajar</span>
-            </a>
+            </Link>
 
-            <a href="/siswa/absensi" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/siswa/absensi" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <CalendarCheck className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Absensi Kelas</span>
-            </a>
+            </Link>
 
-            <a href="/siswa/sertifikat" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+            <Link href="/siswa/sertifikat" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
               <Award className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
               <span className="text-sm md:text-base font-bold text-namsan-text">Sertifikat Level</span>
-            </a>
+            </Link>
 
           </div>
         </div>
@@ -129,10 +130,10 @@ export default async function SiswaDashboardPage() {
             </p>
           </div>
 
-          <a href="/siswa/analitik" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
+          <Link href="/siswa/analitik" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
             <Bot className="w-4 h-4 md:w-5 md:h-5" />
             Buka Analitik & AI
-          </a>
+          </Link>
         </div>
 
       </div>

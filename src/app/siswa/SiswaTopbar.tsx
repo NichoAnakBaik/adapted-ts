@@ -1,13 +1,11 @@
 import React from "react";
-import { Bell } from "lucide-react";
+import { NotificationBell } from "@/components/NotificationBell";
 
 export function SiswaTopbar() {
   return (
     <header className="flex items-center justify-end px-4 lg:px-8 shrink-0 w-full">
       <div className="flex items-center gap-6">
-        <button className="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-namsan-text hover:bg-gray-100 transition-colors">
-          <Bell className="w-5 h-5" />
-        </button>
+        <NotificationBell />
         <div className="text-right">
           <p className="text-xs font-bold text-namsan-text">Kelas Saat Ini</p>
           <p className="text-sm text-namsan-primary font-medium">Level 1 - Kelas A</p>

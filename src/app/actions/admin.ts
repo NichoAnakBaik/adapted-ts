@@ -174,9 +174,21 @@ export async function assignTeacher(classId: string, teacherId: string | null) {
 export async function enrollStudent(classId: string, studentId: string) {
   await checkAdminAuth();
   try {
+    const classData = await prisma.class.findUnique({ where: { id: classId } });
     await prisma.enrollment.create({
       data: { class_id: classId, student_id: studentId }
     });
+    
+    if (classData) {
+      const { createNotification } = await import("./notification");
+      await createNotification(
+        studentId,
+        "Pengingat Kelas Baru",
+        `Anda telah didaftarkan ke kelas "${classData.name}". Segera cek jadwal dan materi pembelajaran Anda.`,
+        `/siswa/kelas`
+      );
+    }
+    
     return { success: true };
   } catch (e) {
     return { error: "Siswa sudah terdaftar di kelas ini" };
@@ -333,7 +345,27 @@ export async function deleteAdminExam(id: string) {
 
 export async function toggleAdminExamPublish(id: string, is_published: boolean) {
   await checkAdminAuth();
-  await prisma.exam.update({ where: { id }, data: { is_published } });
+  
+  const exam = await prisma.exam.update({ 
+    where: { id }, 
+    data: { is_published },
+    include: { class: { include: { enrollments: true } } }
+  });
+
+  if (is_published) {
+    const { createNotificationsForUsers } = await import("./notification");
+    const studentIds = exam.class.enrollments.map(e => e.student_id);
+    
+    if (studentIds.length > 0) {
+      await createNotificationsForUsers(
+        studentIds,
+        exam.is_final ? "Ujian Baru Diterbitkan" : "Kuis Baru Diterbitkan",
+        `${exam.is_final ? "Ujian" : "Kuis"} "${exam.title}" untuk kelas ${exam.class.name} sekarang sudah bisa dikerjakan.`,
+        exam.is_final ? `/siswa/ujian` : `/siswa/kuis`
+      );
+    }
+  }
+
   return { success: true };
 }
 

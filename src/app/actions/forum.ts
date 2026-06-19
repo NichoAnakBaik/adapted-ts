@@ -34,13 +34,39 @@ export async function postMessage(forumId: string, message: string) {
   const session = await getSession();
   if (!session || !message.trim()) return { error: "Pesan tidak valid" };
 
-  await prisma.forumMessage.create({
+  const newMessage = await prisma.forumMessage.create({
     data: {
       forum_id: forumId,
       user_id: session.user.id,
       message: message.trim()
+    },
+    include: { 
+      forum: { include: { class: { include: { enrollments: true } } } },
+      user: true
     }
   });
+
+  const { createNotificationsForUsers } = await import("./notification");
+  const studentIds = newMessage.forum.class.enrollments.map(e => e.student_id);
+  const teacherId = newMessage.forum.class.teacher_id;
+  const allUserIds = [...studentIds];
+  if (teacherId) allUserIds.push(teacherId);
+  const recipients = allUserIds.filter(id => id !== session.user.id);
+  
+  if (recipients.length > 0) {
+    const linkPath = session.user.role === "SISWA" 
+      ? `/siswa/forum/${newMessage.forum.class_id}` 
+      : session.user.role === "PENGAJAR"
+        ? `/pengajar/forum/${newMessage.forum.class_id}`
+        : `/admin/forum/${newMessage.forum.class_id}`;
+        
+    await createNotificationsForUsers(
+      recipients,
+      "Pesan Forum Baru",
+      `${newMessage.user.nama_lengkap} baru saja memposting di forum ${newMessage.forum.class.name}.`,
+      linkPath
+    );
+  }
 
   return { success: true };
 }
