@@ -40,7 +40,7 @@ export async function postMessage(forumId: string, message: string, parentId?: s
       user_id: session.user.id,
       message: message.trim(),
       parent_id: parentId || null,
-    },
+    } as any,
     include: { 
       forum: { include: { class: { include: { enrollments: true } } } },
       user: true
