@@ -293,7 +293,8 @@ export async function getExamDetails(id: string) {
         include: {
           student: {
             select: { id: true, nama_lengkap: true, username: true }
-          }
+          },
+          question_attempts: { include: { question: true } }
         },
         orderBy: { created_at: 'desc' }
       }

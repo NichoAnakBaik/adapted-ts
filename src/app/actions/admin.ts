@@ -376,7 +376,8 @@ export async function getAdminExamDetails(id: string) {
       },
       exam_attempts: {
         include: {
-          student: { select: { nama_lengkap: true, username: true } }
+          student: { select: { nama_lengkap: true, username: true } },
+          question_attempts: { include: { question: true } }
         },
         orderBy: { start_time: 'desc' }
       }

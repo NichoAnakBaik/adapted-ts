@@ -4,7 +4,7 @@ import React from "react";
 import { ArrowLeft, CheckCircle2, XCircle, BrainCircuit, MessageSquareText, PlayCircle } from "lucide-react";
 import Link from "next/link";
 
-export default function SiswaHasilClient({ attempt }: { attempt: any }) {
+export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: any, hideBackLink?: boolean }) {
   const { exam, question_attempts } = attempt;
 
   return (
@@ -12,9 +12,11 @@ export default function SiswaHasilClient({ attempt }: { attempt: any }) {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-32 h-32 bg-namsan-soft rounded-bl-full -z-10 opacity-50"></div>
         
-        <Link href={exam.is_final ? "/siswa/ujian" : "/siswa/kuis"} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-namsan-primary mb-4 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Kembali
-        </Link>
+        {!hideBackLink && (
+          <Link href={exam.is_final ? "/siswa/ujian" : "/siswa/kuis"} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-namsan-primary mb-4 transition-colors">
+            <ArrowLeft className="w-4 h-4" /> Kembali
+          </Link>
+        )}
         
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>

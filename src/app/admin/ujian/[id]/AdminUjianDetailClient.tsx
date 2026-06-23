@@ -5,6 +5,7 @@ import { FileQuestion, ArrowLeft, Plus, Trash2, Headphones, BookOpen, PenTool, M
 import Link from "next/link";
 import { createAdminQuestion, deleteAdminQuestion, assignExamToStudent, assignAllEligibleStudents } from "@/app/actions/admin";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
+import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
 
 export default function AdminUjianDetailClient({ exam, initialEligibleStudents }: { exam: any, initialEligibleStudents: any[] }) {
   const [questions, setQuestions] = useState(exam.questions);
@@ -12,8 +13,9 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
   const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
-  const [viewMode, setViewMode] = useState<"SOAL" | "HASIL" | "ELIGIBILITY">("SOAL");
+  const [viewMode, setViewMode] = useState<"SOAL" | "HASIL" | "ELIGIBILITY" | "HASIL_DETAIL">("SOAL");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedAttempt, setSelectedAttempt] = useState<any>(null);
   
   const [eligibleStudents, setEligibleStudents] = useState(initialEligibleStudents);
   const [assigningAll, setAssigningAll] = useState(false);
@@ -110,9 +112,9 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
           <CheckCircle className="w-4 h-4" /> Persetujuan Siswa
         </button>
         <button
-          onClick={() => setViewMode("HASIL")}
+          onClick={() => { setViewMode("HASIL"); setSelectedAttempt(null); }}
           className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
-            viewMode === "HASIL" ? "bg-namsan-primary text-white shadow-md" : "text-gray-500 hover:bg-gray-50"
+            viewMode === "HASIL" || viewMode === "HASIL_DETAIL" ? "bg-namsan-primary text-white shadow-md" : "text-gray-500 hover:bg-gray-50"
           }`}
         >
           <Users className="w-4 h-4" /> Hasil Siswa
@@ -426,12 +428,18 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                         </td>
                         <td className="p-4">
                           {attempt.end_time ? (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-4">
                               <div className={`w-12 h-10 flex items-center justify-center rounded-xl font-black ${
                                 (attempt.total_score || 0) >= 70 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
                               }`}>
                                 {attempt.total_score || 0}
                               </div>
+                              <button 
+                                onClick={() => { setSelectedAttempt(attempt); setViewMode("HASIL_DETAIL"); }}
+                                className="text-sm font-bold text-namsan-primary hover:underline"
+                              >
+                                Lihat Detail
+                              </button>
                             </div>
                           ) : (
                             <span className="text-gray-400 text-sm">-</span>
@@ -456,7 +464,22 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
             </div>
           </div>
         </div>
-      )}
+      ) : viewMode === "HASIL_DETAIL" && selectedAttempt ? (
+        <div className="space-y-4">
+          <button 
+            onClick={() => { setViewMode("HASIL"); setSelectedAttempt(null); }}
+            className="flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-bold text-sm mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Tabel Hasil
+          </button>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-bold mb-4 border-b pb-4">
+              Detail Hasil: {selectedAttempt.student.nama_lengkap} (@{selectedAttempt.student.username})
+            </h3>
+            <SiswaHasilClient attempt={{...selectedAttempt, exam: exam}} hideBackLink={true} />
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

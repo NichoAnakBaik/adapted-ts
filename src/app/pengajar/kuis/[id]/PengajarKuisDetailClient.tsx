@@ -5,13 +5,15 @@ import { ArrowLeft, Plus, FileQuestion, Trash2, Clock, CheckCircle2 } from "luci
 import Link from "next/link";
 import { createQuestion } from "@/app/actions/pengajar";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
+import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
 
 export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [showForm, setShowForm] = useState(false);
   const [questionType, setQuestionType] = useState("READING");
   const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
   const [error, setError] = useState("");
-  const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL">("SOAL");
+  const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL" | "HASIL_DETAIL">("SOAL");
+  const [selectedAttempt, setSelectedAttempt] = useState<any>(null);
 
   const handleCreateQuestion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -71,9 +73,9 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
           </div>
         </button>
         <button
-          onClick={() => setActiveTab("HASIL")}
+          onClick={() => { setActiveTab("HASIL"); setSelectedAttempt(null); }}
           className={`px-4 py-3 font-bold text-sm transition-colors border-b-2 ${
-            activeTab === "HASIL" ? "border-namsan-primary text-namsan-primary" : "border-transparent text-gray-500 hover:text-gray-700"
+            activeTab === "HASIL" || activeTab === "HASIL_DETAIL" ? "border-namsan-primary text-namsan-primary" : "border-transparent text-gray-500 hover:text-gray-700"
           }`}
         >
           <div className="flex items-center gap-2">
@@ -280,8 +282,14 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                       {attempt.total_score !== null ? attempt.total_score : '-'} / 100
                     </span>
                   </td>
-                  <td className="p-4 text-sm text-gray-500">
-                    {new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}
+                  <td className="p-4 text-sm text-gray-500 flex items-center gap-4 justify-between">
+                    <span>{new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}</span>
+                    <button 
+                      onClick={() => { setSelectedAttempt(attempt); setActiveTab("HASIL_DETAIL"); }}
+                      className="text-namsan-primary font-bold hover:underline"
+                    >
+                      Lihat Detail
+                    </button>
                   </td>
                 </tr>
               ))}
@@ -292,6 +300,23 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               )}
             </tbody>
           </table>
+        </div>
+      )}
+
+      {activeTab === "HASIL_DETAIL" && selectedAttempt && (
+        <div className="space-y-4">
+          <button 
+            onClick={() => { setActiveTab("HASIL"); setSelectedAttempt(null); }}
+            className="flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-bold text-sm mb-4 transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4" /> Kembali ke Tabel Hasil
+          </button>
+          <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+            <h3 className="text-lg font-bold mb-4 border-b pb-4">
+              Detail Hasil: {selectedAttempt.student.nama_lengkap} (@{selectedAttempt.student.username})
+            </h3>
+            <SiswaHasilClient attempt={{...selectedAttempt, exam: exam}} hideBackLink={true} />
+          </div>
         </div>
       )}
     </div>
