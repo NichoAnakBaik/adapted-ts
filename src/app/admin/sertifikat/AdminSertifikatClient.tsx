@@ -8,6 +8,12 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
   const [certificates, setCertificates] = useState(initialCertificates);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredCertificates = certificates.filter(c => 
+    c.student.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    c.class.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus sertifikat ini?")) return;
@@ -114,7 +120,16 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+          <input 
+            type="text" 
+            placeholder="Cari nama siswa atau kelas..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full md:max-w-xs p-2.5 border rounded-lg text-sm bg-white focus:border-namsan-primary outline-none"
+          />
+        </div>
         <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[700px] text-left border-collapse">
             <thead>
@@ -127,7 +142,7 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
             </tr>
           </thead>
           <tbody>
-            {certificates.map((cert) => (
+            {filteredCertificates.map((cert) => (
               <tr key={cert.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <td className="p-4 font-medium text-namsan-text">
                   {cert.student.nama_lengkap}
@@ -161,7 +176,7 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
                 </td>
               </tr>
             ))}
-            {certificates.length === 0 && (
+            {filteredCertificates.length === 0 && (
               <tr>
                 <td colSpan={5} className="p-8 text-center text-gray-500">Belum ada sertifikat yang diterbitkan.</td>
               </tr>

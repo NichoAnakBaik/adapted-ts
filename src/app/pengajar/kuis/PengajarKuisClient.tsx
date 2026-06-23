@@ -10,6 +10,12 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
   const [exams, setExams] = useState(initialExams);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredExams = exams.filter(ex => 
+    ex.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    ex.class.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -97,8 +103,18 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
         </div>
       )}
 
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">
+        <input 
+          type="text" 
+          placeholder="Cari judul kuis atau nama kelas..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {exams.map((ex) => (
+        {filteredExams.map((ex) => (
           <div key={ex.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:border-namsan-primary transition-colors group">
             <div className="flex justify-between items-start mb-4">
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
@@ -145,7 +161,7 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
           </div>
         ))}
 
-        {exams.length === 0 && (
+        {filteredExams.length === 0 && (
           <div className="col-span-full bg-white p-12 rounded-2xl text-center border border-gray-100 border-dashed">
             <ClipboardList className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-namsan-text">Belum Ada Kuis</h3>

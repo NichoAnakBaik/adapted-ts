@@ -10,6 +10,12 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
   const [editingUser, setEditingUser] = useState<any>(null);
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredUsers = users.filter(u => 
+    u.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    u.username.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus pengguna ini?")) return;
@@ -126,7 +132,16 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+          <input 
+            type="text" 
+            placeholder="Cari nama atau username..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full md:max-w-xs p-2.5 border rounded-lg text-sm bg-white focus:border-namsan-primary outline-none"
+          />
+        </div>
         <div className="w-full overflow-x-auto">
           <div className="min-w-full inline-block align-middle">
             <table className="min-w-full text-left border-collapse">
@@ -139,7 +154,7 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
                 </tr>
               </thead>
               <tbody>
-                {users.map((u) => (
+                {filteredUsers.map((u) => (
                   <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors text-xs md:text-base">
                     <td className="p-3 md:p-4 font-medium text-namsan-text whitespace-nowrap">{u.nama_lengkap}</td>
                     <td className="p-3 md:p-4 text-gray-500 whitespace-nowrap">{u.username}</td>
@@ -165,7 +180,7 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
                     </td>
                   </tr>
                 ))}
-                {users.length === 0 && (
+                {filteredUsers.length === 0 && (
                   <tr>
                     <td colSpan={4} className="p-6 md:p-8 text-center text-xs md:text-sm text-gray-500">Belum ada pengguna.</td>
                   </tr>

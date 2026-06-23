@@ -1,10 +1,15 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Users, BookOpen, GraduationCap } from "lucide-react";
 import Link from "next/link";
 
 export default function PengajarKelasClient({ classes }: { classes: any[] }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredClasses = classes.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -19,8 +24,18 @@ export default function PengajarKelasClient({ classes }: { classes: any[] }) {
         </div>
       </div>
 
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">
+        <input 
+          type="text" 
+          placeholder="Cari nama kelas..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {classes.map((c) => (
+        {filteredClasses.map((c) => (
           <Link key={c.id} href={`/pengajar/kelas/${c.id}`} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:shadow-md hover:border-namsan-primary transition-all group">
             <div className="flex justify-between items-start mb-4">
               <div className="p-3 bg-namsan-soft rounded-lg group-hover:bg-blue-100 transition-colors">
@@ -60,7 +75,7 @@ export default function PengajarKelasClient({ classes }: { classes: any[] }) {
           </Link>
         ))}
         
-        {classes.length === 0 && (
+        {filteredClasses.length === 0 && (
           <div className="col-span-full bg-white p-12 rounded-2xl text-center border border-gray-100 border-dashed">
             <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-namsan-text">Belum Ada Kelas</h3>

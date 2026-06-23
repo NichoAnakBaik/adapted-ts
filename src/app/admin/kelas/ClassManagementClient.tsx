@@ -11,6 +11,11 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
   const [showForm, setShowForm] = useState(false);
   const [classType, setClassType] = useState("ONLINE");
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredClasses = classes.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleDelete = async (id: string) => {
     if (!confirm("Yakin ingin menghapus kelas ini? Semua data terkait modul dan nilai akan terhapus!")) return;
@@ -110,7 +115,16 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
+        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
+          <input 
+            type="text" 
+            placeholder="Cari nama kelas..." 
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full md:max-w-xs p-2.5 border rounded-lg text-sm bg-white focus:border-namsan-primary outline-none"
+          />
+        </div>
         <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[800px] text-left border-collapse">
           <thead>
@@ -123,7 +137,7 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
             </tr>
           </thead>
           <tbody>
-            {classes.map((c) => (
+            {filteredClasses.map((c) => (
               <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
                 <td className="p-4 font-medium text-namsan-text">{c.name}</td>
                 <td className="p-4">
@@ -158,7 +172,7 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
                 </td>
               </tr>
             ))}
-            {classes.length === 0 && (
+            {filteredClasses.length === 0 && (
               <tr>
                 <td colSpan={5} className="p-8 text-center text-gray-500">Belum ada kelas yang dibuat.</td>
               </tr>

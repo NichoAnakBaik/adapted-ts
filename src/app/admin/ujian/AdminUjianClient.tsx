@@ -9,6 +9,12 @@ export default function AdminUjianClient({ initialExams, classes }: { initialExa
   const [exams, setExams] = useState(initialExams);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredExams = exams.filter(e => 
+    e.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
+    e.class.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   const handleCreate = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -103,8 +109,18 @@ export default function AdminUjianClient({ initialExams, classes }: { initialExa
         </div>
       )}
 
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">
+        <input 
+          type="text" 
+          placeholder="Cari judul ujian atau nama kelas..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {exams.map((exam) => (
+        {filteredExams.map((exam) => (
           <div key={exam.id} className={`bg-white rounded-2xl shadow-sm border ${exam.is_published ? 'border-namsan-primary' : 'border-gray-200'} overflow-hidden flex flex-col transition-all hover:shadow-md`}>
             <div className="p-5 border-b border-gray-50 flex-1">
               <div className="flex justify-between items-start mb-3">
@@ -143,7 +159,7 @@ export default function AdminUjianClient({ initialExams, classes }: { initialExa
             </div>
           </div>
         ))}
-        {exams.length === 0 && (
+        {filteredExams.length === 0 && (
           <div className="col-span-full py-12 text-center bg-white rounded-2xl border border-gray-100">
             <PenTool className="w-12 h-12 text-gray-300 mx-auto mb-3" />
             <h3 className="text-lg font-bold text-gray-700">Belum Ada Ujian</h3>

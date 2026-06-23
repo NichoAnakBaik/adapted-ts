@@ -1,9 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { BookOpen, FileText, Video, Calendar, ArrowRight } from "lucide-react";
 
 export default function SiswaKelasClient({ classes }: { classes: any[] }) {
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const filteredClasses = classes.filter(c => 
+    c.name.toLowerCase().includes(searchQuery.toLowerCase())
+  );
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -18,8 +23,18 @@ export default function SiswaKelasClient({ classes }: { classes: any[] }) {
         </div>
       </div>
 
+      <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">
+        <input 
+          type="text" 
+          placeholder="Cari nama kelas..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {classes.map((c) => (
+        {filteredClasses.map((c) => (
           <div key={c.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:border-namsan-primary transition-colors group">
             <div className="flex justify-between items-start mb-4">
               <span className={`px-3 py-1 rounded-full text-xs font-bold ${c.type === 'ONLINE' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'}`}>
@@ -75,7 +90,7 @@ export default function SiswaKelasClient({ classes }: { classes: any[] }) {
           </div>
         ))}
         
-        {classes.length === 0 && (
+        {filteredClasses.length === 0 && (
           <div className="col-span-full bg-white p-12 rounded-2xl text-center border border-gray-100 border-dashed">
             <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-4" />
             <h3 className="text-lg font-bold text-namsan-text">Belum Ada Kelas</h3>
