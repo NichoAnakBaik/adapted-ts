@@ -99,8 +99,8 @@ model Class {
   exams        Exam[]
   certificates Certificate[]
   forums       Forum[]
-  attendances  Attendance[]
   learning_progresses LearningProgress[]
+  attendance_sessions AttendanceSession[]
 }
 
 model Enrollment {
@@ -262,19 +262,30 @@ model RecommendationHistory {
   created_at          DateTime @default(now())
 }
 
+model AttendanceSession {
+  id          String   @id @default(uuid())
+  class_id    String
+  class       Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  title       String
+  description String?
+  date        DateTime?
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+
+  attendances Attendance[]
+}
+
 model Attendance {
   id             String           @id @default(uuid())
   student_id     String
   student        User             @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  class_id       String
-  class          Class            @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  date           DateTime         @default(now())
+  session_id     String
+  session        AttendanceSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
   status         AttendanceStatus @default(PRESENT)
   check_in_time  DateTime?
-  check_out_time DateTime?
   notes          String?
   created_at     DateTime         @default(now())
   updated_at     DateTime         @updatedAt
 
-  @@unique([student_id, class_id, date])
+  @@unique([student_id, session_id])
 }

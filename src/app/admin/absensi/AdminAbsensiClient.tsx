@@ -1,17 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CalendarCheck, Users, RefreshCw, Calendar as CalendarIcon, Settings, Edit2, Save, X, Eye } from "lucide-react";
-import { getTeacherAttendanceSessions, generateAttendanceSessions, updateAttendanceSession, getSessionAttendances } from "@/app/actions/absensi";
+import { CalendarCheck, Users, RefreshCw, Calendar as CalendarIcon, Eye, X } from "lucide-react";
+import { getAdminAttendanceSessions, getSessionAttendances } from "@/app/actions/absensi";
 
-export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
+export default function AdminAbsensiClient({ classes }: { classes: any[] }) {
   const [selectedClass, setSelectedClass] = useState(classes.length > 0 ? classes[0].id : "");
   const [sessions, setSessions] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-
-  // Edit Mode state
-  const [editingSession, setEditingSession] = useState<string | null>(null);
-  const [editData, setEditData] = useState({ title: "", date: "", description: "" });
 
   // View Attendance state
   const [viewingSession, setViewingSession] = useState<any | null>(null);
@@ -25,36 +21,10 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
   const loadSessions = async () => {
     setLoading(true);
     try {
-      const data = await getTeacherAttendanceSessions(selectedClass);
+      const data = await getAdminAttendanceSessions(selectedClass);
       setSessions(data);
     } catch (e) { console.error(e); }
     setLoading(false);
-  };
-
-  const handleGenerate = async (count: number) => {
-    if (!confirm(`Apakah Anda yakin ingin membuat ${count} sesi otomatis?`)) return;
-    setLoading(true);
-    await generateAttendanceSessions(selectedClass, count);
-    await loadSessions();
-  };
-
-  const startEdit = (s: any) => {
-    setEditingSession(s.id);
-    setEditData({
-      title: s.title || "",
-      date: s.date ? new Date(s.date).toISOString().split('T')[0] : "",
-      description: s.description || ""
-    });
-  };
-
-  const saveEdit = async (s: any) => {
-    const fd = new FormData();
-    fd.append("title", editData.title);
-    fd.append("date", editData.date);
-    fd.append("description", editData.description);
-    await updateAttendanceSession(s.id, fd);
-    setEditingSession(null);
-    loadSessions();
   };
 
   const loadAttendancesForSession = async (s: any) => {
@@ -70,9 +40,9 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-namsan-text flex items-center gap-2">
-            <CalendarCheck className="w-6 h-6 text-teal-500" /> Manajemen Sesi Absensi
+            <CalendarCheck className="w-6 h-6 text-teal-500" /> Pantau Absensi Global
           </h1>
-          <p className="text-gray-500 text-sm mt-1">Kelola jadwal pertemuan dan lihat absensi siswa per sesi.</p>
+          <p className="text-gray-500 text-sm mt-1">Pantau jadwal pertemuan dan tingkat kehadiran siswa di seluruh kelas.</p>
         </div>
         <div className="w-full md:w-64">
           <label className="block text-xs font-bold text-gray-600 mb-1">Pilih Kelas</label>
@@ -93,18 +63,10 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
       {loading ? (
         <div className="flex justify-center py-16"><RefreshCw className="w-8 h-8 animate-spin text-gray-400" /></div>
       ) : sessions.length === 0 ? (
-        <div className="bg-white rounded-2xl p-8 md:p-16 text-center border-2 border-dashed border-gray-200 hover:border-teal-200 transition-colors">
+        <div className="bg-white rounded-2xl p-8 md:p-16 text-center border-2 border-dashed border-gray-200">
           <CalendarIcon className="w-16 h-16 text-gray-300 mx-auto mb-4" />
           <h3 className="text-xl font-bold text-gray-700 mb-2">Belum Ada Sesi Pertemuan</h3>
-          <p className="text-gray-500 mb-8 max-w-md mx-auto text-sm">Kelas ini belum memiliki kerangka sesi absensi. Anda bisa membuat 14 atau 16 sesi secara otomatis lalu mengatur tanggalnya secara spesifik nanti.</p>
-          <div className="flex flex-col sm:flex-row justify-center gap-3">
-            <button onClick={() => handleGenerate(14)} className="bg-teal-50 text-teal-700 hover:bg-teal-100 font-bold py-3 px-8 rounded-xl transition-colors">
-              Buat 14 Sesi
-            </button>
-            <button onClick={() => handleGenerate(16)} className="bg-namsan-primary text-white hover:bg-namsan-primary/90 font-bold py-3 px-8 rounded-xl transition-colors shadow-sm">
-              Buat 16 Sesi
-            </button>
-          </div>
+          <p className="text-gray-500 text-sm">Pengajar kelas ini belum menyiapkan jadwal sesi absensi.</p>
         </div>
       ) : (
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
@@ -114,59 +76,26 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
             </h2>
           </div>
           <div className="divide-y divide-gray-100">
-            {sessions.map((s, idx) => (
-              <div key={s.id} className="p-4 hover:bg-gray-50/80 transition-colors flex flex-col md:flex-row justify-between gap-4">
-                {editingSession === s.id ? (
-                  <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="text-xs font-bold text-gray-500 mb-1 block">Judul Sesi</label>
-                      <input type="text" value={editData.title} onChange={e => setEditData({...editData, title: e.target.value})} className="w-full p-2.5 border border-gray-200 focus:border-namsan-primary rounded-lg text-sm bg-white outline-none" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-gray-500 mb-1 block">Tanggal Pelaksanaan</label>
-                      <input type="date" value={editData.date} onChange={e => setEditData({...editData, date: e.target.value})} className="w-full p-2.5 border border-gray-200 focus:border-namsan-primary rounded-lg text-sm bg-white outline-none" />
-                    </div>
-                    <div>
-                      <label className="text-xs font-bold text-gray-500 mb-1 block">Deskripsi / Materi</label>
-                      <input type="text" value={editData.description} onChange={e => setEditData({...editData, description: e.target.value})} placeholder="Topik pembahasan..." className="w-full p-2.5 border border-gray-200 focus:border-namsan-primary rounded-lg text-sm bg-white outline-none" />
-                    </div>
+            {sessions.map((s) => (
+              <div key={s.id} className="p-4 hover:bg-gray-50/80 transition-colors flex flex-col md:flex-row justify-between items-center gap-4">
+                <div className="flex-1 flex flex-col justify-center">
+                  <div className="flex items-center gap-3 mb-1.5">
+                    <span className="font-bold text-namsan-text">{s.title}</span>
+                    {s.date ? (
+                      <span className="text-xs font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100">
+                        {new Date(s.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
+                      </span>
+                    ) : (
+                      <span className="text-xs font-bold px-2.5 py-1 bg-red-50 text-red-600 rounded-md border border-red-100">Tanggal belum diatur</span>
+                    )}
                   </div>
-                ) : (
-                  <div className="flex-1 flex flex-col justify-center">
-                    <div className="flex items-center gap-3 mb-1.5">
-                      <span className="font-bold text-namsan-text">{s.title}</span>
-                      {s.date ? (
-                        <span className="text-xs font-bold px-2.5 py-1 bg-blue-50 text-blue-700 rounded-md border border-blue-100">
-                          {new Date(s.date).toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
-                        </span>
-                      ) : (
-                        <span className="text-xs font-bold px-2.5 py-1 bg-red-50 text-red-600 rounded-md border border-red-100">Tanggal belum diatur</span>
-                      )}
-                    </div>
-                    <p className="text-sm text-gray-500">{s.description || "Tidak ada deskripsi/materi yang dicatat."}</p>
-                  </div>
-                )}
+                  <p className="text-sm text-gray-500">{s.description || "Tidak ada deskripsi/materi yang dicatat."}</p>
+                </div>
                 
                 <div className="flex items-center gap-2 md:pl-4 md:border-l border-gray-100">
-                  {editingSession === s.id ? (
-                    <>
-                      <button onClick={() => saveEdit(s)} className="p-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm" title="Simpan Perubahan">
-                        <Save className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => setEditingSession(null)} className="p-2.5 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors" title="Batal">
-                        <X className="w-4 h-4" />
-                      </button>
-                    </>
-                  ) : (
-                    <>
-                      <button onClick={() => startEdit(s)} className="p-2.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Edit Detail Sesi">
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                      <button onClick={() => loadAttendancesForSession(s)} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-namsan-text font-bold text-xs rounded-lg hover:border-namsan-primary hover:text-namsan-primary transition-colors">
-                        <Eye className="w-4 h-4" /> Cek Kehadiran ({s._count?.attendances || 0})
-                      </button>
-                    </>
-                  )}
+                  <button onClick={() => loadAttendancesForSession(s)} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-namsan-text font-bold text-xs rounded-lg hover:border-namsan-primary hover:text-namsan-primary transition-colors">
+                    <Eye className="w-4 h-4" /> Cek Kehadiran ({s._count?.attendances || 0})
+                  </button>
                 </div>
               </div>
             ))}

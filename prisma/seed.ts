@@ -166,6 +166,30 @@ async function main() {
   const activityTypes = ['LOGIN', 'MODULE_ACCESS', 'EXAM_ATTEMPT', 'FORUM_PARTICIPATION'];
   const now = new Date();
   
+  // Prepare Attendance Sessions for Class A
+  const existingSessions = await prisma.attendanceSession.count({ where: { class_id: classA.id }});
+  let session1, session2;
+  if (existingSessions === 0) {
+    session1 = await prisma.attendanceSession.create({
+      data: {
+        class_id: classA.id,
+        title: 'Pertemuan 1',
+        date: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000),
+      }
+    });
+    session2 = await prisma.attendanceSession.create({
+      data: {
+        class_id: classA.id,
+        title: 'Pertemuan 2',
+        date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000),
+      }
+    });
+  } else {
+    const sessions = await prisma.attendanceSession.findMany({ where: { class_id: classA.id }, take: 2 });
+    session1 = sessions[0];
+    session2 = sessions[1] || sessions[0];
+  }
+
   for (const s of allStudents) {
     const existingLogs = await prisma.studentActivityLog.count({ where: { student_id: s.id } });
     if (existingLogs < 10) {
@@ -188,12 +212,12 @@ async function main() {
 
     // Generate Attendances
     const existingAtt = await prisma.attendance.count({ where: { student_id: s.id } });
-    if (existingAtt === 0) {
+    if (existingAtt === 0 && session1 && session2) {
       await prisma.attendance.create({
-        data: { class_id: classA.id, student_id: s.id, status: 'PRESENT', date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000) }
+        data: { session_id: session2.id, student_id: s.id, status: 'PRESENT', check_in_time: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000) }
       });
       await prisma.attendance.create({
-        data: { class_id: classA.id, student_id: s.id, status: 'LATE', date: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000) }
+        data: { session_id: session1.id, student_id: s.id, status: 'LATE', check_in_time: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000) }
       });
     }
 
