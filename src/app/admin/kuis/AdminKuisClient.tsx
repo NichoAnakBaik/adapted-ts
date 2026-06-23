@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { ClipboardList, Users, Clock, FileQuestion, BadgeInfo } from "lucide-react";
+import { ClipboardList, Users, Clock, FileQuestion, BadgeInfo, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminKuisClient({ initialQuizzes }: { initialQuizzes: any[] }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -63,13 +64,16 @@ export default function AdminKuisClient({ initialQuizzes }: { initialQuizzes: an
               </div>
             </div>
             
-            <div className="bg-gray-50 p-4 border-t border-gray-100">
-              <div className="flex justify-between items-center text-sm">
+            <div className="bg-gray-50 p-3 border-t border-gray-100">
+              <div className="flex justify-between items-center text-sm mb-3 px-1">
                 <span className="text-gray-500 flex items-center gap-1">
                   <Users className="w-4 h-4" /> Pengajar: <span className="font-bold text-gray-700">{quiz.class.teacher?.nama_lengkap || '-'}</span>
                 </span>
                 <span className="font-bold text-namsan-primary">{quiz._count.exam_attempts} Pengerjaan</span>
               </div>
+              <Link href={`/admin/kuis/${quiz.id}`} className="w-full flex justify-center items-center gap-2 bg-white border border-gray-200 hover:border-namsan-primary text-namsan-text font-bold py-2 rounded-xl transition-colors">
+                Pantau Detail <ArrowRight className="w-4 h-4" />
+              </Link>
             </div>
           </div>
         ))}
