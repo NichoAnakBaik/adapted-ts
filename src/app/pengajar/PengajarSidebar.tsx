@@ -15,6 +15,7 @@ export function PengajarSidebar({ user }: { user: any }) {
     { name: "Kelas Saya", href: "/pengajar/kelas", icon: Users },
     { name: "Kuis Kelas", href: "/pengajar/kuis", icon: PenTool },
     { name: "Pemantauan Ujian", href: "/pengajar/ujian", icon: FileQuestion },
+    { name: "Forum Kelas", href: "/pengajar/forum", icon: MessageSquare },
     { name: "Absensi Kelas", href: "/pengajar/absensi", icon: CalendarCheck },
     { name: "Penerbitan Sertifikat", href: "/pengajar/sertifikat", icon: Award },
     { name: "Analitik Siswa", href: "/pengajar/analitik", icon: LineChart, special: true },

@@ -30,7 +30,7 @@ export async function getClassForum(classId: string) {
   return { forum, messages };
 }
 
-export async function postMessage(forumId: string, message: string) {
+export async function postMessage(forumId: string, message: string, parentId?: string) {
   const session = await getSession();
   if (!session || !message.trim()) return { error: "Pesan tidak valid" };
 
@@ -38,7 +38,8 @@ export async function postMessage(forumId: string, message: string) {
     data: {
       forum_id: forumId,
       user_id: session.user.id,
-      message: message.trim()
+      message: message.trim(),
+      parent_id: parentId || null,
     },
     include: { 
       forum: { include: { class: { include: { enrollments: true } } } },
@@ -47,25 +48,67 @@ export async function postMessage(forumId: string, message: string) {
   });
 
   const { createNotificationsForUsers } = await import("./notification");
-  const studentIds = newMessage.forum.class.enrollments.map(e => e.student_id);
+  
+  // Base recipients: everyone in class except sender
+  const studentIds = newMessage.forum.class.enrollments.map((e: any) => e.student_id);
   const teacherId = newMessage.forum.class.teacher_id;
   const allUserIds = [...studentIds];
   if (teacherId) allUserIds.push(teacherId);
   const recipients = allUserIds.filter(id => id !== session.user.id);
   
-  if (recipients.length > 0) {
-    const linkPath = session.user.role === "SISWA" 
+  const linkPath = session.user.role === "SISWA" 
       ? `/siswa/forum/${newMessage.forum.class_id}` 
       : session.user.role === "PENGAJAR"
         ? `/pengajar/forum/${newMessage.forum.class_id}`
         : `/admin/forum/${newMessage.forum.class_id}`;
-        
+
+  // Extract Mentions using regex
+  const mentionRegex = /@([a-zA-Z0-9_]+)/g;
+  const matches = [...message.matchAll(mentionRegex)];
+  const mentionedUsernames = matches.map(m => m[1]);
+
+  if (mentionedUsernames.length > 0) {
+    const mentionedUsers = await prisma.user.findMany({
+      where: { username: { in: mentionedUsernames } }
+    });
+    
+    const mentionedUserIds = mentionedUsers.map(u => u.id).filter(id => id !== session.user.id);
+    
+    if (mentionedUserIds.length > 0) {
+      await createNotificationsForUsers(
+        mentionedUserIds,
+        "Seseorang menyebut Anda",
+        `${newMessage.user.nama_lengkap} menyebut Anda dalam sebuah kiriman di forum ${newMessage.forum.class.name}.`,
+        linkPath
+      );
+      // Remove mentioned users from general recipients so they don't get double notification
+      for (const id of mentionedUserIds) {
+        const index = recipients.indexOf(id);
+        if (index > -1) recipients.splice(index, 1);
+      }
+    }
+  }
+
+  // Send general notification
+  if (recipients.length > 0 && !parentId) {
     await createNotificationsForUsers(
       recipients,
       "Pesan Forum Baru",
-      `${newMessage.user.nama_lengkap} baru saja memposting di forum ${newMessage.forum.class.name}.`,
+      `${newMessage.user.nama_lengkap} membuat kiriman baru di forum ${newMessage.forum.class.name}.`,
       linkPath
     );
+  } else if (recipients.length > 0 && parentId) {
+    // If it's a reply, maybe only notify the parent author + mentions?
+    // For now, we just notify the parent author if they are in the class
+    const parentMsg = await prisma.forumMessage.findUnique({ where: { id: parentId } });
+    if (parentMsg && parentMsg.user_id !== session.user.id) {
+      await createNotificationsForUsers(
+        [parentMsg.user_id],
+        "Balasan Baru",
+        `${newMessage.user.nama_lengkap} membalas kiriman Anda di forum ${newMessage.forum.class.name}.`,
+        linkPath
+      );
+    }
   }
 
   return { success: true };
