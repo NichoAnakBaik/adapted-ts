@@ -179,6 +179,24 @@ export async function deleteMeetingLink(classId: string) {
   return { success: true };
 }
 
+export async function updateModuleLink(classId: string, link: string) {
+  await checkAdminAuth();
+  await prisma.class.update({
+    where: { id: classId },
+    data: { module_link: link }
+  });
+  return { success: true };
+}
+
+export async function deleteModuleLink(classId: string) {
+  await checkAdminAuth();
+  await prisma.class.update({
+    where: { id: classId },
+    data: { module_link: null }
+  });
+  return { success: true };
+}
+
 // --- ENROLLMENT MANAGEMENT ---
 
 export async function enrollStudent(classId: string, studentId: string) {

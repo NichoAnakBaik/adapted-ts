@@ -59,15 +59,49 @@ export default function ClassDetailClient({ classData, teachers, allStudents }: 
               )}
             </div>
             <div className="mt-4 space-y-2">
-              {classData.module_link && (
-                <p className="text-sm text-gray-600 flex items-center gap-2">
-                  <BookOpen className="w-4 h-4 text-namsan-primary" />
-                  <span className="font-bold">Modul (GDrive):</span> 
-                  <a href={classData.module_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline break-all">
-                    {classData.module_link}
-                  </a>
-                </p>
-              )}
+              <div className="text-sm text-gray-600">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold">Modul (GDrive):</span>
+                  {classData.module_link ? (
+                    <a href={classData.module_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline break-all">
+                      {classData.module_link}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 italic">Belum ada link modul</span>
+                  )}
+                  
+                  <div className="flex gap-1 ml-2">
+                    <button 
+                      onClick={async () => {
+                        const newLink = prompt("Masukkan Link GDrive Modul:", classData.module_link || "");
+                        if (newLink !== null) {
+                          const { updateModuleLink } = await import("@/app/actions/admin");
+                          const res = await updateModuleLink(classData.id, newLink);
+                          if (res.error) alert(res.error);
+                          else window.location.reload();
+                        }
+                      }}
+                      className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1 px-2 rounded transition-colors"
+                    >
+                      {classData.module_link ? "Ubah Link" : "Tambah Link"}
+                    </button>
+                    {classData.module_link && (
+                      <button 
+                        onClick={async () => {
+                          if (!confirm("Hapus link modul ini?")) return;
+                          const { deleteModuleLink } = await import("@/app/actions/admin");
+                          const res = await deleteModuleLink(classData.id);
+                          if (res.success) window.location.reload();
+                        }}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded"
+                        title="Hapus Link Modul"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
               {classData.meeting_link && (
                 <div className="text-sm text-gray-600 flex items-center gap-2">
                   <span className="font-bold">Link Meeting:</span> 
