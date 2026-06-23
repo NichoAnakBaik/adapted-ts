@@ -370,7 +370,13 @@ export async function getAdminExamDetails(id: string) {
     where: { id },
     include: {
       class: true,
-      questions: { orderBy: { created_at: 'asc' } }
+      questions: { orderBy: { created_at: 'asc' } },
+      exam_attempts: {
+        include: {
+          student: { select: { nama_lengkap: true, username: true } }
+        },
+        orderBy: { start_time: 'desc' }
+      }
     }
   });
 }

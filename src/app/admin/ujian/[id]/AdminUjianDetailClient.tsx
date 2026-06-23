@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileQuestion, ArrowLeft, Plus, Trash2, Headphones, BookOpen, PenTool, MessageCircle } from "lucide-react";
+import { FileQuestion, ArrowLeft, Plus, Trash2, Headphones, BookOpen, PenTool, MessageCircle, Users, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import { createAdminQuestion, deleteAdminQuestion } from "@/app/actions/admin";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
@@ -12,6 +12,8 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
   const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
+  const [viewMode, setViewMode] = useState<"SOAL" | "HASIL">("SOAL");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const tabs = [
     { id: "READING", label: "Membaca (Reading)", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-50" },
@@ -65,7 +67,27 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
         </div>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-1.5 w-fit">
+        <button
+          onClick={() => setViewMode("SOAL")}
+          className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all ${
+            viewMode === "SOAL" ? "bg-namsan-primary text-white shadow-md" : "text-gray-500 hover:bg-gray-50"
+          }`}
+        >
+          Manajemen Soal
+        </button>
+        <button
+          onClick={() => setViewMode("HASIL")}
+          className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+            viewMode === "HASIL" ? "bg-namsan-primary text-white shadow-md" : "text-gray-500 hover:bg-gray-50"
+          }`}
+        >
+          <Users className="w-4 h-4" /> Hasil Siswa
+        </button>
+      </div>
+
+      {viewMode === "SOAL" ? (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
         {/* TAB NAVIGATION */}
         <div className="flex border-b border-gray-100 overflow-x-auto">
           {tabs.map((tab) => {
@@ -245,6 +267,90 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
           </div>
         </div>
       </div>
+      ) : (
+        <div className="space-y-4">
+          <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">
+            <input 
+              type="text" 
+              placeholder="Cari nama atau username siswa..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+            />
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full min-w-[700px] text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 text-gray-500 text-sm">
+                    <th className="p-4 font-bold rounded-tl-2xl">Siswa</th>
+                    <th className="p-4 font-bold">Waktu Mulai</th>
+                    <th className="p-4 font-bold">Waktu Selesai & Durasi</th>
+                    <th className="p-4 font-bold rounded-tr-2xl">Nilai Akhir</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {exam.exam_attempts?.filter((a: any) => 
+                    a.student.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    a.student.username.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).map((attempt: any) => {
+                    const start = new Date(attempt.start_time);
+                    const end = attempt.end_time ? new Date(attempt.end_time) : null;
+                    const duration = end ? Math.round((end.getTime() - start.getTime()) / 60000) : null;
+
+                    return (
+                      <tr key={attempt.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
+                        <td className="p-4">
+                          <div className="font-bold text-namsan-text">{attempt.student.nama_lengkap}</div>
+                          <div className="text-xs text-gray-500">@{attempt.student.username}</div>
+                        </td>
+                        <td className="p-4 text-sm text-gray-600">
+                          {start.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
+                        </td>
+                        <td className="p-4 text-sm text-gray-600">
+                          {end ? (
+                            <div>
+                              <div>{end.toLocaleTimeString('id-ID', { timeStyle: 'short' })}</div>
+                              <div className="text-xs text-namsan-primary font-bold mt-0.5">{duration} menit</div>
+                            </div>
+                          ) : (
+                            <span className="text-orange-500 text-xs font-bold px-2 py-1 bg-orange-50 rounded-lg">Sedang Mengerjakan</span>
+                          )}
+                        </td>
+                        <td className="p-4">
+                          {attempt.end_time ? (
+                            <div className="flex items-center gap-2">
+                              <div className={`w-12 h-10 flex items-center justify-center rounded-xl font-black ${
+                                (attempt.total_score || 0) >= 70 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                              }`}>
+                                {attempt.total_score || 0}
+                              </div>
+                            </div>
+                          ) : (
+                            <span className="text-gray-400 text-sm">-</span>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                  {(!exam.exam_attempts || exam.exam_attempts.filter((a: any) => 
+                    a.student.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    a.student.username.toLowerCase().includes(searchQuery.toLowerCase())
+                  ).length === 0) && (
+                    <tr>
+                      <td colSpan={4} className="p-8 text-center text-gray-500">
+                        <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        Belum ada data hasil ujian siswa yang cocok.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
