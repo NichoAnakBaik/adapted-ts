@@ -75,7 +75,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 md:gap-2 mb-1 flex-wrap">
             <span className="font-bold text-gray-900 text-sm md:text-base hover:underline cursor-pointer truncate max-w-[150px] md:max-w-xs">{msg.user?.nama_lengkap}</span>
-            {isPengajar && <CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" title="Terverifikasi (Pengajar)" />}
+            {isPengajar && <span title="Terverifikasi (Pengajar)"><CheckCircle2 className="w-4 h-4 text-blue-500 flex-shrink-0" /></span>}
             <span className="text-gray-500 text-xs md:text-sm truncate max-w-[100px] md:max-w-[150px]">@{msg.user?.username || 'user'}</span>
             <span className="text-gray-400 text-xs md:text-sm flex-shrink-0">·</span>
             <span className="text-gray-500 text-xs md:text-sm hover:underline cursor-pointer flex-shrink-0">
