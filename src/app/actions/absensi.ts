@@ -134,6 +134,33 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
   return { success: true };
 }
 
+export async function createSingleAttendanceSession(classId: string) {
+  await checkAuth("PENGAJAR");
+
+  const existingCount = await prisma.attendanceSession.count({
+    where: { class_id: classId }
+  });
+
+  await prisma.attendanceSession.create({
+    data: {
+      class_id: classId,
+      title: `Sesi Tambahan ${existingCount + 1}`,
+    }
+  });
+
+  return { success: true };
+}
+
+export async function deleteAttendanceSession(sessionId: string) {
+  await checkAuth("PENGAJAR");
+
+  await prisma.attendanceSession.delete({
+    where: { id: sessionId }
+  });
+
+  return { success: true };
+}
+
 export async function getSessionAttendances(sessionId: string) {
   // Can be called by PENGAJAR or ADMIN
   await checkAuth(); 

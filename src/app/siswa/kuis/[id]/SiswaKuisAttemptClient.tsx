@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Clock, CheckCircle2, PlayCircle, AlertCircle, ArrowRight, Mic, Square } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, PlayCircle, AlertCircle, ArrowRight, Mic, Square, Timer } from "lucide-react";
 import Link from "next/link";
 import { submitExam } from "@/app/actions/siswa";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
@@ -20,11 +20,39 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
 
   // Timer logic for the current question
   const [startTime, setStartTime] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number | null>(null);
 
   // Set initial start time on mount
   useEffect(() => {
     setStartTime(Date.now());
-  }, []);
+    if (exam.time_limit) {
+      setTimeLeft(exam.time_limit * 60);
+    }
+  }, [exam.time_limit]);
+
+  // Timer Countdown Effect
+  useEffect(() => {
+    if (timeLeft === null || isSubmitting || result) return;
+
+    if (timeLeft <= 0) {
+      handleSubmit(true);
+      return;
+    }
+
+    const timerId = setInterval(() => {
+      setTimeLeft((prev) => (prev !== null && prev > 0 ? prev - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(timerId);
+  }, [timeLeft, isSubmitting, result]);
+
+  const formatTime = (seconds: number) => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor((seconds % 3600) / 60);
+    const s = seconds % 60;
+    if (h > 0) return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  };
 
   // Speaking recording state
   const [isRecording, setIsRecording] = useState(false);
@@ -98,8 +126,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
     setAnswers(prev => ({ ...prev, [questionId]: value }));
   };
 
-  const handleSubmit = async () => {
-    if (!confirm("Apakah Anda yakin ingin mengumpulkan ujian ini? Jawaban tidak dapat diubah lagi.")) return;
+  const handleSubmit = async (isAutoSubmit: boolean = false) => {
+    if (!isAutoSubmit && !confirm("Apakah Anda yakin ingin mengumpulkan ujian ini? Jawaban tidak dapat diubah lagi.")) return;
     
     // Record time for the final question before submitting
     recordTimeSpent();
@@ -184,9 +212,22 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
           <h1 className="text-2xl font-bold text-namsan-text mb-1">{exam.title}</h1>
           <p className="text-namsan-text-muted text-sm">{exam.class.name}</p>
         </div>
-        <div className="flex items-center gap-2 bg-orange-50 text-orange-600 px-4 py-2 rounded-xl font-bold">
-          <Clock className="w-5 h-5" />
-          {exam.time_limit ? `${exam.time_limit} Menit` : 'Tanpa Batas Waktu'}
+        <div className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold transition-colors ${
+          timeLeft !== null && timeLeft <= 60 
+            ? 'bg-red-50 text-red-600 animate-pulse' 
+            : 'bg-orange-50 text-orange-600'
+        }`}>
+          {timeLeft !== null ? (
+            <>
+              <Timer className="w-5 h-5" />
+              <span className="font-mono text-lg tracking-wider">{formatTime(timeLeft)}</span>
+            </>
+          ) : (
+            <>
+              <Clock className="w-5 h-5" />
+              <span>Tanpa Batas Waktu</span>
+            </>
+          )}
         </div>
       </div>
 
@@ -344,7 +385,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
 
         {currentQIndex === exam.questions.length - 1 ? (
           <button 
-            onClick={handleSubmit}
+            onClick={() => handleSubmit(false)}
             disabled={isSubmitting}
             className="bg-gradient-to-r from-namsan-text to-gray-800 hover:from-gray-800 hover:to-black text-white font-bold py-3.5 px-8 md:px-10 rounded-2xl flex items-center gap-2 transition-all duration-300 disabled:opacity-50 shadow-md hover:shadow-xl hover:-translate-y-0.5"
           >

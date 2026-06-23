@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { CalendarCheck, Users, RefreshCw, Calendar as CalendarIcon, Settings, Edit2, Save, X, Eye } from "lucide-react";
-import { getTeacherAttendanceSessions, generateAttendanceSessions, updateAttendanceSession, getSessionAttendances } from "@/app/actions/absensi";
+import { CalendarCheck, Users, RefreshCw, Calendar as CalendarIcon, Settings, Edit2, Save, X, Eye, Plus, Trash2 } from "lucide-react";
+import { getTeacherAttendanceSessions, generateAttendanceSessions, updateAttendanceSession, getSessionAttendances, createSingleAttendanceSession, deleteAttendanceSession } from "@/app/actions/absensi";
 
 export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
   const [selectedClass, setSelectedClass] = useState(classes.length > 0 ? classes[0].id : "");
@@ -55,6 +55,19 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
     await updateAttendanceSession(s.id, fd);
     setEditingSession(null);
     loadSessions();
+  };
+
+  const handleCreateSingle = async () => {
+    setLoading(true);
+    await createSingleAttendanceSession(selectedClass);
+    await loadSessions();
+  };
+
+  const handleDelete = async (sessionId: string) => {
+    if (!confirm("Yakin ingin menghapus sesi absensi ini? Seluruh data kehadiran siswa pada sesi ini juga akan ikut terhapus.")) return;
+    setLoading(true);
+    await deleteAttendanceSession(sessionId);
+    await loadSessions();
   };
 
   const loadAttendancesForSession = async (s: any) => {
@@ -112,6 +125,12 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
             <h2 className="text-lg font-bold text-namsan-text flex items-center gap-2">
               <CalendarIcon className="w-5 h-5 text-gray-400" /> Daftar Sesi Kelas ({sessions.length} Sesi)
             </h2>
+            <button 
+              onClick={handleCreateSingle}
+              className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2 px-4 rounded-lg flex items-center gap-2 text-sm transition-colors shadow-sm"
+            >
+              <Plus className="w-4 h-4" /> Tambah Sesi
+            </button>
           </div>
           <div className="divide-y divide-gray-100">
             {sessions.map((s, idx) => (
@@ -164,6 +183,9 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
                       </button>
                       <button onClick={() => loadAttendancesForSession(s)} className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 text-namsan-text font-bold text-xs rounded-lg hover:border-namsan-primary hover:text-namsan-primary transition-colors">
                         <Eye className="w-4 h-4" /> Cek Kehadiran ({s._count?.attendances || 0})
+                      </button>
+                      <button onClick={() => handleDelete(s.id)} className="p-2.5 text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" title="Hapus Sesi">
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     </>
                   )}
