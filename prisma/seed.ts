@@ -51,7 +51,8 @@ async function main() {
       id: 'dummy-class-a',
       name: 'Bahasa Korea Dasar (Hangeul)',
       type: 'ONLINE',
-      teacher_id: teacher.id
+      teacher_id: teacher.id,
+      module_link: 'https://drive.google.com/drive/folders/dummy-a'
     }
   });
 
@@ -62,7 +63,8 @@ async function main() {
       id: 'dummy-class-b',
       name: 'Bahasa Korea Menengah (Percakapan)',
       type: 'OFFLINE',
-      teacher_id: teacher.id
+      teacher_id: teacher.id,
+      module_link: 'https://drive.google.com/drive/folders/dummy-b'
     }
   });
   console.log('Created dummy classes.');
@@ -77,26 +79,6 @@ async function main() {
         data: { class_id: classA.id, student_id: s.id }
       });
     }
-  }
-
-  // 5. Create Modules
-  const modules = [
-    { title: 'Pengenalan Huruf Vokal dan Konsonan', class_id: classA.id },
-    { title: 'Aturan Batchim (Konsonan Akhir)', class_id: classA.id },
-    { title: 'Salam dan Perkenalan Diri', class_id: classB.id },
-    { title: 'Angka Sino dan Native Korea', class_id: classB.id }
-  ];
-
-  for (let i = 0; i < modules.length; i++) {
-    await prisma.module.upsert({
-      where: { id: `dummy-module-${i}` },
-      update: {},
-      create: {
-        id: `dummy-module-${i}`,
-        title: modules[i].title,
-        class_id: modules[i].class_id
-      }
-    });
   }
 
   // 6. Create Exams (1 Kuis, 1 Ujian Akhir)
