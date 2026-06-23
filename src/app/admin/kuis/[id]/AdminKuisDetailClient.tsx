@@ -138,7 +138,7 @@ export default function AdminKuisDetailClient({ exam }: { exam: any }) {
             </div>
           </div>
         </div>
-      ) : (
+      ) : viewMode === "HASIL" ? (
         <div className="space-y-4">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">
             <input 
