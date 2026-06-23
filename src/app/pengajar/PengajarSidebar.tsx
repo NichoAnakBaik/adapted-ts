@@ -1,14 +1,12 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, BookOpen, PenTool, MessageSquare, Award, LineChart, Users, LogOut, ActivitySquare, Settings, FileQuestion, CalendarCheck } from "lucide-react";
-import ProfileSettingsModal from "@/components/ProfileSettingsModal";
 
 export function PengajarSidebar({ user }: { user: any }) {
   const pathname = usePathname();
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const menuItems = [
     { name: "Dashboard", href: "/pengajar/dashboard", icon: LayoutDashboard },
@@ -23,8 +21,7 @@ export function PengajarSidebar({ user }: { user: any }) {
   ];
 
   return (
-    <>
-      <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen shrink-0">
+    <aside className="w-64 bg-white border-r border-gray-200 flex flex-col h-screen shrink-0">
         {/* Logo */}
       <div className="p-6 flex items-center gap-3">
         <div className="w-8 h-8 bg-namsan-primary text-white font-bold flex items-center justify-center rounded-md">
@@ -63,10 +60,7 @@ export function PengajarSidebar({ user }: { user: any }) {
 
       <div className="mt-auto border-t border-gray-100 p-4 shrink-0">
         {/* User Profile */}
-        <button 
-          onClick={() => setIsSettingsOpen(true)}
-          className="w-full flex items-center gap-3 mb-4 px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors text-left"
-        >
+        <div className="w-full flex items-center gap-3 mb-4 px-2 py-2 rounded-xl text-left">
           <div className="w-10 h-10 rounded-full bg-namsan-primary flex items-center justify-center text-white font-bold text-sm shrink-0">
             {user?.username?.substring(0, 2).toUpperCase() || "PG"}
           </div>
@@ -74,8 +68,7 @@ export function PengajarSidebar({ user }: { user: any }) {
             <p className="text-sm font-bold text-namsan-text truncate">{user?.username || "Pengajar"}</p>
             <p className="text-xs text-namsan-text-muted capitalize truncate">{user?.role?.toLowerCase() || "pengajar"}</p>
           </div>
-          <Settings className="w-4 h-4 text-gray-400 shrink-0" />
-        </button>
+        </div>
         {/* Logout Button */}
         <form action="/api/logout" method="POST">
           <button
@@ -88,7 +81,5 @@ export function PengajarSidebar({ user }: { user: any }) {
         </form>
       </div>
     </aside>
-      <ProfileSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
-    </>
   );
 }
