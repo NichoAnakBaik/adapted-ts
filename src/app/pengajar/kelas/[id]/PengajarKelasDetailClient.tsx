@@ -17,6 +17,47 @@ export default function PengajarKelasDetailClient({ classData }: { classData: an
         <div>
           <h1 className="text-2xl font-bold text-namsan-text">{classData.name}</h1>
           <p className="text-sm text-namsan-text-muted">Detail Kelas, Siswa, dan Modul Pembelajaran</p>
+          <div className="mt-3 space-y-2">
+            {classData.module_link && (
+              <p className="text-sm text-gray-600 flex items-center gap-2">
+                <BookOpen className="w-4 h-4 text-namsan-primary" />
+                <span className="font-bold">Modul (GDrive):</span> 
+                <a href={classData.module_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline break-all">
+                  {classData.module_link}
+                </a>
+              </p>
+            )}
+            
+            {classData.type === 'ONLINE' && (
+              <div className="text-sm text-gray-600">
+                <div className="flex flex-wrap items-center gap-2">
+                  <span className="font-bold">Link Meeting:</span>
+                  {classData.meeting_link ? (
+                    <a href={classData.meeting_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate max-w-xs">
+                      {classData.meeting_link}
+                    </a>
+                  ) : (
+                    <span className="text-gray-400 italic">Belum ada link meeting</span>
+                  )}
+                  
+                  <button 
+                    onClick={async () => {
+                      const newLink = prompt("Masukkan Link Meeting (Zoom/GMeet):", classData.meeting_link || "");
+                      if (newLink !== null) {
+                        const { updateMeetingLink } = await import("@/app/actions/pengajar");
+                        const res = await updateMeetingLink(classData.id, newLink);
+                        if (res.error) alert(res.error);
+                        else window.location.reload();
+                      }
+                    }}
+                    className="ml-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1 px-2 rounded transition-colors"
+                  >
+                    {classData.meeting_link ? "Ubah Link" : "Tambah Link"}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -30,17 +71,6 @@ export default function PengajarKelasDetailClient({ classData }: { classData: an
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4" />
             Daftar Siswa ({classData.enrollments.length})
-          </div>
-        </button>
-        <button
-          onClick={() => setActiveTab("MODUL")}
-          className={`px-4 py-3 font-bold text-sm transition-colors border-b-2 ${
-            activeTab === "MODUL" ? "border-namsan-primary text-namsan-primary" : "border-transparent text-gray-500 hover:text-gray-700"
-          }`}
-        >
-          <div className="flex items-center gap-2">
-            <BookOpen className="w-4 h-4" />
-            Modul Pembelajaran ({modules.length})
           </div>
         </button>
       </div>
@@ -70,49 +100,6 @@ export default function PengajarKelasDetailClient({ classData }: { classData: an
                 </div>
               ))
             )}
-          </div>
-        </div>
-      )}
-
-      {activeTab === "MODUL" && (
-        <div className="space-y-4">
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-sm">
-                  <th className="p-4 font-bold text-namsan-text-muted">Judul Modul</th>
-                  <th className="p-4 font-bold text-namsan-text-muted text-center">Lampiran</th>
-                </tr>
-              </thead>
-              <tbody>
-                {modules.map((m: any) => (
-                  <tr key={m.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                    <td className="p-4 font-medium text-namsan-text">{m.title}</td>
-                    <td className="p-4 text-center">
-                      <div className="flex items-center justify-center gap-3">
-                        {m.pdf_url ? (
-                          <a href={m.pdf_url} target="_blank" rel="noreferrer" className="text-red-500 hover:bg-red-50 p-1.5 rounded" title="Buka PDF">
-                            <FileText className="w-5 h-5" />
-                          </a>
-                        ) : <span className="w-5 h-5 opacity-20"><FileText className="w-5 h-5" /></span>}
-                        
-                        {m.audio_url ? (
-                          <div className="flex flex-col items-center gap-1">
-                            <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Audio</span>
-                            <audio controls src={m.audio_url} className="w-48 h-10" />
-                          </div>
-                        ) : <span className="w-5 h-5 opacity-20"><Headphones className="w-5 h-5" /></span>}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {modules.length === 0 && (
-                  <tr>
-                    <td colSpan={2} className="p-8 text-center text-gray-500">Belum ada modul yang didistribusikan oleh Admin untuk kelas ini.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
           </div>
         </div>
       )}

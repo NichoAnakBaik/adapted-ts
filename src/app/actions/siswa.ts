@@ -14,29 +14,25 @@ async function checkSiswaAuth() {
   return session;
 }
 
-// --- STUDENT MODULES ---
+// --- STUDENT CLASSES ---
 
-export async function getStudentModules() {
+export async function getStudentClasses() {
   const session = await checkSiswaAuth();
   
   // Find all classes the student is enrolled in
   const enrollments = await prisma.enrollment.findMany({
     where: { student_id: session.user.id },
-    select: { class_id: true }
-  });
-
-  const classIds = enrollments.map(e => e.class_id);
-
-  // Fetch all modules belonging to those classes
-  return prisma.module.findMany({
-    where: {
-      class_id: { in: classIds }
-    },
     include: {
-      class: { select: { name: true, teacher: { select: { nama_lengkap: true } } } }
+      class: {
+        include: {
+          teacher: { select: { nama_lengkap: true } }
+        }
+      }
     },
     orderBy: { created_at: 'desc' }
   });
+
+  return enrollments.map(e => e.class);
 }
 
 export async function getDashboardStats() {

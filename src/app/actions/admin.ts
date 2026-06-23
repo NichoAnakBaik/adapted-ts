@@ -145,11 +145,12 @@ export async function createClass(formData: FormData) {
   const type = formData.get("type") as "ONLINE" | "OFFLINE";
   const schedule = formData.get("schedule") as string;
   const meeting_link = formData.get("meeting_link") as string;
+  const module_link = formData.get("module_link") as string;
 
-  if (!name || !type) return { error: "Nama kelas dan tipe wajib diisi" };
+  if (!name || !type || !module_link) return { error: "Nama kelas, tipe, dan Link Modul wajib diisi" };
 
   await prisma.class.create({
-    data: { name, level, type, schedule, meeting_link: meeting_link || null }
+    data: { name, level, type, schedule, meeting_link: meeting_link || null, module_link: module_link }
   });
   return { success: true };
 }
@@ -165,6 +166,15 @@ export async function assignTeacher(classId: string, teacherId: string | null) {
   await prisma.class.update({
     where: { id: classId },
     data: { teacher_id: teacherId }
+  });
+  return { success: true };
+}
+
+export async function deleteMeetingLink(classId: string) {
+  await checkAdminAuth();
+  await prisma.class.update({
+    where: { id: classId },
+    data: { meeting_link: null }
   });
   return { success: true };
 }
@@ -261,41 +271,6 @@ export async function deleteCertificate(id: string) {
   return { success: true };
 }
 
-// --- MODULE MANAGEMENT (ADMIN) ---
-
-export async function getAdminModules() {
-  await checkAdminAuth();
-  return prisma.module.findMany({
-    include: { class: { select: { name: true } } },
-    orderBy: { created_at: 'desc' }
-  });
-}
-
-export async function createAdminModule(formData: FormData) {
-  await checkAdminAuth();
-  const class_id = formData.get("class_id") as string;
-  const title = formData.get("title") as string;
-  const pdf_url = formData.get("pdf_url") as string;
-  const audio_url = formData.get("audio_url") as string;
-
-  if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
-
-  await prisma.module.create({
-    data: { 
-      class_id, 
-      title, 
-      pdf_url: pdf_url?.trim() || null, 
-      audio_url: audio_url?.trim() || null 
-    }
-  });
-  return { success: true };
-}
-
-export async function deleteAdminModule(id: string) {
-  await checkAdminAuth();
-  await prisma.module.delete({ where: { id } });
-  return { success: true };
-}
 
 // --- KUIS & UJIAN MANAGEMENT (ADMIN) ---
 

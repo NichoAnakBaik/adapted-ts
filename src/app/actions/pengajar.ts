@@ -22,7 +22,7 @@ export async function getTeacherClasses() {
   return prisma.class.findMany({
     where: { teacher_id: session.user.id },
     include: {
-      _count: { select: { enrollments: true, modules: true } }
+      _count: { select: { enrollments: true, exams: true } }
     },
     orderBy: { created_at: 'desc' }
   });
@@ -42,33 +42,29 @@ export async function getClassDetails(id: string) {
         },
         orderBy: { created_at: 'desc' }
       },
-      modules: {
-        orderBy: { created_at: 'asc' }
-      },
-      _count: { select: { modules: true, exams: true } }
+      _count: { select: { exams: true } }
     }
   });
 
   return classData;
 }
 
-// --- MODULE MANAGEMENT ---
-
-export async function getModules() {
+export async function updateMeetingLink(classId: string, meeting_link: string) {
   const session = await checkPengajarAuth();
   
-  // Get modules only for classes taught by this teacher
-  return prisma.module.findMany({
-    where: {
-      class: {
-        teacher_id: session.user.id
-      }
-    },
-    include: {
-      class: { select: { name: true } }
-    },
-    orderBy: { created_at: 'desc' }
+  const classData = await prisma.class.findFirst({
+    where: { id: classId, teacher_id: session.user.id }
   });
+
+  if (!classData) return { error: "Akses ditolak atau kelas tidak ditemukan" };
+  if (classData.type !== "ONLINE") return { error: "Link meeting hanya untuk kelas online" };
+
+  await prisma.class.update({
+    where: { id: classId },
+    data: { meeting_link }
+  });
+
+  return { success: true };
 }
 
 export async function getTeacherAnalytics() {
@@ -143,55 +139,6 @@ export async function getTeacherAnalytics() {
     recommendations, 
     performanceList 
   };
-}
-
-export async function createModule(formData: FormData) {
-  const session = await checkPengajarAuth();
-  
-  const class_id = formData.get("class_id") as string;
-  const title = formData.get("title") as string;
-  const pdf_file = formData.get("pdf_url") as File | null;
-  const audio_file = formData.get("audio_url") as File | null;
-
-  if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
-
-  const pdf_url = pdf_file ? await saveUploadedFile(pdf_file, "modul_pdf") : null;
-  const audio_url = audio_file ? await saveUploadedFile(audio_file, "modul_audio") : null;
-
-  // Verify the teacher owns this class
-  const classData = await prisma.class.findFirst({
-    where: { id: class_id, teacher_id: session.user.id }
-  });
-
-  if (!classData) return { error: "Akses ditolak atau kelas tidak ditemukan" };
-
-  await prisma.module.create({
-    data: {
-      class_id,
-      title,
-      pdf_url: pdf_url || null,
-      audio_url: audio_url || null
-    }
-  });
-
-  return { success: true };
-}
-
-export async function deleteModule(id: string) {
-  const session = await checkPengajarAuth();
-  
-  // Check ownership
-  const moduleData = await prisma.module.findUnique({
-    where: { id },
-    include: { class: true }
-  });
-
-  if (moduleData?.class?.teacher_id !== session.user.id) {
-    return { error: "Akses ditolak" };
-  }
-
-  await prisma.module.delete({ where: { id } });
-  return { success: true };
 }
 
 // --- EXAM MANAGEMENT ---

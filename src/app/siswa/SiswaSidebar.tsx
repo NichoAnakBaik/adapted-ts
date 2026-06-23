@@ -12,7 +12,7 @@ export function SiswaSidebar({ user }: { user: any }) {
 
   const menuItems = [
     { name: "Dashboard", href: "/siswa/dashboard", icon: LayoutDashboard },
-    { name: "Modul Belajar", href: "/siswa/modul", icon: BookOpen },
+    { name: "Kelas Saya", href: "/siswa/kelas", icon: BookOpen },
     { name: "Kuis Kelas", href: "/siswa/kuis", icon: PenTool },
     { name: "Ujian Akhir", href: "/siswa/ujian", icon: PenTool },
     { name: "Forum Kelas", href: "/siswa/forum", icon: MessageSquare },

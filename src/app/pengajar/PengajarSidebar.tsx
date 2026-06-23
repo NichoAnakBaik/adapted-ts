@@ -13,7 +13,6 @@ export function PengajarSidebar({ user }: { user: any }) {
   const menuItems = [
     { name: "Dashboard", href: "/pengajar/dashboard", icon: LayoutDashboard },
     { name: "Kelas Saya", href: "/pengajar/kelas", icon: Users },
-    { name: "Modul Pembelajaran", href: "/pengajar/modul", icon: BookOpen },
     { name: "Kuis Kelas", href: "/pengajar/kuis", icon: PenTool },
     { name: "Pemantauan Ujian", href: "/pengajar/ujian", icon: FileQuestion },
     { name: "Absensi Kelas", href: "/pengajar/absensi", icon: CalendarCheck },

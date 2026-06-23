@@ -88,6 +88,7 @@ model Class {
   type         ClassType @default(ONLINE)
   schedule     String? // Could be a JSON string or simple text for now
   meeting_link String? // Zoom/GMeet link for online classes
+  module_link  String? // GDrive link for module material
   teacher_id   String?
   teacher      User?     @relation("PengajarKelas", fields: [teacher_id], references: [id])
   created_at   DateTime  @default(now())
@@ -95,11 +96,11 @@ model Class {
 
   // Relationships
   enrollments  Enrollment[]
-  modules      Module[]
   exams        Exam[]
   certificates Certificate[]
   forums       Forum[]
   attendances  Attendance[]
+  learning_progresses LearningProgress[]
 }
 
 model Enrollment {
@@ -113,19 +114,6 @@ model Enrollment {
   updated_at DateTime @updatedAt
 
   @@unique([student_id, class_id])
-}
-
-model Module {
-  id         String   @id @default(uuid())
-  class_id   String
-  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  title      String
-  pdf_url    String?
-  audio_url  String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  learning_progresses LearningProgress[]
 }
 
 model Exam {
@@ -251,14 +239,14 @@ model LearningProgress {
   id            String    @id @default(uuid())
   student_id    String
   student       User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  module_id     String
-  module        Module    @relation(fields: [module_id], references: [id], onDelete: Cascade)
+  class_id      String
+  class         Class     @relation(fields: [class_id], references: [id], onDelete: Cascade)
   is_completed  Boolean   @default(false)
   last_accessed DateTime? @default(now())
   created_at    DateTime  @default(now())
   updated_at    DateTime  @updatedAt
 
-  @@unique([student_id, module_id])
+  @@unique([student_id, class_id])
 }
 
 model RecommendationHistory {

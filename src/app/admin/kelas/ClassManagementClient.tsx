@@ -80,10 +80,16 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
                 </select>
               </div>
               
+              <div className="md:col-span-2">
+                <label className="block text-sm font-bold text-gray-700 mb-2">Link GDrive Modul (Wajib)</label>
+                <input type="url" name="module_link" required placeholder="https://drive.google.com/..." className="w-full p-2.5 border rounded-lg" />
+              </div>
+
               {classType === "ONLINE" && (
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Link Meeting (Zoom/GMeet)</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Link Meeting (Opsional)</label>
                   <input type="url" name="meeting_link" placeholder="https://zoom.us/j/..." className="w-full p-2.5 border rounded-lg" />
+                  <p className="text-xs text-gray-500 mt-1">Pengajar dapat menambahkan link ini nanti jika dikosongkan.</p>
                 </div>
               )}
               

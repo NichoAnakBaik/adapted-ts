@@ -58,11 +58,37 @@ export default function ClassDetailClient({ classData, teachers, allStudents }: 
                 </span>
               )}
             </div>
-            {classData.meeting_link && (
-              <p className="mt-3 text-sm text-gray-600">
-                <span className="font-bold">Link Meeting:</span> <a href={classData.meeting_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{classData.meeting_link}</a>
-              </p>
-            )}
+            <div className="mt-4 space-y-2">
+              {classData.module_link && (
+                <p className="text-sm text-gray-600 flex items-center gap-2">
+                  <BookOpen className="w-4 h-4 text-namsan-primary" />
+                  <span className="font-bold">Modul (GDrive):</span> 
+                  <a href={classData.module_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline break-all">
+                    {classData.module_link}
+                  </a>
+                </p>
+              )}
+              {classData.meeting_link && (
+                <div className="text-sm text-gray-600 flex items-center gap-2">
+                  <span className="font-bold">Link Meeting:</span> 
+                  <a href={classData.meeting_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline truncate max-w-xs">
+                    {classData.meeting_link}
+                  </a>
+                  <button 
+                    onClick={async () => {
+                      if (!confirm("Hapus link meeting ini?")) return;
+                      const { deleteMeetingLink } = await import("@/app/actions/admin");
+                      const res = await deleteMeetingLink(classData.id);
+                      if (res.success) window.location.reload();
+                    }}
+                    className="p-1 text-red-500 hover:bg-red-50 rounded"
+                    title="Hapus Link Meeting"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
