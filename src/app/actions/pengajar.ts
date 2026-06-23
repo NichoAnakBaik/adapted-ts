@@ -16,6 +16,78 @@ async function checkPengajarAuth() {
 
 // --- CLASS VIEWS ---
 
+export async function getTeacherDashboardStats() {
+  const session = await checkPengajarAuth();
+  const teacherId = session.user.id;
+
+  const activeClassesCount = await prisma.class.count({
+    where: { teacher_id: teacherId }
+  });
+
+  const students = await prisma.enrollment.findMany({
+    where: { class: { teacher_id: teacherId } },
+    select: { student_id: true }
+  });
+  const uniqueStudentsCount = new Set(students.map(s => s.student_id)).size;
+
+  const examsCount = await prisma.exam.count({
+    where: { class: { teacher_id: teacherId } }
+  });
+
+  // ML Engine: Aggregate weak points
+  const questionAttempts = await prisma.questionAttempt.findMany({
+    where: {
+      exam_attempt: {
+        exam: { class: { teacher_id: teacherId } }
+      }
+    },
+    include: { question: { select: { type: true } } }
+  });
+
+  let weakType = "SPEAKING"; // fallback
+  if (questionAttempts.length > 0) {
+    const scoresByType: Record<string, { totalScore: number, count: number }> = {};
+    questionAttempts.forEach(qa => {
+      const t = qa.question.type;
+      if (!scoresByType[t]) scoresByType[t] = { totalScore: 0, count: 0 };
+      scoresByType[t].totalScore += (qa.score || 0);
+      scoresByType[t].count += 1;
+    });
+
+    let lowestAvg = Infinity;
+    for (const [t, data] of Object.entries(scoresByType)) {
+      const avg = data.totalScore / data.count;
+      if (avg < lowestAvg) {
+        lowestAvg = avg;
+        weakType = t;
+      }
+    }
+  }
+
+  // Generate Recommendation text based on weakType
+  const typeLabels: Record<string, string> = {
+    "SPEAKING": "Berbicara (Speaking)",
+    "LISTENING": "Mendengarkan (Listening)",
+    "WRITING": "Menulis (Writing)",
+    "READING": "Membaca (Reading)",
+    "MULTIPLE_CHOICE": "Pilihan Ganda Dasar"
+  };
+
+  const weakPointName = typeLabels[weakType] || weakType;
+  
+  let recommendationText = `Sistem AI belum dapat mendeteksi pola karena data masih sedikit.`;
+  if (questionAttempts.length > 0) {
+    recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus atau mengunggah modul tambahan terkait ${weakPointName} untuk meningkatkan retensi siswa.`;
+  }
+
+  return {
+    teacherName: session.user.username,
+    activeClassesCount,
+    uniqueStudentsCount,
+    examsCount,
+    mlRecommendation: recommendationText
+  };
+}
 export async function getTeacherClasses() {
   const session = await checkPengajarAuth();
   

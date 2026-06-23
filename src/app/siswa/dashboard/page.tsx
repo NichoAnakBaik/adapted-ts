@@ -123,11 +123,9 @@ export default async function SiswaDashboardPage() {
           
           <div className="space-y-3 md:space-y-4 flex-1 text-center lg:text-left">
             <p className="text-gray-300 text-xs md:text-sm leading-relaxed">
-              Tingkat penguasaan materi bahasa Korea kamu saat ini menyentuh angka <strong>- %</strong>.
+              Tingkat penguasaan materi bahasa Korea kamu saat ini menyentuh angka <strong>{stats.masteryPercentage}%</strong>.
             </p>
-            <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
-              Sistem mendeteksi adanya kelemahan minor pada pola kalimat level ini. Direkomendasikan melakukan re-evaluasi kuis.
-            </p>
+            <div className="text-gray-400 text-xs md:text-sm leading-relaxed prose prose-sm prose-invert" dangerouslySetInnerHTML={{ __html: stats.mlRecommendation.replace(/\*\*(.*?)\*\*/g, '<strong class="text-namsan-primary">$1</strong>') }} />
           </div>
 
           <Link href="/siswa/analitik" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">

@@ -59,11 +59,68 @@ export async function getDashboardStats() {
     orderBy: { created_at: 'desc' }
   });
 
+  // 4. ML Engine: Calculate Mastery and Weak Points
+  const attempts = await prisma.examAttempt.findMany({
+    where: { student_id: userId },
+    include: { question_attempts: { include: { question: true } } }
+  });
+
+  let totalScoreSum = 0;
+  let totalAttempts = 0;
+  const scoresByType: Record<string, { totalScore: number, count: number }> = {};
+
+  attempts.forEach(attempt => {
+    totalScoreSum += (attempt.total_score || 0);
+    totalAttempts += 1;
+
+    attempt.question_attempts.forEach(qa => {
+      const t = qa.question.type;
+      if (!scoresByType[t]) scoresByType[t] = { totalScore: 0, count: 0 };
+      scoresByType[t].totalScore += (qa.score || 0);
+      scoresByType[t].count += 1;
+    });
+  });
+
+  const masteryPercentage = totalAttempts > 0 ? Math.round(totalScoreSum / totalAttempts) : 0;
+
+  let weakType = "SPEAKING"; // fallback
+  let lowestAvg = Infinity;
+  for (const [t, data] of Object.entries(scoresByType)) {
+    const avg = data.totalScore / data.count;
+    if (avg < lowestAvg) {
+      lowestAvg = avg;
+      weakType = t;
+    }
+  }
+
+  const typeLabels: Record<string, string> = {
+    "SPEAKING": "Berbicara (Speaking)",
+    "LISTENING": "Mendengarkan (Listening)",
+    "WRITING": "Menulis (Writing)",
+    "READING": "Membaca (Reading)",
+    "MULTIPLE_CHOICE": "Pilihan Ganda Dasar"
+  };
+
+  const weakPointName = typeLabels[weakType] || weakType;
+
+  let mlRecommendation = `Sistem AI belum dapat mendeteksi pola belajar kamu karena data kuis masih kosong. Ayo kerjakan kuis pertamamu!`;
+  if (totalAttempts > 0) {
+    if (masteryPercentage >= 80) {
+      mlRecommendation = `Luar biasa! Tingkat penguasaan materimu sangat baik. Namun, AI mendeteksi kamu bisa lebih tajam lagi pada bagian **${weakPointName}**. Jangan lupa terus berlatih bagian tersebut ya!`;
+    } else if (masteryPercentage >= 60) {
+      mlRecommendation = `Performa belajarmu stabil. Sistem mendeteksi adanya kelemahan minor pada bagian **${weakPointName}**. AI merekomendasikan kamu untuk membaca ulang materi terkait sebelum mengambil ujian akhir.`;
+    } else {
+      mlRecommendation = `Kamu sedang kesulitan ya? AI mendeteksi kamu sangat butuh bantuan pada bagian **${weakPointName}**. Jangan ragu untuk bertanya di Forum Kelas atau menghubungi Pengajar secara langsung.`;
+    }
+  }
+
   return {
     nama_lengkap: session.user.username, // Using username as fallback if nama_lengkap is not in session
     completedModules,
     durationMinutes,
-    activeClass: activeEnrollment?.class || null
+    activeClass: activeEnrollment?.class || null,
+    masteryPercentage,
+    mlRecommendation
   };
 }
 

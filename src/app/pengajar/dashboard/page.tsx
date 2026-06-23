@@ -1,8 +1,11 @@
 import React from "react";
 import { BookOpen, CheckCircle2, Clock, Users, PenTool, MessageSquare, Award, Bot, GraduationCap } from "lucide-react";
 import Link from "next/link";
+import { getTeacherDashboardStats } from "@/app/actions/pengajar";
 
-export default function PengajarDashboardPage() {
+export default async function PengajarDashboardPage() {
+  const stats = await getTeacherDashboardStats();
+  
   return (
     <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
       
@@ -12,7 +15,7 @@ export default function PengajarDashboardPage() {
           <GraduationCap className="w-10 h-10 md:w-12 md:h-12 text-namsan-dark" strokeWidth={1.5} />
         </div>
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-namsan-text mb-1">안녕하세요, Seonsaengnim!</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-namsan-text mb-1">안녕하세요, {stats.teacherName}!</h1>
           <p className="text-namsan-text/80 text-sm md:text-base font-medium">
             Panel Pengajar Namsan Korean Course. Kelola kelas, modul, dan pantau progres belajar siswa Anda.
           </p>
@@ -26,7 +29,7 @@ export default function PengajarDashboardPage() {
             <CheckCircle2 className="w-5 h-5 md:w-6 md:h-6 text-namsan-primary" />
           </div>
           <p className="text-xs md:text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Kelas Aktif</p>
-          <p className="text-2xl md:text-3xl font-bold text-namsan-text">2</p>
+          <p className="text-2xl md:text-3xl font-bold text-namsan-text">{stats.activeClassesCount}</p>
         </div>
         
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
@@ -34,15 +37,15 @@ export default function PengajarDashboardPage() {
             <Users className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
           </div>
           <p className="text-xs md:text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Siswa Diajar</p>
-          <p className="text-2xl md:text-3xl font-bold text-namsan-text">45</p>
+          <p className="text-2xl md:text-3xl font-bold text-namsan-text">{stats.uniqueStudentsCount}</p>
         </div>
 
         <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
           <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2 md:mb-3">
             <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-namsan-blue" />
           </div>
-          <p className="text-xs md:text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Modul Dibuat</p>
-          <p className="text-2xl md:text-3xl font-bold text-namsan-text">12</p>
+          <p className="text-xs md:text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Kuis Dibuat</p>
+          <p className="text-2xl md:text-3xl font-bold text-namsan-text">{stats.examsCount}</p>
         </div>
       </div>
 
@@ -59,9 +62,9 @@ export default function PengajarDashboardPage() {
               <span className="text-sm md:text-base font-bold text-namsan-text">Kelas Saya</span>
             </Link>
             
-            <Link href="/pengajar/modul" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="text-sm md:text-base font-bold text-namsan-text">Manajemen Modul</span>
+            <Link href="/pengajar/forum" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
+              <MessageSquare className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
+              <span className="text-sm md:text-base font-bold text-namsan-text">Forum Kelas</span>
             </Link>
             
             <Link href="/pengajar/kuis" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
@@ -85,17 +88,12 @@ export default function PengajarDashboardPage() {
           </div>
           
           <div className="space-y-3 md:space-y-4 flex-1 text-center lg:text-left">
-            <p className="text-gray-300 text-xs md:text-sm leading-relaxed">
-              Berdasarkan hasil kuis terakhir, <strong className="text-namsan-primary">40% siswa</strong> di kelas Beginner A1 masih kesulitan pada bagian <i>Listening</i>.
-            </p>
-            <p className="text-gray-400 text-xs md:text-sm leading-relaxed">
-              AI merekomendasikan Anda untuk mengunggah modul audio tambahan pada pertemuan berikutnya.
-            </p>
+            <div className="text-gray-300 text-sm leading-relaxed prose prose-sm prose-invert" dangerouslySetInnerHTML={{ __html: stats.mlRecommendation.replace(/\*\*(.*?)\*\*/g, '<strong class="text-namsan-primary">$1</strong>') }} />
           </div>
 
           <Link href="/pengajar/analitik" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
             <Bot className="w-4 h-4 md:w-5 md:h-5" />
-            Buka Analitik Kelas
+            Buka Analitik Penuh
           </Link>
         </div>
 
