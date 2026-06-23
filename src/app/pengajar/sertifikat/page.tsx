@@ -38,7 +38,11 @@ export default async function PengajarSertifikat() {
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">{cert.student.nama_lengkap}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{cert.class?.name || '-'}</td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold">
-                  <a href={cert.file_url} target="_blank" rel="noreferrer" className="text-namsan-primary hover:underline">Lihat Sertifikat</a>
+                  {cert.file_url ? (
+                    <a href={cert.file_url} target="_blank" rel="noreferrer" className="text-namsan-primary hover:underline">Lihat Sertifikat</a>
+                  ) : (
+                    <span className="text-gray-400">Belum diunggah</span>
+                  )}
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                    {cert.status === 'APPROVED' ? (

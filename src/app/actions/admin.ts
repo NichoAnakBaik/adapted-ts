@@ -371,6 +371,9 @@ export async function getAdminExamDetails(id: string) {
     include: {
       class: true,
       questions: { orderBy: { created_at: 'asc' } },
+      exam_assignments: {
+        include: { student: { select: { id: true, nama_lengkap: true, username: true } } }
+      },
       exam_attempts: {
         include: {
           student: { select: { nama_lengkap: true, username: true } }
@@ -379,6 +382,98 @@ export async function getAdminExamDetails(id: string) {
       }
     }
   });
+}
+
+// --- EXAM ASSIGNMENT MANAGEMENT ---
+
+export async function getEligibleStudents(examId: string) {
+  await checkAdminAuth();
+  
+  const exam = await prisma.exam.findUnique({
+    where: { id: examId },
+    include: {
+      class: {
+        include: {
+          enrollments: { include: { student: { select: { id: true, nama_lengkap: true, username: true } } } },
+          attendance_sessions: { include: { attendances: true } }
+        }
+      },
+      exam_assignments: true
+    }
+  });
+
+  if (!exam) return [];
+
+  const totalSessions = exam.class.attendance_sessions.length;
+  const assignments = exam.exam_assignments.map(a => a.student_id);
+
+  const eligibleStudents = exam.class.enrollments.map(enrol => {
+    const studentId = enrol.student_id;
+    let presentCount = 0;
+    
+    exam.class.attendance_sessions.forEach(session => {
+      const att = session.attendances.find(a => a.student_id === studentId);
+      if (att && (att.status === 'PRESENT' || att.status === 'LATE')) {
+        presentCount++;
+      }
+    });
+
+    const attendanceRate = totalSessions > 0 ? (presentCount / totalSessions) * 100 : 100;
+    const isAssigned = assignments.includes(studentId);
+
+    return {
+      student: enrol.student,
+      attendanceRate,
+      presentCount,
+      totalSessions,
+      isAssigned
+    };
+  });
+
+  return eligibleStudents;
+}
+
+export async function assignExamToStudent(examId: string, studentId: string) {
+  const session = await checkAdminAuth();
+  // Return early if session is voided. Although checkAdminAuth redirects, just to be safe.
+  
+  const currentSession = await getSession();
+  
+  try {
+    await prisma.examAssignment.create({
+      data: {
+        exam_id: examId,
+        student_id: studentId,
+        assigned_by: currentSession?.user?.id
+      }
+    });
+    return { success: true };
+  } catch (e) {
+    return { error: "Siswa sudah di-assign." };
+  }
+}
+
+export async function assignAllEligibleStudents(examId: string) {
+  const session = await getSession();
+  await checkAdminAuth();
+
+  const eligibleStudents = await getEligibleStudents(examId);
+  const toAssign = eligibleStudents.filter(s => s.attendanceRate >= 75 && !s.isAssigned);
+
+  if (toAssign.length === 0) return { error: "Tidak ada siswa tambahan yang memenuhi syarat (>=75%)." };
+
+  const data = toAssign.map(s => ({
+    exam_id: examId,
+    student_id: s.student.id,
+    assigned_by: session?.user?.id
+  }));
+
+  await prisma.examAssignment.createMany({
+    data,
+    skipDuplicates: true
+  });
+
+  return { success: true, count: toAssign.length };
 }
 
 export async function createAdminQuestion(formData: FormData) {

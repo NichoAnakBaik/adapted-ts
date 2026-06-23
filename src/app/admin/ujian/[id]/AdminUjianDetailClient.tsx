@@ -3,17 +3,20 @@
 import React, { useState } from "react";
 import { FileQuestion, ArrowLeft, Plus, Trash2, Headphones, BookOpen, PenTool, MessageCircle, Users, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { createAdminQuestion, deleteAdminQuestion } from "@/app/actions/admin";
+import { createAdminQuestion, deleteAdminQuestion, assignExamToStudent, assignAllEligibleStudents } from "@/app/actions/admin";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 
-export default function AdminUjianDetailClient({ exam }: { exam: any }) {
+export default function AdminUjianDetailClient({ exam, initialEligibleStudents }: { exam: any, initialEligibleStudents: any[] }) {
   const [questions, setQuestions] = useState(exam.questions);
   const [activeTab, setActiveTab] = useState<"SPEAKING" | "LISTENING" | "READING" | "WRITING">("READING");
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
   const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
-  const [viewMode, setViewMode] = useState<"SOAL" | "HASIL">("SOAL");
+  const [viewMode, setViewMode] = useState<"SOAL" | "HASIL" | "ELIGIBILITY">("SOAL");
   const [searchQuery, setSearchQuery] = useState("");
+  
+  const [eligibleStudents, setEligibleStudents] = useState(initialEligibleStudents);
+  const [assigningAll, setAssigningAll] = useState(false);
 
   const tabs = [
     { id: "READING", label: "Membaca (Reading)", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-50" },
@@ -47,6 +50,28 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
     }
   };
 
+  const handleAssignSingle = async (studentId: string) => {
+    const res = await assignExamToStudent(exam.id, studentId);
+    if (res.success) {
+      setEligibleStudents(prev => prev.map(s => s.student.id === studentId ? { ...s, isAssigned: true } : s));
+    } else {
+      alert(res.error || "Gagal meng-assign ujian.");
+    }
+  };
+
+  const handleAssignAllEligible = async () => {
+    if (!confirm("Assign semua siswa yang memenuhi persentase kehadiran (>= 75%)?")) return;
+    setAssigningAll(true);
+    const res = await assignAllEligibleStudents(exam.id);
+    if (res.success) {
+      alert(`Berhasil meng-assign ${res.count} siswa.`);
+      setEligibleStudents(prev => prev.map(s => s.attendanceRate >= 75 ? { ...s, isAssigned: true } : s));
+    } else {
+      alert(res.error || "Gagal meng-assign ujian.");
+    }
+    setAssigningAll(false);
+  };
+
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
       <Link href="/admin/ujian" className="inline-flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-medium transition-colors">
@@ -75,6 +100,14 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
           }`}
         >
           Manajemen Soal
+        </button>
+        <button
+          onClick={() => setViewMode("ELIGIBILITY")}
+          className={`px-6 py-2.5 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${
+            viewMode === "ELIGIBILITY" ? "bg-namsan-primary text-white shadow-md" : "text-gray-500 hover:bg-gray-50"
+          }`}
+        >
+          <CheckCircle className="w-4 h-4" /> Persetujuan Siswa
         </button>
         <button
           onClick={() => setViewMode("HASIL")}
@@ -267,6 +300,79 @@ export default function AdminUjianDetailClient({ exam }: { exam: any }) {
           </div>
         </div>
       </div>
+      ) : viewMode === "ELIGIBILITY" ? (
+        <div className="space-y-4">
+          <div className="bg-white p-5 rounded-2xl shadow-sm border border-gray-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+              <h2 className="text-lg font-bold text-gray-900">Kelayakan Ujian (Absensi)</h2>
+              <p className="text-gray-500 text-sm mt-1">Siswa membutuhkan tingkat kehadiran minimal 75% untuk dapat mengikuti ujian akhir ini.</p>
+            </div>
+            <button 
+              onClick={handleAssignAllEligible}
+              disabled={assigningAll}
+              className="px-5 py-2.5 bg-namsan-primary hover:bg-namsan-primary/90 text-white font-bold rounded-xl text-sm transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {assigningAll ? "Memproses..." : "Assign Semua Siswa Memenuhi Syarat"}
+            </button>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="w-full overflow-x-auto">
+              <table className="w-full min-w-[700px] text-left border-collapse">
+                <thead>
+                  <tr className="bg-gray-50/50 text-gray-500 text-sm">
+                    <th className="p-4 font-bold rounded-tl-2xl">Nama Siswa</th>
+                    <th className="p-4 font-bold text-center">Kehadiran (Sesi)</th>
+                    <th className="p-4 font-bold text-center">Persentase</th>
+                    <th className="p-4 font-bold rounded-tr-2xl text-right">Aksi</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-50">
+                  {eligibleStudents.map((s, idx) => (
+                    <tr key={s.student.id} className="hover:bg-gray-50 transition-colors">
+                      <td className="p-4">
+                        <div className="font-bold text-namsan-text">{s.student.nama_lengkap}</div>
+                        <div className="text-xs text-gray-500">@{s.student.username}</div>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className="font-medium text-gray-700">{s.presentCount}</span> / <span className="text-gray-400">{s.totalSessions}</span>
+                      </td>
+                      <td className="p-4 text-center">
+                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border ${
+                          s.attendanceRate >= 75 ? "bg-green-50 text-green-700 border-green-100" : "bg-red-50 text-red-600 border-red-100"
+                        }`}>
+                          {s.attendanceRate.toFixed(0)}%
+                        </span>
+                      </td>
+                      <td className="p-4 text-right">
+                        {s.isAssigned ? (
+                          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100">
+                            <CheckCircle className="w-4 h-4" /> Ter-assign
+                          </span>
+                        ) : (
+                          <button
+                            onClick={() => handleAssignSingle(s.student.id)}
+                            className="px-4 py-1.5 border-2 border-namsan-primary text-namsan-primary hover:bg-namsan-primary hover:text-white rounded-lg text-sm font-bold transition-colors"
+                          >
+                            Assign Siswa
+                          </button>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                  {eligibleStudents.length === 0 && (
+                    <tr>
+                      <td colSpan={4} className="p-8 text-center text-gray-500">
+                        <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                        Belum ada siswa terdaftar di kelas ini.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
       ) : (
         <div className="space-y-4">
           <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">

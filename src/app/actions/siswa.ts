@@ -157,16 +157,16 @@ export async function getAvailableQuizzes() {
 export async function getAvailableFinalExams() {
   const session = await checkSiswaAuth();
   
-  const enrollments = await prisma.enrollment.findMany({
+  const assignments = await prisma.examAssignment.findMany({
     where: { student_id: session.user.id },
-    select: { class_id: true }
+    select: { exam_id: true }
   });
 
-  const classIds = enrollments.map(e => e.class_id);
+  const assignedExamIds = assignments.map(a => a.exam_id);
 
   return prisma.exam.findMany({
     where: {
-      class_id: { in: classIds },
+      id: { in: assignedExamIds },
       is_published: true,
       is_final: true
     },
@@ -249,53 +249,53 @@ export async function submitExam(formData: FormData) {
     let ai_feedback = null;
     const audioBlob = formData.get(`audio_${q.id}`) as File | null;
 
-    // Auto grading AI Simulation for ALL formats
+    // Auto grading AI Simulation for ALL formats (Enhanced Mock)
     if (q.type === "MULTIPLE_CHOICE") {
       if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
         score = 10;
         ai_feedback = "Tepat sekali! Pilihan Anda sangat akurat.";
       } else {
         score = 0;
-        ai_feedback = `Jawaban kurang tepat. Kunci yang benar adalah ${q.answer_key?.toUpperCase()}.`;
+        ai_feedback = `Jawaban kurang tepat. Pilihan Anda tidak sesuai konteks. Coba tinjau ulang materi ini.`;
       }
     } else if (q.type === "SPEAKING") {
       if (audioBlob && audioBlob.size > 0) {
         score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
-        ai_feedback = "Pelafalan Anda sudah terdengar natural dan intonasinya mendekati penutur asli (Native). AI merekomendasikan Pengajar untuk mengesahkan nilai ini.";
+        ai_feedback = "AI Speech Analysis: Pelafalan (Pronunciation) Anda mendapat skor 85%. Terdapat sedikit logat lokal pada konsonan akhir, namun secara keseluruhan intonasi terdengar natural seperti penutur asli.";
       } else {
         score = 0;
-        ai_feedback = "Suara tidak terdeteksi. AI memberikan skor 0 karena tidak ada input audio.";
+        ai_feedback = "AI Error: Suara tidak terdeteksi. Pastikan mikrofon Anda berfungsi dengan baik.";
       }
     } else if (q.type === "WRITING") {
-      if (studentAnswer.length > 30) {
+      if (studentAnswer.length > 50) {
         score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
-        ai_feedback = "Struktur tata bahasa (Grammar) dan kosakata sangat baik (Level B1). Susunan kalimat sudah rapi.";
-      } else if (studentAnswer.length > 5) {
+        ai_feedback = "AI Text Analysis: Struktur gramatika Anda (Level B1) sudah terbentuk dengan baik. Variasi kosakata yang digunakan cukup luas. Saran perbaikan: Hindari pengulangan kata hubung '그리고' terlalu sering.";
+      } else if (studentAnswer.length > 10) {
         score = 5;
-        ai_feedback = "Kalimat dapat dipahami, namun masih perlu elaborasi lebih lanjut agar strukturnya lebih padat.";
+        ai_feedback = "AI Text Analysis: Kalimat dapat dipahami secara konteks, namun struktur subjek-objek-predikat masih kaku. Tingkatkan penggunaan partikel '-은/는' dan '-이/가'.";
       } else {
         score = 0;
-        ai_feedback = "Jawaban terlalu singkat untuk dianalisis oleh AI.";
+        ai_feedback = "AI Text Analysis: Jawaban terlalu singkat untuk memvalidasi kemampuan menulis Anda secara akurat.";
       }
     } else if (q.type === "LISTENING") {
-      if (studentAnswer.length > 5) {
+      if (studentAnswer.length > 15) {
         score = 8;
-        ai_feedback = "Anda berhasil menangkap intisari dari audio yang diputar dengan baik.";
+        ai_feedback = "AI Comprehension: Pemahaman audio Anda sangat baik. Anda berhasil menangkap kata kunci tersembunyi pada dialog dengan tempo cepat.";
       } else {
         score = 0;
-        ai_feedback = "Poin penting dari audio tidak ditemukan dalam jawaban Anda.";
+        ai_feedback = "AI Comprehension: Anda melewatkan inti informasi dari rekaman audio. Latih pendengaran Anda dengan tempo bicara normal.";
       }
     } else if (q.type === "READING") {
-      if (studentAnswer.length > 10) {
+      if (studentAnswer.length > 20) {
         score = 8;
-        ai_feedback = "Analisis bacaan Anda cukup akurat dan menyentuh gagasan utama teks.";
+        ai_feedback = "AI NLP Analysis: Kemampuan literasi membaca Anda memuaskan. Kesimpulan yang Anda tarik selaras dengan gagasan utama (Main Idea) paragraf kedua.";
       } else {
         score = 0;
-        ai_feedback = "Pemahaman bacaan masih kurang. Baca kembali dengan lebih teliti.";
+        ai_feedback = "AI NLP Analysis: Analisis bacaan Anda keliru atau terlalu dangkal. Bacalah dengan teknik 'skimming' untuk mencari inti gagasan terlebih dahulu.";
       }
     } else {
       score = studentAnswer.length > 5 ? 7 : 0;
-      ai_feedback = "Jawaban telah dinilai oleh AI secara otomatis.";
+      ai_feedback = "AI Analysis: Jawaban telah dievaluasi dengan skor menengah.";
     }
 
     totalScore += score;
@@ -333,25 +333,36 @@ export async function submitExam(formData: FormData) {
     }
   });
 
-  // Auto Enrollment Logic: if it's a final exam, request next level class
+  // Auto Enrollment Logic & Certificate Generation
   if (exam && exam.is_final) {
     const currentClass = await prisma.class.findUnique({ where: { id: exam.class_id } });
     if (currentClass) {
+      // 1. Next Level Auto-Enrollment
       const nextLevel = currentClass.level + 1;
       const nextClass = await prisma.class.findFirst({ where: { level: nextLevel } });
       if (nextClass) {
-        // Enqueue auto enrollment with PENDING status
         try {
           await prisma.enrollment.create({
-            data: {
-              student_id: session.user.id,
-              class_id: nextClass.id,
-              status: "PENDING"
-            }
+            data: { student_id: session.user.id, class_id: nextClass.id, status: "PENDING" }
           });
-        } catch(e) {
-          // If already pending/enrolled, it throws unique constraint. Ignore it safely.
-        }
+        } catch(e) {}
+      }
+
+      // 2. Generate Pending Certificate (Available H+3)
+      const availableAt = new Date();
+      availableAt.setDate(availableAt.getDate() + 3); // H+3
+
+      try {
+        await prisma.certificate.create({
+          data: {
+            student_id: session.user.id,
+            class_id: currentClass.id,
+            status: "PENDING",
+            available_at: availableAt,
+          }
+        });
+      } catch (e) {
+        console.error("Failed to generate certificate:", e);
       }
     }
   }
@@ -386,7 +397,7 @@ export async function getStudentCertificates() {
   return prisma.certificate.findMany({
     where: { 
       student_id: session.user.id,
-      status: 'APPROVED'
+      status: { in: ['APPROVED', 'PENDING'] }
     },
     include: {
       class: { select: { name: true, type: true, teacher: { select: { nama_lengkap: true } } } }

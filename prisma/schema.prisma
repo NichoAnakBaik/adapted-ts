@@ -62,6 +62,7 @@ model User {
   enrollments            Enrollment[]
   student_activity_logs  StudentActivityLog[]
   exam_attempts          ExamAttempt[]
+  exam_assignments       ExamAssignment[]
   learning_progresses    LearningProgress[]
   recommendation_history RecommendationHistory[]
   sertifikat_siswa       Certificate[]           @relation("SertifikatSiswa")
@@ -130,6 +131,7 @@ model Exam {
 
   questions     Question[]
   exam_attempts ExamAttempt[]
+  exam_assignments ExamAssignment[]
 }
 
 model Question {
@@ -159,8 +161,9 @@ model Certificate {
   student    User              @relation("SertifikatSiswa", fields: [student_id], references: [id], onDelete: Cascade)
   class_id   String
   class      Class             @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  file_url   String
+  file_url   String?
   status     CertificateStatus @default(PENDING)
+  available_at DateTime?
   created_at DateTime          @default(now())
   updated_at DateTime          @updatedAt
 }
@@ -236,6 +239,18 @@ model QuestionAttempt {
 
   created_at DateTime @default(now())
   updated_at DateTime @updatedAt
+}
+
+model ExamAssignment {
+  id         String   @id @default(uuid())
+  exam_id    String
+  exam       Exam     @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student_id String
+  student    User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  assigned_by String?
+  created_at DateTime @default(now())
+
+  @@unique([exam_id, student_id])
 }
 
 model LearningProgress {

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, Plus, Trash2, CheckCircle2, XCircle, Clock, ArrowRight } from "lucide-react";
+import { Award, Plus, Trash2, CheckCircle2, XCircle, Clock, ArrowRight, Download } from "lucide-react";
 import { createOrUpdateCertificate, deleteCertificate } from "@/app/actions/admin";
 
 export default function AdminSertifikatClient({ initialCertificates, students, classes }: { initialCertificates: any[], students: any[], classes: any[] }) {
@@ -165,9 +165,13 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
                   </select>
                 </td>
                 <td className="p-4">
-                  <a href={cert.file_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-500 hover:underline flex items-center gap-1">
-                    Buka File <ArrowRight className="w-3 h-3" />
-                  </a>
+                  {cert.file_url ? (
+                    <a href={cert.file_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-500 hover:underline flex items-center gap-1">
+                      <Download className="w-4 h-4" /> Buka
+                    </a>
+                  ) : (
+                    <span className="text-sm text-gray-400">Belum diunggah</span>
+                  )}
                 </td>
                 <td className="p-4 text-right">
                   <button onClick={() => handleDelete(cert.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Hapus'">
