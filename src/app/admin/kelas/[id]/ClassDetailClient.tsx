@@ -76,9 +76,8 @@ export default function ClassDetailClient({ classData, teachers, allStudents }: 
                         const newLink = prompt("Masukkan Link GDrive Modul:", classData.module_link || "");
                         if (newLink !== null) {
                           const { updateModuleLink } = await import("@/app/actions/admin");
-                          const res = await updateModuleLink(classData.id, newLink);
-                          if (res.error) alert(res.error);
-                          else window.location.reload();
+                          await updateModuleLink(classData.id, newLink);
+                          window.location.reload();
                         }
                       }}
                       className="text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1 px-2 rounded transition-colors"
