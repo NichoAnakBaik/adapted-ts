@@ -9,7 +9,7 @@ import { saveUploadedFile } from "@/lib/upload";
 async function checkSiswaAuth() {
   const session = await getSession();
   if (!session || session.user?.role !== "SISWA") {
-    redirect("/login");
+    redirect("/?login=true");
   }
   return session;
 }

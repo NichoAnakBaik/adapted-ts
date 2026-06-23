@@ -7,7 +7,7 @@ import { ActivitySquare } from "lucide-react";
 
 export default async function PengajarAktivitasPage() {
   const session = await getSession();
-  if (!session || session.user.role !== "PENGAJAR") redirect("/login");
+  if (!session || session.user.role !== "PENGAJAR") redirect("/?login=true");
 
   const logs = await getActivityLogs("PENGAJAR");
 

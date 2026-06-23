@@ -7,7 +7,7 @@ import { ShieldAlert } from "lucide-react";
 
 export default async function AdminLogsPage() {
   const session = await getSession();
-  if (!session || session.user.role !== "ADMIN") redirect("/login");
+  if (!session || session.user.role !== "ADMIN") redirect("/?login=true");
 
   const logs = await getActivityLogs("ADMIN");
 

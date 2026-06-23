@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function AdminForumSelectionPage() {
   const session = await getSession();
-  if (!session || session.user.role !== "ADMIN") redirect("/login");
+  if (!session || session.user.role !== "ADMIN") redirect("/?login=true");
 
   const classes = await prisma.class.findMany({
     include: {

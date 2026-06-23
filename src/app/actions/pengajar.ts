@@ -9,7 +9,7 @@ import { saveUploadedFile } from "@/lib/upload";
 async function checkPengajarAuth() {
   const session = await getSession();
   if (!session || session.user?.role !== "PENGAJAR") {
-    redirect("/login");
+    redirect("/?login=true");
   }
   return session;
 }

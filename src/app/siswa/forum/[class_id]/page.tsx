@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma";
 export default async function SiswaClassForumPage({ params }: { params: Promise<{ class_id: string }> }) {
   const { class_id } = await params;
   const session = await getSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/?login=true");
 
   // Verify enrollment
   const enrollment = await prisma.enrollment.findUnique({

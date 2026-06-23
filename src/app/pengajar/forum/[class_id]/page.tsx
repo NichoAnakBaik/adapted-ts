@@ -10,7 +10,7 @@ import { prisma } from "@/lib/prisma";
 export default async function PengajarClassForumPage({ params }: { params: Promise<{ class_id: string }> }) {
   const { class_id } = await params;
   const session = await getSession();
-  if (!session) redirect("/login");
+  if (!session) redirect("/?login=true");
 
   // Verify ownership
   const classData = await prisma.class.findUnique({

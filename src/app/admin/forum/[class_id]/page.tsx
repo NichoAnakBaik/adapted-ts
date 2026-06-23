@@ -9,7 +9,7 @@ import { notFound, redirect } from "next/navigation";
 export default async function AdminClassForumPage({ params }: { params: Promise<{ class_id: string }> }) {
   const { class_id } = await params;
   const session = await getSession();
-  if (!session || session.user.role !== "ADMIN") redirect("/login");
+  if (!session || session.user.role !== "ADMIN") redirect("/?login=true");
 
   const forumData = await getClassForum(class_id);
   if (!forumData) notFound();

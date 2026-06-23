@@ -11,11 +11,11 @@ async function checkAdminAuth() {
   console.log("checkAdminAuth() -> session:", session);
   if (!session) {
     console.log("checkAdminAuth() -> No session, redirecting");
-    redirect("/login");
+    redirect("/?login=true");
   }
   if (session.user?.role !== "ADMIN") {
     console.log("checkAdminAuth() -> Role mismatch, redirecting. Expected ADMIN, got:", session.user?.role);
-    redirect("/login");
+    redirect("/?login=true");
   }
 }
 

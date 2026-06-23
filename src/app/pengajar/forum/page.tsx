@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function PengajarForumSelectionPage() {
   const session = await getSession();
-  if (!session || session.user.role !== "PENGAJAR") redirect("/login");
+  if (!session || session.user.role !== "PENGAJAR") redirect("/?login=true");
 
   const classes = await prisma.class.findMany({
     where: { teacher_id: session.user.id }

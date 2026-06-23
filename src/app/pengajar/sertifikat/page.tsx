@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 
 export default async function PengajarSertifikat() {
   const session = await getSession();
-  if (!session) redirect('/login');
+  if (!session) redirect("/?login=true");
   
   const sertifikatList = await prisma.certificate.findMany({
     where: { class: { teacher_id: session.user.id } },

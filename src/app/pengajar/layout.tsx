@@ -9,7 +9,7 @@ export default async function PengajarLayout({ children }: { children: React.Rea
   const session = await getSession();
   
   if (!session || session.user.role !== "PENGAJAR") {
-    redirect("/login");
+    redirect("/?login=true");
   }
 
   return (

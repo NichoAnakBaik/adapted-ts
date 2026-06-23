@@ -40,7 +40,7 @@ export async function loginAction(formData: FormData) {
 
 export async function logoutAction() {
   await clearSession();
-  redirect("/login");
+  redirect("/?login=true");
 }
 
 export async function signupAction(formData: FormData) {

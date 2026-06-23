@@ -7,7 +7,7 @@ import { redirect } from "next/navigation";
 
 export default async function SiswaForumSelectionPage() {
   const session = await getSession();
-  if (!session || session.user.role !== "SISWA") redirect("/login");
+  if (!session || session.user.role !== "SISWA") redirect("/?login=true");
 
   const enrollments = await prisma.enrollment.findMany({
     where: { student_id: session.user.id },

@@ -7,7 +7,7 @@ import { History } from "lucide-react";
 
 export default async function SiswaAktivitasPage() {
   const session = await getSession();
-  if (!session || session.user.role !== "SISWA") redirect("/login");
+  if (!session || session.user.role !== "SISWA") redirect("/?login=true");
 
   const logs = await getActivityLogs("SISWA");
 

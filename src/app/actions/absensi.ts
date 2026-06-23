@@ -6,8 +6,8 @@ import { redirect } from "next/navigation";
 
 async function checkAuth(role?: string) {
   const session = await getSession();
-  if (!session) redirect("/login");
-  if (role && session.user.role !== role) redirect("/login");
+  if (!session) redirect("/?login=true");
+  if (role && session.user.role !== role) redirect("/?login=true");
   return session;
 }
 

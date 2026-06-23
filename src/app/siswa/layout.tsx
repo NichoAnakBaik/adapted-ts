@@ -9,7 +9,7 @@ export default async function SiswaLayout({ children }: { children: React.ReactN
   const session = await getSession();
   
   if (!session || session.user.role !== "SISWA") {
-    redirect("/login");
+    redirect("/?login=true");
   }
 
   return (
