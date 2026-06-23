@@ -195,7 +195,7 @@ export default function SiswaAbsensiClient({ history, classes }: { history: any[
         <h3 className="text-base md:text-lg font-bold text-namsan-text mb-3 md:mb-4">Riwayat Kehadiran Keseluruhan</h3>
         
         {history.length > 0 ? (
-          <div className="overflow-x-auto -mx-4 md:mx-0">
+          <div className="w-full overflow-x-auto">
             <div className="min-w-full inline-block align-middle">
               <div className="overflow-hidden">
                 <table className="min-w-full text-left border-collapse">

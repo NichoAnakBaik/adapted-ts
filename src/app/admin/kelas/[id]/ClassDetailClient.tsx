@@ -202,8 +202,8 @@ export default function ClassDetailClient({ classData, teachers, allStudents }: 
 
             {/* Enrolled Students List */}
             {classData.enrollments.length > 0 ? (
-              <div className="border border-gray-100 rounded-xl overflow-hidden">
-                <table className="w-full text-left border-collapse">
+              <div className="border border-gray-100 rounded-xl overflow-hidden w-full overflow-x-auto">
+                <table className="w-full text-left border-collapse min-w-[500px]">
                   <tbody>
                     {classData.enrollments.map((e: any) => (
                       <tr key={e.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors">

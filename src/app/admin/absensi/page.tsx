@@ -10,7 +10,7 @@ export default async function PantauAbsensi() {
     <div className="space-y-6">
       <h1 className="text-3xl font-bold text-gray-900">Pantau Absensi Global</h1>
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto -mx-4 md:mx-0">
+        <div className="w-full overflow-x-auto">
           <table className="min-w-full min-w-[600px] divide-y divide-gray-200">
             <thead className="bg-gray-50">
             <tr>

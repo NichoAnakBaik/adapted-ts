@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LayoutDashboard, Users, BookOpen, MessageSquare, Settings, Award, ShieldAlert, LogOut, FileText, ClipboardList, PenTool } from "lucide-react";
+import ProfileSettingsModal from "@/components/ProfileSettingsModal";
 
 export function AdminSidebar({ user }: { user: any }) {
   const pathname = usePathname();
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   const menuItems = [
     { name: "Dashboard", href: "/admin/dashboard", icon: LayoutDashboard },
@@ -60,8 +62,8 @@ export function AdminSidebar({ user }: { user: any }) {
 
       <div className="mt-auto border-t border-gray-100 p-4 shrink-0">
         {/* User Profile */}
-        <Link 
-          href="/admin/profil"
+        <button 
+          onClick={() => setIsSettingsOpen(true)}
           className="w-full flex items-center gap-3 mb-4 px-2 py-2 rounded-xl hover:bg-gray-50 transition-colors text-left"
         >
           <div className="w-10 h-10 rounded-full bg-namsan-red-light flex items-center justify-center text-white font-bold text-sm shrink-0">
@@ -72,7 +74,7 @@ export function AdminSidebar({ user }: { user: any }) {
             <p className="text-xs text-namsan-text-muted capitalize truncate">{user?.role?.toLowerCase() || "admin"}</p>
           </div>
           <Settings className="w-4 h-4 text-gray-400 shrink-0" />
-        </Link>
+        </button>
         {/* Logout Button */}
         <form action="/api/logout" method="POST">
           <button
@@ -85,6 +87,7 @@ export function AdminSidebar({ user }: { user: any }) {
         </form>
       </div>
     </aside>
+      <ProfileSettingsModal isOpen={isSettingsOpen} onClose={() => setIsSettingsOpen(false)} />
     </>
   );
 }

@@ -22,7 +22,7 @@ export default async function PengajarSertifikat() {
       </div>
 
       <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto -mx-4 md:mx-0">
+        <div className="w-full overflow-x-auto">
           <table className="min-w-full min-w-[600px] divide-y divide-gray-200">
             <thead className="bg-gray-50">
             <tr>

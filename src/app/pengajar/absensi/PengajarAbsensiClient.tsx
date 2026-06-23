@@ -93,7 +93,7 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
             <RefreshCw className="w-8 h-8 animate-spin text-gray-400" />
           </div>
         ) : attendanceList.length > 0 ? (
-          <div className="overflow-x-auto -mx-4 md:mx-0">
+          <div className="w-full overflow-x-auto">
             <div className="min-w-full inline-block align-middle">
               <div className="overflow-hidden">
                 <table className="min-w-full text-left border-collapse">

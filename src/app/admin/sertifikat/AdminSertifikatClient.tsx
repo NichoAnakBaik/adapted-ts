@@ -115,7 +115,7 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
       )}
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto -mx-4 md:mx-0">
+        <div className="w-full overflow-x-auto">
           <table className="w-full min-w-[700px] text-left border-collapse">
             <thead>
             <tr className="bg-gray-50 border-b border-gray-100 text-sm">

@@ -127,7 +127,7 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
       )}
 
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-        <div className="overflow-x-auto -mx-4 md:mx-0">
+        <div className="w-full overflow-x-auto">
           <div className="min-w-full inline-block align-middle">
             <table className="min-w-full text-left border-collapse">
               <thead>
