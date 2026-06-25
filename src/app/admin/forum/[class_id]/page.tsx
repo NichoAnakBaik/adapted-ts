@@ -15,7 +15,7 @@ export default async function AdminClassForumPage({ params }: { params: Promise<
   if (!forumData) notFound();
 
   return (
-    <div className="max-w-4xl mx-auto h-[calc(100vh-250px)] flex flex-col">
+    <div className="w-full h-[calc(100vh-220px)] flex flex-col">
       <div className="mb-4 flex-shrink-0 space-y-4">
         <Link href="/admin/forum" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-namsan-primary transition-colors">
           <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Forum

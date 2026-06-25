@@ -115,24 +115,24 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
       <div key={msg.id} className={`flex gap-3 px-3 py-2.5 md:px-4 md:py-3 ${isUtama ? 'border-b border-gray-100 hover:bg-gray-50/50 transition-colors' : 'mt-1 border-l-2 border-gray-200 ml-3 pl-3 hover:bg-gray-50/50 rounded-r-xl'}`}>
         {/* Avatar */}
         <div className="flex-shrink-0">
-          <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-white shadow-sm text-sm ${isPengajar ? 'bg-gradient-to-br from-purple-500 to-indigo-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'}`}>
-            {msg.user?.nama_lengkap?.charAt(0) || <User className="w-5 h-5" />}
+          <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white shadow-sm text-xs ${isPengajar ? 'bg-gradient-to-br from-purple-500 to-indigo-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'}`}>
+            {msg.user?.nama_lengkap?.charAt(0) || <User className="w-4 h-4" />}
           </div>
         </div>
 
         {/* Content */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5 mb-1 flex-wrap">
-            <span className="font-semibold text-gray-900 text-sm hover:underline cursor-pointer truncate max-w-[150px] md:max-w-xs">{msg.user?.nama_lengkap}</span>
+            <span className="font-semibold text-gray-900 text-[13px] hover:underline cursor-pointer truncate max-w-[150px] md:max-w-xs">{msg.user?.nama_lengkap}</span>
             {isPengajar && <span title="Terverifikasi (Pengajar)"><CheckCircle2 className="w-3.5 h-3.5 text-blue-500 flex-shrink-0" /></span>}
-            <span className="text-gray-500 text-xs truncate max-w-[100px] md:max-w-[150px]">@{msg.user?.username || 'user'}</span>
+            <span className="text-gray-500 text-[11px] truncate max-w-[100px] md:max-w-[150px]">@{msg.user?.username || 'user'}</span>
             <span className="text-gray-400 text-xs flex-shrink-0">·</span>
-            <span className="text-gray-500 text-xs hover:underline cursor-pointer flex-shrink-0">
+            <span className="text-gray-500 text-[11px] hover:underline cursor-pointer flex-shrink-0">
               {new Date(msg.created_at).toLocaleDateString('id-ID', { month: 'short', day: 'numeric' })}
             </span>
           </div>
 
-          <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap break-words mb-1.5">
+          <div className="text-gray-800 text-[13px] leading-relaxed whitespace-pre-wrap break-words mb-1.5">
             {renderTextWithMentions(msg.message)}
           </div>
 
@@ -263,7 +263,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 flex flex-col flex-1 min-h-0 overflow-hidden">
       {/* Header */}
       <div className="px-4 md:px-5 py-3 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-white/80 backdrop-blur-md z-10">
-        <h2 className="font-bold text-base md:text-lg text-gray-900">{forumData.forum.title}</h2>
+        <h2 className="font-bold text-base text-gray-900">{forumData.forum.title}</h2>
         <MoreHorizontal className="w-4 h-4 text-gray-500 cursor-pointer" />
       </div>
 
@@ -279,16 +279,16 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Apa yang sedang terjadi di kelas ini?"
-                className="w-full text-sm md:text-base outline-none resize-none min-h-[40px] bg-transparent text-gray-900 placeholder-gray-400 py-1"
+                className="w-full text-[13px] outline-none resize-none min-h-[40px] bg-transparent text-gray-900 placeholder-gray-400 py-1"
               />
               <div className="border-t border-gray-200/50 pt-2 flex justify-between items-center mt-1">
-                <div className="text-[10px] md:text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
+                <div className="text-[10px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
                   Gunakan @ untuk _mention_
                 </div>
                 <button 
                   type="submit"
                   disabled={!newMessage.trim() || isSending}
-                  className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-blue-500 text-white font-bold py-1.5 px-5 rounded-full transition-colors shadow-sm text-xs md:text-sm"
+                  className="bg-blue-500 hover:bg-blue-600 disabled:opacity-50 disabled:hover:bg-blue-500 text-white font-bold py-1.5 px-5 rounded-full transition-colors shadow-sm text-xs"
                 >
                   {isSending ? "Memposting..." : "Posting"}
                 </button>
