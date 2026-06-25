@@ -113,3 +113,62 @@ export async function postMessage(forumId: string, message: string, parentId?: s
 
   return { success: true };
 }
+
+export async function deleteForumMessage(messageId: string) {
+  const session = await getSession();
+  if (!session) return { error: "Akses ditolak" };
+
+  const message = await prisma.forumMessage.findUnique({ where: { id: messageId } });
+  if (!message) return { error: "Pesan tidak ditemukan" };
+  
+  // Allow admins or the message author to delete
+  if (message.user_id !== session.user.id && session.user.role !== "ADMIN") {
+    return { error: "Anda tidak berhak menghapus pesan ini" };
+  }
+
+  await prisma.forumMessage.delete({ where: { id: messageId } });
+  return { success: true };
+}
+
+export async function toggleForumReaction(messageId: string, emoji: string) {
+  const session = await getSession();
+  if (!session) return { error: "Akses ditolak" };
+
+  const message = await prisma.forumMessage.findUnique({ where: { id: messageId } });
+  if (!message) return { error: "Pesan tidak ditemukan" };
+
+  let reactionsObj: Record<string, string[]> = {};
+  if (message.reactions) {
+    try {
+      reactionsObj = JSON.parse(message.reactions);
+    } catch (e) { }
+  }
+
+  // Initialize array for emoji if not exists
+  if (!reactionsObj[emoji]) {
+    reactionsObj[emoji] = [];
+  }
+
+  const userId = session.user.id;
+  const userIndex = reactionsObj[emoji].indexOf(userId);
+
+  if (userIndex > -1) {
+    // Remove reaction
+    reactionsObj[emoji].splice(userIndex, 1);
+  } else {
+    // Add reaction
+    reactionsObj[emoji].push(userId);
+  }
+
+  // Clean up empty emoji keys
+  if (reactionsObj[emoji].length === 0) {
+    delete reactionsObj[emoji];
+  }
+
+  await prisma.forumMessage.update({
+    where: { id: messageId },
+    data: { reactions: JSON.stringify(reactionsObj) }
+  });
+
+  return { success: true };
+}

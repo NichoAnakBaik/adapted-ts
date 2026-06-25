@@ -186,6 +186,7 @@ model ForumMessage {
   user_id    String
   user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
   message    String
+  reactions  String?  @db.Text
   parent_id  String?
   parent     ForumMessage?  @relation("ForumThread", fields: [parent_id], references: [id], onDelete: Cascade)
   replies    ForumMessage[] @relation("ForumThread")

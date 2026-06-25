@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { MessageCircle, Heart, Repeat2, Share, MoreHorizontal, User, Send, CheckCircle2 } from "lucide-react";
-import { postMessage } from "@/app/actions/forum";
+import { MessageCircle, MoreHorizontal, User, Send, CheckCircle2, Trash2, Smile } from "lucide-react";
+import { postMessage, deleteForumMessage, toggleForumReaction } from "@/app/actions/forum";
 
 export default function ForumChatClient({ forumData, currentUserId, readOnly = false }: { forumData: any, currentUserId: string, readOnly?: boolean }) {
   const [messages, setMessages] = useState(forumData.messages || []);
@@ -44,6 +44,44 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
     setReplyingTo(null);
   };
 
+  const handleDelete = async (msgId: string) => {
+    if (!confirm("Hapus pesan ini?")) return;
+    const res = await deleteForumMessage(msgId);
+    if (res.success) {
+      // Optimistic delete
+      setMessages((prev: any) => prev.filter((m: any) => m.id !== msgId && m.parent_id !== msgId));
+    } else {
+      alert(res.error || "Gagal menghapus pesan");
+    }
+  };
+
+  const handleReaction = async (msgId: string, emoji: string) => {
+    // Optimistic Update
+    setMessages((prev: any) => prev.map((m: any) => {
+      if (m.id === msgId) {
+        let reactionsObj: Record<string, string[]> = {};
+        if (m.reactions) {
+          try { reactionsObj = JSON.parse(m.reactions); } catch (e) {}
+        }
+        if (!reactionsObj[emoji]) reactionsObj[emoji] = [];
+        
+        const idx = reactionsObj[emoji].indexOf(currentUserId);
+        if (idx > -1) {
+          reactionsObj[emoji].splice(idx, 1);
+        } else {
+          reactionsObj[emoji].push(currentUserId);
+        }
+        if (reactionsObj[emoji].length === 0) delete reactionsObj[emoji];
+        return { ...m, reactions: JSON.stringify(reactionsObj) };
+      }
+      return m;
+    }));
+
+    await toggleForumReaction(msgId, emoji);
+  };
+
+  const EMOJI_LIST = ["👍", "❤️", "😂", "😮", "😢", "🙏"];
+
   const renderTextWithMentions = (text: string) => {
     const parts = text.split(/(@[a-zA-Z0-9_]+)/g);
     return parts.map((part, i) => {
@@ -61,6 +99,11 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
     const isPengajar = msg.user?.role === "PENGAJAR";
     const isUtama = !isReply;
     const replies = messages.filter((m: any) => m.parent_id === msg.id);
+
+    let parsedReactions: Record<string, string[]> = {};
+    if (msg.reactions) {
+      try { parsedReactions = JSON.parse(msg.reactions); } catch(e) {}
+    }
 
     return (
       <div key={msg.id} className={`flex gap-3 md:gap-4 p-4 md:p-5 ${isUtama ? 'border-b border-gray-100 hover:bg-gray-50/50 transition-colors' : 'mt-2 border-l-2 border-gray-200 ml-2 md:ml-4 pl-4 hover:bg-gray-50/50 rounded-r-xl'}`}>
@@ -87,8 +130,27 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
             {renderTextWithMentions(msg.message)}
           </div>
 
+          {/* Render Reactions */}
+          {Object.keys(parsedReactions).length > 0 && (
+            <div className="flex flex-wrap gap-1.5 mb-2">
+              {Object.entries(parsedReactions).map(([emoji, users]) => {
+                const hasReacted = users.includes(currentUserId);
+                return (
+                  <button 
+                    key={emoji}
+                    onClick={() => handleReaction(msg.id, emoji)}
+                    className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs md:text-sm border transition-colors ${hasReacted ? 'bg-blue-50 border-blue-200 text-blue-700' : 'bg-gray-50 border-gray-200 text-gray-600 hover:bg-gray-100'}`}
+                  >
+                    <span>{emoji}</span>
+                    <span className="font-medium">{users.length}</span>
+                  </button>
+                );
+              })}
+            </div>
+          )}
+
           {/* Action Buttons */}
-          <div className="flex items-center gap-6 md:gap-8 text-gray-500">
+          <div className="flex items-center gap-4 md:gap-6 text-gray-500">
             <button 
               onClick={() => setReplyingTo(replyingTo === msg.id ? null : msg.id)}
               className="flex items-center gap-1.5 text-xs md:text-sm hover:text-blue-500 group transition-colors"
@@ -98,21 +160,38 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
               </div>
               <span className={replies.length > 0 ? "font-medium" : ""}>{replies.length || ""}</span>
             </button>
-            <button className="flex items-center gap-1.5 text-xs md:text-sm hover:text-green-500 group transition-colors">
-              <div className="p-1.5 md:p-2 rounded-full group-hover:bg-green-50 transition-colors">
-                <Repeat2 className="w-4 h-4 md:w-5 md:h-5" />
+            
+            <div className="relative group/emoji">
+              <button className="flex items-center gap-1.5 text-xs md:text-sm hover:text-yellow-500 transition-colors">
+                <div className="p-1.5 md:p-2 rounded-full group-hover/emoji:bg-yellow-50 transition-colors">
+                  <Smile className="w-4 h-4 md:w-5 md:h-5" />
+                </div>
+              </button>
+              
+              {/* WhatsApp Style Emoji Hover Menu */}
+              <div className="absolute left-0 bottom-full mb-1 hidden group-hover/emoji:flex bg-white shadow-lg border border-gray-100 rounded-full px-2 py-1 gap-1 z-20 animate-in slide-in-from-bottom-2">
+                {EMOJI_LIST.map(em => (
+                  <button 
+                    key={em} 
+                    onClick={() => handleReaction(msg.id, em)}
+                    className="hover:scale-125 transition-transform text-lg md:text-xl p-1"
+                  >
+                    {em}
+                  </button>
+                ))}
               </div>
-            </button>
-            <button className="flex items-center gap-1.5 text-xs md:text-sm hover:text-red-500 group transition-colors">
-              <div className="p-1.5 md:p-2 rounded-full group-hover:bg-red-50 transition-colors">
-                <Heart className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-            </button>
-            <button className="flex items-center gap-1.5 text-xs md:text-sm hover:text-blue-500 group transition-colors">
-              <div className="p-1.5 md:p-2 rounded-full group-hover:bg-blue-50 transition-colors">
-                <Share className="w-4 h-4 md:w-5 md:h-5" />
-              </div>
-            </button>
+            </div>
+
+            {isMe && !readOnly && (
+              <button 
+                onClick={() => handleDelete(msg.id)}
+                className="flex items-center gap-1.5 text-xs md:text-sm hover:text-red-500 group transition-colors ml-auto"
+              >
+                <div className="p-1.5 md:p-2 rounded-full group-hover:bg-red-50 transition-colors">
+                  <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                </div>
+              </button>
+            )}
           </div>
 
           {/* Inline Reply Form */}
