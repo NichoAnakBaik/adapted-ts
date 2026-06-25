@@ -448,6 +448,11 @@ export async function assignExamToStudent(examId: string, studentId: string) {
         assigned_by: currentSession?.user?.id
       }
     });
+    // Auto-publish the exam so students can see it immediately
+    await prisma.exam.update({
+      where: { id: examId },
+      data: { is_published: true }
+    });
     return { success: true };
   } catch (e) {
     return { error: "Siswa sudah di-assign." };
@@ -472,6 +477,12 @@ export async function assignAllEligibleStudents(examId: string) {
   await prisma.examAssignment.createMany({
     data,
     skipDuplicates: true
+  });
+
+  // Auto-publish the exam so students can see it immediately
+  await prisma.exam.update({
+    where: { id: examId },
+    data: { is_published: true }
   });
 
   return { success: true, count: toAssign.length };

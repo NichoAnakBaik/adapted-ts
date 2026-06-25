@@ -167,8 +167,8 @@ export async function getAvailableFinalExams() {
   return prisma.exam.findMany({
     where: {
       id: { in: assignedExamIds },
-      is_published: true,
       is_final: true
+      // is_published is ignored here because if it's assigned, it should be visible to that specific student.
     },
     include: {
       class: { select: { name: true, teacher: { select: { nama_lengkap: true } } } },
@@ -208,8 +208,17 @@ export async function getExamToTake(id: string) {
     }
   });
 
-  // Basic security check (ideally verify enrollment too)
-  if (!exam || !exam.is_published) return null;
+  // Check if it's assigned to this student (for final exams)
+  let isAssigned = false;
+  if (exam?.is_final) {
+    const assignment = await prisma.examAssignment.findFirst({
+      where: { exam_id: id, student_id: session.user.id }
+    });
+    isAssigned = !!assignment;
+  }
+
+  // Basic security check: must be published OR explicitly assigned
+  if (!exam || (!exam.is_published && !isAssigned)) return null;
   return exam;
 }
 
