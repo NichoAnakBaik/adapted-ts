@@ -10,6 +10,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
   const [isSending, setIsSending] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [expandedThreads, setExpandedThreads] = useState<string[]>([]);
 
   const handleSend = async (e: React.FormEvent, parentId: string | null = null) => {
     e.preventDefault();
@@ -100,13 +101,18 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
     const isUtama = !isReply;
     const replies = messages.filter((m: any) => m.parent_id === msg.id);
 
+    const isExpanded = expandedThreads.includes(msg.id);
+    const toggleExpand = () => {
+      setExpandedThreads(prev => isExpanded ? prev.filter(id => id !== msg.id) : [...prev, msg.id]);
+    };
+
     let parsedReactions: Record<string, string[]> = {};
     if (msg.reactions) {
       try { parsedReactions = JSON.parse(msg.reactions); } catch(e) {}
     }
 
     return (
-      <div key={msg.id} className={`flex gap-3 p-3 md:p-4 ${isUtama ? 'border-b border-gray-100 hover:bg-gray-50/50 transition-colors' : 'mt-1 border-l-2 border-gray-200 ml-3 pl-3 hover:bg-gray-50/50 rounded-r-xl'}`}>
+      <div key={msg.id} className={`flex gap-3 px-3 py-2.5 md:px-4 md:py-3 ${isUtama ? 'border-b border-gray-100 hover:bg-gray-50/50 transition-colors' : 'mt-1 border-l-2 border-gray-200 ml-3 pl-3 hover:bg-gray-50/50 rounded-r-xl'}`}>
         {/* Avatar */}
         <div className="flex-shrink-0">
           <div className={`w-8 h-8 md:w-10 md:h-10 rounded-full flex items-center justify-center font-bold text-white shadow-sm text-sm ${isPengajar ? 'bg-gradient-to-br from-purple-500 to-indigo-500' : 'bg-gradient-to-br from-blue-400 to-blue-600'}`}>
@@ -126,13 +132,13 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
             </span>
           </div>
 
-          <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap break-words mb-2">
+          <div className="text-gray-800 text-sm leading-relaxed whitespace-pre-wrap break-words mb-1.5">
             {renderTextWithMentions(msg.message)}
           </div>
 
           {/* Render Reactions */}
           {Object.keys(parsedReactions).length > 0 && (
-            <div className="flex flex-wrap gap-1 mb-2">
+            <div className="flex flex-wrap gap-1 mb-1.5">
               {Object.entries(parsedReactions).map(([emoji, users]) => {
                 const hasReacted = users.includes(currentUserId);
                 return (
@@ -227,7 +233,25 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
           {/* Render Replies (Nested Threads) */}
           {replies.length > 0 && (
             <div className="mt-2">
-              {replies.map((reply: any) => renderPost(reply, true))}
+              {!isExpanded ? (
+                <button 
+                  onClick={toggleExpand}
+                  className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1 mt-1"
+                >
+                  <MessageCircle className="w-3.5 h-3.5" />
+                  Lihat {replies.length} balasan
+                </button>
+              ) : (
+                <>
+                  <button 
+                    onClick={toggleExpand}
+                    className="text-xs text-gray-500 font-medium hover:underline flex items-center gap-1 mt-1 mb-2"
+                  >
+                    Sembunyikan balasan
+                  </button>
+                  {replies.map((reply: any) => renderPost(reply, true))}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -245,7 +269,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
 
       {/* Main Compose Box */}
       {!readOnly && (
-        <div className="p-4 border-b-4 border-gray-100 bg-gray-50/30">
+        <div className="p-3 md:px-4 md:py-3 border-b border-gray-100 bg-gray-50/30">
           <form onSubmit={(e) => handleSend(e, null)} className="flex gap-3 items-start">
             <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gray-200 flex items-center justify-center flex-shrink-0">
               <User className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
@@ -255,9 +279,9 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
                 placeholder="Apa yang sedang terjadi di kelas ini?"
-                className="w-full text-sm md:text-base outline-none resize-none min-h-[50px] bg-transparent text-gray-900 placeholder-gray-400 py-1"
+                className="w-full text-sm md:text-base outline-none resize-none min-h-[40px] bg-transparent text-gray-900 placeholder-gray-400 py-1"
               />
-              <div className="border-t border-gray-200/50 pt-2 flex justify-between items-center">
+              <div className="border-t border-gray-200/50 pt-2 flex justify-between items-center mt-1">
                 <div className="text-[10px] md:text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
                   Gunakan @ untuk _mention_
                 </div>
