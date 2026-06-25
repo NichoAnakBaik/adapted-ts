@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, Plus, FileQuestion, Trash2, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, FileQuestion, Trash2, Pencil, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { createQuestion } from "@/app/actions/pengajar";
+import { createQuestion, updateQuestion } from "@/app/actions/pengajar";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
 
@@ -11,6 +11,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [showForm, setShowForm] = useState(false);
   const [questionType, setQuestionType] = useState("READING");
   const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL" | "HASIL_DETAIL">("SOAL");
   const [selectedAttempt, setSelectedAttempt] = useState<any>(null);
@@ -21,7 +22,13 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
     const formData = new FormData(e.currentTarget);
     formData.append("exam_id", exam.id);
     
-    const res = await createQuestion(formData);
+    let res;
+    if (editingQuestion) {
+      formData.append("id", editingQuestion.id);
+      res = await updateQuestion(formData);
+    } else {
+      res = await createQuestion(formData);
+    }
     
     if (res.error) {
       setError(res.error);
@@ -29,6 +36,21 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
       setShowForm(false);
       window.location.reload();
     }
+  };
+
+  const openEditForm = (q: any) => {
+    setEditingQuestion(q);
+    setQuestionType(q.type || "READING");
+    setQuestionFormat(q.format || "MULTIPLE_CHOICE");
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingQuestion(null);
+    setQuestionType("READING");
+    setQuestionFormat("MULTIPLE_CHOICE");
+    setError("");
   };
 
   return (
@@ -89,7 +111,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
         <>
           <div className="flex justify-end">
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => showForm ? closeForm() : setShowForm(true)}
               className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2 px-4 rounded-lg flex items-center gap-2 transition-colors text-sm"
             >
               {showForm ? "Batal" : <><Plus className="w-4 h-4" /> Tambah Soal</>}
@@ -100,8 +122,8 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h2 className="text-xl font-bold text-gray-800">Buat Soal Baru</h2>
-              <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
+              <h2 className="text-xl font-bold text-gray-800">{editingQuestion ? "Edit Soal" : "Buat Soal Baru"}</h2>
+              <button type="button" onClick={closeForm} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
             {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
             
@@ -132,13 +154,14 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Tingkat Kesulitan (1-5)</label>
-                <input type="number" name="difficulty" min="1" max="5" defaultValue="1" required className="w-full p-2.5 border rounded-lg" />
+                <input type="number" name="difficulty" min="1" max="5" defaultValue={editingQuestion?.difficulty || 1} required className="w-full p-2.5 border rounded-lg" />
               </div>
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-gray-700 mb-2">Pertanyaan</label>
                 <KoreanTextarea 
                   name="question_text" 
+                  defaultValue={editingQuestion?.question_text || ""}
                   required 
                   rows={3} 
                   placeholder="Ketik soal di sini..." 
@@ -148,33 +171,35 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
 
               {/* All types can have optional image */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Soal (Opsional)</label>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Soal {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Opsional)"}</label>
                 <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
+                {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
               </div>
 
               {/* All types can optionally have audio, but LISTENING might require it */}
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">File Audio MP3 (Opsional / Wajib untuk Listening)</label>
-                <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={questionType === "LISTENING"} />
+                <label className="block text-sm font-medium text-gray-700 mb-1">File Audio MP3 {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Opsional / Wajib untuk Listening)"}</label>
+                <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={questionType === "LISTENING" && !editingQuestion} />
+                {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>}
               </div>
 
               {questionFormat === "MULTIPLE_CHOICE" && (
                 <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan A</label>
-                    <KoreanInput type="text" name="option_a" required placeholder="Teks Pilihan A..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                    <KoreanInput type="text" name="option_a" defaultValue={editingQuestion?.option_a || ""} required placeholder="Teks Pilihan A..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan B</label>
-                    <KoreanInput type="text" name="option_b" required placeholder="Teks Pilihan B..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                    <KoreanInput type="text" name="option_b" defaultValue={editingQuestion?.option_b || ""} required placeholder="Teks Pilihan B..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan C</label>
-                    <KoreanInput type="text" name="option_c" required placeholder="Teks Pilihan C..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                    <KoreanInput type="text" name="option_c" defaultValue={editingQuestion?.option_c || ""} required placeholder="Teks Pilihan C..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                   </div>
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan D</label>
-                    <KoreanInput type="text" name="option_d" required placeholder="Teks Pilihan D..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                    <KoreanInput type="text" name="option_d" defaultValue={editingQuestion?.option_d || ""} required placeholder="Teks Pilihan D..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                   </div>
                 </div>
               )}
@@ -184,17 +209,18 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 <KoreanInput 
                   type="text" 
                   name="answer_key" 
+                  defaultValue={editingQuestion?.answer_key || ""}
                   placeholder="Kunci Jawaban (contoh: A, atau teks isian)" 
                   className="w-full p-2.5 border rounded-lg" 
                 />
               </div>
 
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                <button type="button" onClick={closeForm} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
                   Batal
                 </button>
                 <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                  Simpan Soal
+                  {editingQuestion ? "Simpan Perubahan" : "Simpan Soal"}
                 </button>
               </div>
             </form>
@@ -250,6 +276,15 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                   <CheckCircle2 className="w-4 h-4" /> Kunci: {q.answer_key}
                 </div>
               )}
+            </div>
+            <div className="flex flex-col gap-2">
+              <button 
+                onClick={() => openEditForm(q)}
+                className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"
+                title="Edit Soal"
+              >
+                <Pencil className="w-5 h-5" />
+              </button>
             </div>
           </div>
         ))}

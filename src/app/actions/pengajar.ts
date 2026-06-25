@@ -325,14 +325,53 @@ export async function createQuestion(formData: FormData) {
   const exam = await prisma.exam.findUnique({ where: { id: exam_id }, include: { class: true } });
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
-  const audio_reference = audio_file ? await saveUploadedFile(audio_file, "kuis_audio") : null;
-  const image_url = image_file ? await saveUploadedFile(image_file, "kuis_image") : null;
+  const audio_reference = audio_file && audio_file.size > 0 ? await saveUploadedFile(audio_file, "kuis_audio") : null;
+  const image_url = image_file && image_file.size > 0 ? await saveUploadedFile(image_file, "kuis_image") : null;
 
   await prisma.question.create({
     data: { 
       exam_id, type, format, question_text, answer_key, audio_reference, image_url, difficulty,
       option_a, option_b, option_c, option_d
     }
+  });
+
+  return { success: true };
+}
+
+export async function updateQuestion(formData: FormData) {
+  const session = await checkPengajarAuth();
+  const id = formData.get("id") as string;
+  const format = formData.get("format") as string || "ESSAY";
+  const question_text = formData.get("question_text") as string;
+  const answer_key = formData.get("answer_key") as string;
+  const audio_file = formData.get("audio_reference") as File | null;
+  const image_file = formData.get("image_url") as File | null;
+  const difficulty = parseInt(formData.get("difficulty") as string) || 1;
+  const option_a = formData.get("option_a") as string | null;
+  const option_b = formData.get("option_b") as string | null;
+  const option_c = formData.get("option_c") as string | null;
+  const option_d = formData.get("option_d") as string | null;
+
+  if (!id || !question_text) return { error: "Data soal tidak lengkap" };
+
+  const question = await prisma.question.findUnique({ where: { id }, include: { exam: { include: { class: true } } } });
+  if (question?.exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
+
+  const updateData: any = {
+    format, question_text, answer_key, difficulty,
+    option_a, option_b, option_c, option_d
+  };
+
+  if (audio_file && audio_file.size > 0) {
+    updateData.audio_reference = await saveUploadedFile(audio_file, "kuis_audio");
+  }
+  if (image_file && image_file.size > 0) {
+    updateData.image_url = await saveUploadedFile(image_file, "kuis_image");
+  }
+
+  await prisma.question.update({
+    where: { id },
+    data: updateData
   });
 
   return { success: true };

@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { FileQuestion, ArrowLeft, Plus, Trash2, Headphones, BookOpen, PenTool, MessageCircle, Users, Clock, CheckCircle } from "lucide-react";
+import { FileQuestion, ArrowLeft, Plus, Trash2, Pencil, Headphones, BookOpen, PenTool, MessageCircle, Users, Clock, CheckCircle } from "lucide-react";
 import Link from "next/link";
-import { createAdminQuestion, deleteAdminQuestion, assignExamToStudent, assignAllEligibleStudents } from "@/app/actions/admin";
+import { createAdminQuestion, updateAdminQuestion, deleteAdminQuestion, assignExamToStudent, assignAllEligibleStudents } from "@/app/actions/admin";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
 
@@ -11,6 +11,7 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
   const [questions, setQuestions] = useState(exam.questions);
   const [activeTab, setActiveTab] = useState<"SPEAKING" | "LISTENING" | "READING" | "WRITING">("READING");
   const [showForm, setShowForm] = useState(false);
+  const [editingQuestion, setEditingQuestion] = useState<any>(null);
   const [error, setError] = useState("");
   const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
   const [viewMode, setViewMode] = useState<"SOAL" | "HASIL" | "ELIGIBILITY" | "HASIL_DETAIL">("SOAL");
@@ -36,12 +37,32 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
     formData.append("exam_id", exam.id);
     formData.append("type", activeTab);
 
-    const res = await createAdminQuestion(formData);
+    let res;
+    if (editingQuestion) {
+      formData.append("id", editingQuestion.id);
+      res = await updateAdminQuestion(formData);
+    } else {
+      res = await createAdminQuestion(formData);
+    }
+    
     if (res.success) {
       window.location.reload();
     } else {
       setError(res.error || "Terjadi kesalahan");
     }
+  };
+
+  const openEditForm = (q: any) => {
+    setEditingQuestion(q);
+    setQuestionFormat(q.format || "ESSAY");
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingQuestion(null);
+    setQuestionFormat("MULTIPLE_CHOICE");
+    setError("");
   };
 
   const handleDeleteQuestion = async (id: string) => {
@@ -153,7 +174,7 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
               Soal {tabs.find(t => t.id === activeTab)?.label}
             </h2>
             <button
-              onClick={() => setShowForm(!showForm)}
+              onClick={() => showForm ? closeForm() : setShowForm(true)}
               className="bg-white border-2 border-namsan-primary text-namsan-dark hover:bg-namsan-primary font-bold py-2 px-4 rounded-xl flex items-center gap-2 transition-colors shadow-sm"
             >
               {showForm ? "Batal Tambah" : <><Plus className="w-5 h-5" /> Tambah Soal</>}
@@ -164,15 +185,17 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
             <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
               <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto border border-blue-100">
                 <div className="flex justify-between items-center mb-4 border-b pb-3">
-                  <h3 className="text-xl font-bold text-gray-800">Buat Soal {tabs.find(t => t.id === activeTab)?.label} Baru</h3>
-                  <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
+                  <h3 className="text-xl font-bold text-gray-800">
+                    {editingQuestion ? `Edit Soal ${tabs.find(t => t.id === activeTab)?.label}` : `Buat Soal ${tabs.find(t => t.id === activeTab)?.label} Baru`}
+                  </h3>
+                  <button type="button" onClick={closeForm} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
                 </div>
                 {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
                 
                 <form onSubmit={handleCreateQuestion} className="space-y-4">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Teks Soal / Pertanyaan</label>
-                    <KoreanTextarea name="question_text" required rows={3} placeholder="Masukkan soal dalam bahasa Indonesia atau Korea..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
+                    <KoreanTextarea name="question_text" defaultValue={editingQuestion?.question_text || ""} required rows={3} placeholder="Masukkan soal dalam bahasa Indonesia atau Korea..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -188,19 +211,19 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                       <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
                         <div>
                           <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan A</label>
-                          <KoreanInput type="text" name="option_a" required placeholder="Teks Pilihan A..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                          <KoreanInput type="text" name="option_a" defaultValue={editingQuestion?.option_a || ""} required placeholder="Teks Pilihan A..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan B</label>
-                          <KoreanInput type="text" name="option_b" required placeholder="Teks Pilihan B..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                          <KoreanInput type="text" name="option_b" defaultValue={editingQuestion?.option_b || ""} required placeholder="Teks Pilihan B..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan C</label>
-                          <KoreanInput type="text" name="option_c" required placeholder="Teks Pilihan C..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                          <KoreanInput type="text" name="option_c" defaultValue={editingQuestion?.option_c || ""} required placeholder="Teks Pilihan C..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                         </div>
                         <div>
                           <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan D</label>
-                          <KoreanInput type="text" name="option_d" required placeholder="Teks Pilihan D..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
+                          <KoreanInput type="text" name="option_d" defaultValue={editingQuestion?.option_d || ""} required placeholder="Teks Pilihan D..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
                         </div>
                       </div>
                     )}
@@ -210,34 +233,36 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                         Kunci Jawaban 
                         {activeTab === "SPEAKING" || activeTab === "WRITING" ? " (Opsional/Panduan)" : " (Wajib)"}
                       </label>
-                      <KoreanInput type="text" name="answer_key" required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Jawaban (atau 1 huruf A/B/C/D jika pilihan ganda)..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      <KoreanInput type="text" name="answer_key" defaultValue={editingQuestion?.answer_key || ""} required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Jawaban (atau 1 huruf A/B/C/D jika pilihan ganda)..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
                     
                     <div>
                       <label className="block text-sm font-bold text-gray-700 mb-2">Tingkat Kesulitan (1-5)</label>
-                      <input type="number" name="difficulty" min="1" max="5" defaultValue="1" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      <input type="number" name="difficulty" defaultValue={editingQuestion?.difficulty || 1} min="1" max="5" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
 
                     {activeTab === "LISTENING" && (
                       <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">File Audio (Wajib untuk Listening)</label>
-                        <input type="file" accept="audio/*" name="audio_reference" required className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                        <label className="block text-sm font-bold text-gray-700 mb-2">File Audio {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Wajib untuk Listening)"}</label>
+                        <input type="file" accept="audio/*" name="audio_reference" required={!editingQuestion} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                        {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File saat ini sudah ada. Upload baru untuk mengganti.</p>}
                       </div>
                     )}
                     {activeTab === "SPEAKING" && (
                       <div className="md:col-span-2">
                         <label className="block text-sm font-bold text-gray-700 mb-2">File Audio Panduan (Opsional)</label>
                         <input type="file" accept="audio/*" name="audio_reference" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                        {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File saat ini sudah ada. Upload baru untuk mengganti.</p>}
                       </div>
                     )}
                   </div>
 
                   <div className="mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                    <button type="button" onClick={closeForm} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
                       Batal
                     </button>
                     <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                      Simpan Soal ke {tabs.find(t => t.id === activeTab)?.label}
+                      {editingQuestion ? "Simpan Perubahan" : `Simpan Soal ke ${tabs.find(t => t.id === activeTab)?.label}`}
                     </button>
                   </div>
                 </form>
@@ -279,7 +304,14 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                     </div>
                   </div>
                 </div>
-                <div>
+                <div className="flex flex-col gap-2">
+                  <button 
+                    onClick={() => openEditForm(q)}
+                    className="p-2 text-gray-400 hover:text-blue-500 hover:bg-blue-50 rounded-xl transition-colors"
+                    title="Edit Soal"
+                  >
+                    <Pencil className="w-5 h-5" />
+                  </button>
                   <button 
                     onClick={() => handleDeleteQuestion(q.id)}
                     className="p-2 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
