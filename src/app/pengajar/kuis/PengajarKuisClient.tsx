@@ -1,14 +1,15 @@
 "use client";
 
 import React, { useState } from "react";
-import { ClipboardList, Plus, Clock, FileQuestion, ArrowRight } from "lucide-react";
+import { ClipboardList, Plus, Clock, FileQuestion, ArrowRight, Trash2, Pencil } from "lucide-react";
 import Link from "next/link";
-import { createExam, toggleExamPublish } from "@/app/actions/pengajar";
+import { createExam, updateExam, deleteExam, toggleExamPublish } from "@/app/actions/pengajar";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 
 export default function PengajarKuisClient({ initialExams, classes }: { initialExams: any[], classes: any[] }) {
   const [exams, setExams] = useState(initialExams);
   const [showForm, setShowForm] = useState(false);
+  const [editingExam, setEditingExam] = useState<any>(null);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -21,7 +22,14 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
     e.preventDefault();
     setError("");
     const formData = new FormData(e.currentTarget);
-    const res = await createExam(formData);
+    
+    let res;
+    if (editingExam) {
+      formData.append("id", editingExam.id);
+      res = await updateExam(formData);
+    } else {
+      res = await createExam(formData);
+    }
     
     if (res.error) {
       setError(res.error);
@@ -29,6 +37,27 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
       setShowForm(false);
       window.location.reload();
     }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Yakin ingin menghapus kuis ini beserta semua soal dan jawaban siswanya?")) return;
+    const res = await deleteExam(id);
+    if (res.success) {
+      setExams(exams.filter(ex => ex.id !== id));
+    } else {
+      alert(res.error || "Gagal menghapus kuis.");
+    }
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingExam(null);
+    setError("");
+  };
+
+  const openEditForm = (exam: any) => {
+    setEditingExam(exam);
+    setShowForm(true);
   };
 
   const handleTogglePublish = async (id: string, currentStatus: boolean) => {
@@ -62,40 +91,41 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h2 className="text-xl font-bold text-gray-800">Buat Kuis Baru</h2>
-              <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
+              <h2 className="text-xl font-bold text-gray-800">{editingExam ? "Edit Kuis" : "Buat Kuis Baru"}</h2>
+              <button type="button" onClick={closeForm} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
             {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
             
             <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
-                <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
+                <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white" defaultValue={editingExam?.class_id || ""} disabled={!!editingExam}>
                   <option value="">-- Pilih Kelas --</option>
                   {classes.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
                   ))}
                 </select>
+                {editingExam && <p className="text-xs text-gray-500 mt-1">Kelas tidak bisa diubah setelah kuis dibuat.</p>}
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Judul Kuis</label>
-                <KoreanInput type="text" name="title" required placeholder="Contoh: Kuis Hangeul 1" className="w-full p-2.5 border rounded-lg" />
+                <KoreanInput type="text" name="title" defaultValue={editingExam?.title || ""} required placeholder="Contoh: Kuis Hangeul 1" className="w-full p-2.5 border rounded-lg" />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Batas Waktu (Menit)</label>
-                <input type="number" name="time_limit" placeholder="Kosongkan jika tidak ada batas" className="w-full p-2.5 border rounded-lg" />
+                <input type="number" name="time_limit" defaultValue={editingExam?.time_limit || ""} placeholder="Kosongkan jika tidak ada batas" className="w-full p-2.5 border rounded-lg" />
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Deskripsi / Instruksi</label>
-                <KoreanTextarea name="description" rows={3} placeholder="Instruksi pengerjaan ujian..." className="w-full p-2.5 border rounded-lg" />
+                <KoreanTextarea name="description" defaultValue={editingExam?.description || ""} rows={3} placeholder="Instruksi pengerjaan ujian..." className="w-full p-2.5 border rounded-lg" />
               </div>
                 <input type="hidden" name="is_final" value="false" />
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                <button type="button" onClick={closeForm} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
                   Batal
                 </button>
                 <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                  Simpan Kuis (Draft)
+                  {editingExam ? "Simpan Perubahan" : "Simpan Kuis (Draft)"}
                 </button>
               </div>
             </form>
@@ -120,6 +150,14 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
                 {ex.class.name}
               </span>
+              <div className="flex gap-2">
+                <button onClick={() => openEditForm(ex)} className="p-1.5 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                  <Pencil className="w-4 h-4" />
+                </button>
+                <button onClick={() => handleDelete(ex.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
             </div>
             
             <h3 className="text-xl font-bold text-namsan-text mb-2 group-hover:text-namsan-primary transition-colors">{ex.title}</h3>

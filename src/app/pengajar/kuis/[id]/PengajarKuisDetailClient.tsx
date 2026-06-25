@@ -130,7 +130,21 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
             <form onSubmit={handleCreateQuestion} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Kemahiran</label>
-                <select name="type" value={questionType} onChange={(e) => setQuestionType(e.target.value)} required className="w-full p-2.5 border rounded-lg bg-white">
+                <select 
+                  name="type" 
+                  value={questionType} 
+                  onChange={(e) => {
+                    const newType = e.target.value;
+                    setQuestionType(newType);
+                    if (newType === "SPEAKING" || newType === "WRITING") {
+                      setQuestionFormat("ESSAY");
+                    } else {
+                      setQuestionFormat("MULTIPLE_CHOICE");
+                    }
+                  }} 
+                  required 
+                  className="w-full p-2.5 border rounded-lg bg-white"
+                >
                   <option value="READING">Reading (Membaca/Teks)</option>
                   <option value="LISTENING">Listening (Mendengarkan Audio)</option>
                   <option value="SPEAKING">Speaking (Pelafalan/Voice)</option>

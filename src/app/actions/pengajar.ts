@@ -139,6 +139,23 @@ export async function updateMeetingLink(classId: string, meeting_link: string) {
   return { success: true };
 }
 
+export async function updateModuleLink(classId: string, module_link: string) {
+  const session = await checkPengajarAuth();
+  
+  const classData = await prisma.class.findFirst({
+    where: { id: classId, teacher_id: session.user.id }
+  });
+
+  if (!classData) return { error: "Akses ditolak atau kelas tidak ditemukan" };
+
+  await prisma.class.update({
+    where: { id: classId },
+    data: { module_link }
+  });
+
+  return { success: true };
+}
+
 export async function getTeacherAnalytics() {
   const session = await checkPengajarAuth();
 
@@ -279,6 +296,39 @@ export async function toggleExamPublish(id: string, is_published: boolean) {
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
   await prisma.exam.update({ where: { id }, data: { is_published } });
+  return { success: true };
+}
+
+export async function updateExam(formData: FormData) {
+  const session = await checkPengajarAuth();
+  const id = formData.get("id") as string;
+  const title = formData.get("title") as string;
+  const description = formData.get("description") as string;
+  const time_limit = formData.get("time_limit") as string;
+
+  if (!id || !title) return { error: "Data kuis tidak lengkap" };
+
+  const exam = await prisma.exam.findUnique({ where: { id }, include: { class: true } });
+  if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
+
+  await prisma.exam.update({
+    where: { id },
+    data: { 
+      title, 
+      description,
+      time_limit: time_limit ? parseInt(time_limit) : null
+    }
+  });
+
+  return { success: true };
+}
+
+export async function deleteExam(id: string) {
+  const session = await checkPengajarAuth();
+  const exam = await prisma.exam.findUnique({ where: { id }, include: { class: true } });
+  if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
+
+  await prisma.exam.delete({ where: { id } });
   return { success: true };
 }
 

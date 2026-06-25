@@ -18,13 +18,46 @@ export default function PengajarKelasDetailClient({ classData }: { classData: an
           <h1 className="text-2xl font-bold text-namsan-text">{classData.name}</h1>
           <p className="text-sm text-namsan-text-muted">Detail Kelas, Siswa, dan Modul Pembelajaran</p>
           <div className="mt-3 space-y-2">
-            {classData.module_link && (
-              <p className="text-sm text-gray-600 flex items-center gap-2">
+            {classData.module_link ? (
+              <p className="text-sm text-gray-600 flex flex-wrap items-center gap-2">
                 <BookOpen className="w-4 h-4 text-namsan-primary" />
                 <span className="font-bold">Modul (GDrive):</span> 
-                <a href={classData.module_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline break-all">
+                <a href={classData.module_link} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline break-all max-w-[200px] truncate">
                   {classData.module_link}
                 </a>
+                <button 
+                  onClick={async () => {
+                    const newLink = prompt("Ubah Link Modul (Gunakan Google Drive dll):", classData.module_link || "");
+                    if (newLink !== null) {
+                      const { updateModuleLink } = await import("@/app/actions/pengajar");
+                      const res = await updateModuleLink(classData.id, newLink);
+                      if (res.error) alert(res.error);
+                      else window.location.reload();
+                    }
+                  }}
+                  className="ml-2 text-xs bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold py-1 px-2 rounded transition-colors"
+                >
+                  Ubah Link
+                </button>
+              </p>
+            ) : (
+              <p className="text-sm text-gray-600 flex flex-wrap items-center gap-2">
+                <BookOpen className="w-4 h-4 text-gray-400" />
+                <span className="font-bold text-gray-400">Modul belum tersedia.</span> 
+                <button 
+                  onClick={async () => {
+                    const newLink = prompt("Masukkan Link Modul (Gunakan Google Drive dll):");
+                    if (newLink) {
+                      const { updateModuleLink } = await import("@/app/actions/pengajar");
+                      const res = await updateModuleLink(classData.id, newLink);
+                      if (res.error) alert(res.error);
+                      else window.location.reload();
+                    }
+                  }}
+                  className="ml-2 text-xs bg-namsan-primary hover:bg-namsan-primary/90 text-white font-bold py-1 px-2 rounded transition-colors"
+                >
+                  Tambah Modul
+                </button>
               </p>
             )}
             
@@ -73,6 +106,17 @@ export default function PengajarKelasDetailClient({ classData }: { classData: an
             Daftar Siswa ({classData.enrollments.length})
           </div>
         </button>
+        <button
+          onClick={() => setActiveTab("MODUL")}
+          className={`px-4 py-3 font-bold text-sm transition-colors border-b-2 ${
+            activeTab === "MODUL" ? "border-namsan-primary text-namsan-primary" : "border-transparent text-gray-500 hover:text-gray-700"
+          }`}
+        >
+          <div className="flex items-center gap-2">
+            <BookOpen className="w-4 h-4" />
+            Materi Modul
+          </div>
+        </button>
       </div>
 
       {activeTab === "SISWA" && (
@@ -101,6 +145,23 @@ export default function PengajarKelasDetailClient({ classData }: { classData: an
               ))
             )}
           </div>
+        </div>
+      )}
+
+      {activeTab === "MODUL" && (
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 text-center space-y-4">
+          <BookOpen className="w-16 h-16 text-namsan-primary/50 mx-auto" />
+          <h2 className="text-xl font-bold text-namsan-text">Materi Kelas</h2>
+          {classData.module_link ? (
+            <div>
+              <p className="text-gray-500 mb-6">Materi modul telah dibagikan melalui tautan eksternal (Google Drive / Cloud).</p>
+              <a href={classData.module_link} target="_blank" rel="noreferrer" className="inline-block bg-namsan-primary hover:bg-namsan-primary/90 text-white font-bold py-3 px-8 rounded-xl transition-all shadow-sm">
+                Buka Tautan Modul
+              </a>
+            </div>
+          ) : (
+            <p className="text-gray-500">Materi modul belum tersedia. Silakan tambahkan link modul di atas agar siswa dapat mengaksesnya.</p>
+          )}
         </div>
       )}
     </div>
