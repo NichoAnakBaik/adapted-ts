@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { User, KeyRound, Save, AlertCircle, CheckCircle2, X } from "lucide-react";
 import { updateProfile, getUserProfile } from "@/app/actions/profile";
 
@@ -10,6 +11,11 @@ export default function ProfileSettingsModal({ isOpen, onClose }: { isOpen: bool
   const [success, setSuccess] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (isOpen) {
@@ -24,7 +30,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }: { isOpen: bool
     }
   }, [isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -46,8 +52,8 @@ export default function ProfileSettingsModal({ isOpen, onClose }: { isOpen: bool
     setIsSubmitting(false);
   };
 
-  return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+  return createPortal(
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="bg-white w-full max-w-lg rounded-2xl shadow-xl border border-gray-100 overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
         <div className="p-4 md:p-6 border-b border-gray-100 flex items-center justify-between bg-gray-50/50 shrink-0">
           <h2 className="text-lg md:text-xl font-bold text-namsan-text flex items-center gap-2">
@@ -130,6 +136,7 @@ export default function ProfileSettingsModal({ isOpen, onClose }: { isOpen: bool
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

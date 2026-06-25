@@ -13,7 +13,19 @@ export async function getUserNotifications() {
     take: 50, // Get the latest 50 notifications
   });
 
-  return { notifications };
+  const rolePrefix = session.user.role === "SISWA" ? "/siswa" : session.user.role === "PENGAJAR" ? "/pengajar" : "/admin";
+
+  const formattedNotifications = notifications.map(notif => {
+    let link = notif.link;
+    if (link) {
+      if (link.startsWith('/admin/')) link = link.replace('/admin/', `${rolePrefix}/`);
+      else if (link.startsWith('/pengajar/')) link = link.replace('/pengajar/', `${rolePrefix}/`);
+      else if (link.startsWith('/siswa/')) link = link.replace('/siswa/', `${rolePrefix}/`);
+    }
+    return { ...notif, link };
+  });
+
+  return { notifications: formattedNotifications };
 }
 
 export async function markNotificationAsRead(id: string) {
