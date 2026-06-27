@@ -193,6 +193,7 @@ export async function getExamToTake(id: string) {
         select: {
           id: true,
           type: true,
+          format: true,
           question_text: true,
           audio_reference: true,
           image_url: true,
@@ -259,7 +260,7 @@ export async function submitExam(formData: FormData) {
     const audioBlob = formData.get(`audio_${q.id}`) as File | null;
 
     // Auto grading AI Simulation for ALL formats (Enhanced Mock)
-    if (q.type === "MULTIPLE_CHOICE") {
+    if (q.type === "MULTIPLE_CHOICE" || q.format === "MULTIPLE_CHOICE") {
       if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
         score = 10;
         ai_feedback = "Tepat sekali! Pilihan Anda sangat akurat.";

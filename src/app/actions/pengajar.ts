@@ -286,16 +286,44 @@ export async function createExam(formData: FormData) {
     data: { class_id, title, description, time_limit, is_final }
   });
 
+  // Notify Admins
+  const { createNotificationsForUsers } = await import("./notification");
+  const admins = await prisma.user.findMany({ where: { role: "ADMIN" }, select: { id: true } });
+  if (admins.length > 0) {
+    const adminIds = admins.map(a => a.id);
+    await createNotificationsForUsers(
+      adminIds,
+      "Kuis Baru Diunggah",
+      `Pengajar telah membuat kuis baru "${title}" di kelas ${classData.name}.`,
+      is_final ? `/admin/ujian` : `/admin/kuis`
+    );
+  }
+
   return { success: true };
 }
 
 export async function toggleExamPublish(id: string, is_published: boolean) {
   const session = await checkPengajarAuth();
   // verify ownership
-  const exam = await prisma.exam.findUnique({ where: { id }, include: { class: true } });
+  const exam = await prisma.exam.findUnique({ where: { id }, include: { class: { include: { enrollments: true } } } });
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
   await prisma.exam.update({ where: { id }, data: { is_published } });
+  
+  if (is_published && exam && exam.class) {
+    const { createNotificationsForUsers } = await import("./notification");
+    const studentIds = exam.class.enrollments.map(e => e.student_id);
+    
+    if (studentIds.length > 0) {
+      await createNotificationsForUsers(
+        studentIds,
+        exam.is_final ? "Ujian Baru Diterbitkan" : "Kuis Baru Diterbitkan",
+        `${exam.is_final ? "Ujian" : "Kuis"} "${exam.title}" untuk kelas ${exam.class.name} sekarang sudah bisa dikerjakan.`,
+        exam.is_final ? `/siswa/ujian` : `/siswa/kuis`
+      );
+    }
+  }
+
   return { success: true };
 }
 
