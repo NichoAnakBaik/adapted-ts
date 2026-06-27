@@ -165,8 +165,24 @@ export async function getSessionAttendances(sessionId: string) {
   // Can be called by PENGAJAR or ADMIN
   await checkAuth(); 
   
+  const session = await prisma.attendanceSession.findUnique({
+    where: { id: sessionId },
+    select: { class_id: true }
+  });
+
+  if (!session) return [];
+
   return prisma.attendance.findMany({
-    where: { session_id: sessionId },
+    where: { 
+      session_id: sessionId,
+      student: {
+        enrollments: {
+          some: {
+            class_id: session.class_id
+          }
+        }
+      }
+    },
     include: {
       student: { select: { nama_lengkap: true, username: true } }
     },

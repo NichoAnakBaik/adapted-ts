@@ -42,7 +42,9 @@ export default function SiswaAbsensiClient({ classes }: { classes: any[] }) {
     setLoadingId(null);
   };
 
-  const todayStr = new Date().toISOString().split('T')[0];
+  const localNow = new Date();
+  const tzOffset = localNow.getTimezoneOffset() * 60000;
+  const todayStr = new Date(localNow.getTime() - tzOffset).toISOString().split('T')[0];
 
   return (
     <div className="max-w-5xl mx-auto space-y-6 pb-12">
