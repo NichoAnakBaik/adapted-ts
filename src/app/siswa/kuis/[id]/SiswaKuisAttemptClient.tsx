@@ -99,7 +99,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
       };
 
       mediaRecorder.onstop = () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+        const mimeType = mediaRecorderRef.current?.mimeType || 'audio/webm';
+        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
         const qId = exam.questions[currentQIndex].id;
         setAudioBlobs(prev => ({ ...prev, [qId]: audioBlob }));
         // Auto-fill answer text to indicate recorded
@@ -153,7 +154,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
       };
       
       if (audioBlobs[q.id]) {
-        formData.append(`audio_${q.id}`, audioBlobs[q.id], `recording_${q.id}.webm`);
+        const ext = audioBlobs[q.id].type.split('/')[1]?.split(';')[0] || 'webm';
+        formData.append(`audio_${q.id}`, audioBlobs[q.id], `recording_${q.id}.${ext}`);
       }
     });
 

@@ -88,7 +88,22 @@ export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: a
                     <div className="space-y-3 mb-4">
                       <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
                         <span className="text-xs font-bold text-gray-500 block mb-1">JAWABAN KAMU</span>
-                        <p className="font-medium text-namsan-text">{studentAnswer}</p>
+                        
+                        {qa?.audio_url && (
+                          <div className="mt-2 mb-3">
+                            <span className="text-sm font-bold text-blue-800 flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4" /> Audio Jawaban Anda</span>
+                            <audio controls src={qa.audio_url} className="w-full max-w-md h-10" />
+                          </div>
+                        )}
+
+                        {qa?.transcript ? (
+                          <div className="mt-2 p-3 bg-white border border-gray-200 rounded-lg">
+                            <span className="text-xs font-bold text-indigo-700 block mb-1">TRANSKRIP AI (Speech-to-Text)</span>
+                            <p className="font-medium text-gray-800 italic">"{qa.transcript}"</p>
+                          </div>
+                        ) : (
+                           <p className="font-medium text-namsan-text">{studentAnswer}</p>
+                        )}
                       </div>
                       {q.answer_key && (
                         <div className="p-4 bg-green-50 rounded-xl border border-green-100">

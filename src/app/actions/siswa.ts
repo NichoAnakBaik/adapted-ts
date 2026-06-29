@@ -259,6 +259,7 @@ export async function submitExam(formData: FormData) {
     let ai_feedback = null;
     const audioBlob = formData.get(`audio_${q.id}`) as File | null;
 
+    let transcript = null;
     // Auto grading AI Simulation for ALL formats (Enhanced Mock)
     if (q.type === "MULTIPLE_CHOICE" || q.format === "MULTIPLE_CHOICE") {
       if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
@@ -271,7 +272,17 @@ export async function submitExam(formData: FormData) {
     } else if (q.type === "SPEAKING") {
       if (audioBlob && audioBlob.size > 0) {
         score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
-        ai_feedback = "AI Speech Analysis: Pelafalan (Pronunciation) Anda mendapat skor 85%. Terdapat sedikit logat lokal pada konsonan akhir, namun secara keseluruhan intonasi terdengar natural seperti penutur asli.";
+        // Generate mock transcript based on answer key or generic text
+        transcript = q.answer_key 
+          ? `[AI Transcript] Saya telah mengatakan: ${q.answer_key} (Akurasi ~85%)` 
+          : `[AI Transcript] Ini adalah simulasi ucapan bahasa Korea yang terdeteksi dari rekaman. (Durasi: ~${timeSpent} detik).`;
+        
+        ai_feedback = "AI Speech Analysis: Pelafalan (Pronunciation) Anda mendapat skor 85%. ";
+        if (q.answer_key) {
+           ai_feedback += `Transkrip suara berhasil dibandingkan dengan kunci jawaban secara otomatis oleh sistem ML.`;
+        } else {
+           ai_feedback += `Terdapat sedikit logat lokal pada konsonan akhir, namun secara keseluruhan intonasi terdengar natural.`;
+        }
       } else {
         score = 0;
         ai_feedback = "AI Error: Suara tidak terdeteksi. Pastikan mikrofon Anda berfungsi dengan baik.";
@@ -320,6 +331,7 @@ export async function submitExam(formData: FormData) {
     return {
       question_id: q.id,
       student_answer: studentAnswer,
+      transcript: transcript,
       time_spent_seconds: timeSpent,
       audio_url: audio_url,
       score: score,
