@@ -258,6 +258,11 @@ export async function submitExam(formData: FormData) {
     let score = 0;
     let ai_feedback = null;
     const audioBlob = formData.get(`audio_${q.id}`) as File | null;
+    console.log(`[DEBUG] submitExam Question ID: ${q.id}`);
+    console.log(`[DEBUG] audioBlob present?`, !!audioBlob);
+    if (audioBlob) {
+      console.log(`[DEBUG] audioBlob size:`, audioBlob.size, 'type:', audioBlob.type, 'name:', audioBlob.name);
+    }
 
     let transcript = null;
     // Auto grading AI Simulation for ALL formats (Enhanced Mock)
