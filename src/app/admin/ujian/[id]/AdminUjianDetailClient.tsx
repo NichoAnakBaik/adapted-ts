@@ -37,18 +37,22 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
     formData.append("exam_id", exam.id);
     formData.append("type", activeTab);
 
-    let res;
-    if (editingQuestion) {
-      formData.append("id", editingQuestion.id);
-      res = await updateAdminQuestion(formData);
-    } else {
-      res = await createAdminQuestion(formData);
-    }
-    
-    if (res.success) {
-      window.location.reload();
-    } else {
-      setError(res.error || "Terjadi kesalahan");
+    try {
+      let res;
+      if (editingQuestion) {
+        formData.append("id", editingQuestion.id);
+        res = await updateAdminQuestion(formData);
+      } else {
+        res = await createAdminQuestion(formData);
+      }
+      
+      if (res.success) {
+        window.location.reload();
+      } else {
+        setError(res.error || "Terjadi kesalahan");
+      }
+    } catch (err: any) {
+      setError(err.message || "Gagal menyimpan soal. Pastikan file tidak terlalu besar (maks 50MB).");
     }
   };
 

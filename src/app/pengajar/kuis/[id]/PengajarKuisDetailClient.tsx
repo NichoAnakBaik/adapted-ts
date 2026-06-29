@@ -22,19 +22,23 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
     const formData = new FormData(e.currentTarget);
     formData.append("exam_id", exam.id);
     
-    let res;
-    if (editingQuestion) {
-      formData.append("id", editingQuestion.id);
-      res = await updateQuestion(formData);
-    } else {
-      res = await createQuestion(formData);
-    }
-    
-    if (res.error) {
-      setError(res.error);
-    } else {
-      setShowForm(false);
-      window.location.reload();
+    try {
+      let res;
+      if (editingQuestion) {
+        formData.append("id", editingQuestion.id);
+        res = await updateQuestion(formData);
+      } else {
+        res = await createQuestion(formData);
+      }
+      
+      if (res.error) {
+        setError(res.error);
+      } else {
+        setShowForm(false);
+        window.location.reload();
+      }
+    } catch (err: any) {
+      setError(err.message || "Gagal menyimpan soal. Pastikan file tidak terlalu besar (maks 20MB).");
     }
   };
 
