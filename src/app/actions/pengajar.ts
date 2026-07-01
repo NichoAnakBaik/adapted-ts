@@ -393,6 +393,9 @@ export async function createQuestion(formData: FormData) {
   const audio_file = formData.get("audio_reference") as File | null;
   const image_file = formData.get("image_url") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
+  
+  console.log(`[DEBUG] createQuestion - audio_file:`, !!audio_file, audio_file?.size, audio_file?.type, audio_file?.name);
+  console.log(`[DEBUG] createQuestion - image_file:`, !!image_file, image_file?.size, image_file?.type, image_file?.name);
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
   const option_c = formData.get("option_c") as string | null;
