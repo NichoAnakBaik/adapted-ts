@@ -404,7 +404,10 @@ export async function createQuestion(formData: FormData) {
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
   const audio_reference = audio_file && audio_file.size > 0 ? await saveUploadedFile(audio_file, "kuis_audio") : null;
+  if (audio_file && audio_file.size > 0 && !audio_reference) return { error: "Sistem gagal menyimpan file audio. Coba gunakan file lain atau pastikan formatnya benar." };
+  
   const image_url = image_file && image_file.size > 0 ? await saveUploadedFile(image_file, "kuis_image") : null;
+  if (image_file && image_file.size > 0 && !image_url) return { error: "Sistem gagal menyimpan file gambar." };
 
   await prisma.question.create({
     data: { 
@@ -441,10 +444,14 @@ export async function updateQuestion(formData: FormData) {
   };
 
   if (audio_file && audio_file.size > 0) {
-    updateData.audio_reference = await saveUploadedFile(audio_file, "kuis_audio");
+    const url = await saveUploadedFile(audio_file, "kuis_audio");
+    if (!url) return { error: "Sistem gagal menyimpan file audio. Coba gunakan file lain." };
+    updateData.audio_reference = url;
   }
   if (image_file && image_file.size > 0) {
-    updateData.image_url = await saveUploadedFile(image_file, "kuis_image");
+    const url = await saveUploadedFile(image_file, "kuis_image");
+    if (!url) return { error: "Sistem gagal menyimpan file gambar." };
+    updateData.image_url = url;
   }
 
   await prisma.question.update({

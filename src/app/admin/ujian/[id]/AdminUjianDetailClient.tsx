@@ -196,7 +196,7 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                 </div>
                 {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
                 
-                <form onSubmit={handleCreateQuestion} className="space-y-4">
+                <form onSubmit={handleCreateQuestion} encType="multipart/form-data" className="space-y-4">
                   <div>
                     <label className="block text-sm font-bold text-gray-700 mb-2">Teks Soal / Pertanyaan</label>
                     <KoreanTextarea name="question_text" defaultValue={editingQuestion?.question_text || ""} required rows={3} placeholder="Masukkan soal dalam bahasa Indonesia atau Korea..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />

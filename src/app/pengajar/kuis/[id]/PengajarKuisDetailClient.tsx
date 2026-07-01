@@ -131,7 +131,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
             </div>
             {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
             
-            <form onSubmit={handleCreateQuestion} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <form onSubmit={handleCreateQuestion} encType="multipart/form-data" className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Kategori Kemahiran</label>
                 <select 
