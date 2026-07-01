@@ -4,6 +4,9 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { saveUploadedFile } from "@/lib/upload";
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
 
 // Basic authorization check for Siswa
 async function checkSiswaAuth() {
@@ -230,7 +233,7 @@ export async function submitExam(formData: FormData) {
   const answersJsonString = formData.get("answers_json") as string;
   if (!examId || !answersJsonString) return { error: "Data tidak lengkap." };
 
-  const answersData: Record<string, { student_answer: string, time_spent_seconds: number }> = JSON.parse(answersJsonString);
+  const answersData: Record<string, { student_answer: string, time_spent_seconds: number, has_audio?: boolean }> = JSON.parse(answersJsonString);
 
   // Prevent duplicate submissions
   const existingAttempt = await prisma.examAttempt.findFirst({
@@ -252,16 +255,38 @@ export async function submitExam(formData: FormData) {
   let autoGradedQuestions = 0;
 
   const questionAttemptData = await Promise.all(questions.map(async (q) => {
-    const data = answersData[q.id] || { student_answer: "", time_spent_seconds: 0 };
+    const data = answersData[q.id] || { student_answer: "", time_spent_seconds: 0, has_audio: false };
     const studentAnswer = data.student_answer;
     const timeSpent = data.time_spent_seconds;
     let score = 0;
     let ai_feedback = null;
-    const audioBlob = formData.get(`audio_${q.id}`) as File | null;
-    console.log(`[DEBUG] submitExam Question ID: ${q.id}`);
-    console.log(`[DEBUG] audioBlob present?`, !!audioBlob);
-    if (audioBlob) {
-      console.log(`[DEBUG] audioBlob size:`, audioBlob.size, 'type:', audioBlob.type, 'name:', audioBlob.name);
+    
+    // Instead of File, we get the base64 string
+    const audioB64 = formData.get(`audio_b64_${q.id}`) as string | null;
+    
+    let audio_url = null;
+    if (audioB64) {
+      try {
+        const matches = audioB64.match(/^data:(.+);base64,(.+)$/);
+        if (matches && matches.length === 3) {
+          const mimeType = matches[1];
+          const base64Data = matches[2];
+          const ext = mimeType.split('/')[1]?.split(';')[0] || 'webm';
+          
+          const buffer = Buffer.from(base64Data, "base64");
+          const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
+          const subfolder = "student_speaking";
+          const uploadsDir = path.join(process.cwd(), "public", "uploads", subfolder);
+          
+          await fs.mkdir(uploadsDir, { recursive: true });
+          const filePath = path.join(uploadsDir, uniqueFilename);
+          await fs.writeFile(filePath, buffer);
+          
+          audio_url = `/uploads/${subfolder}/${uniqueFilename}`;
+        }
+      } catch (err) {
+        console.error("Failed to decode and save base64 audio:", err);
+      }
     }
 
     let transcript = null;
@@ -275,7 +300,7 @@ export async function submitExam(formData: FormData) {
         ai_feedback = `Jawaban kurang tepat. Pilihan Anda tidak sesuai konteks. Coba tinjau ulang materi ini.`;
       }
     } else if (q.type === "SPEAKING") {
-      if (audioBlob && audioBlob.size > 0) {
+      if (audioB64 || data.has_audio) {
         score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
         // Generate mock transcript based on answer key or generic text
         transcript = q.answer_key 
@@ -327,10 +352,9 @@ export async function submitExam(formData: FormData) {
     totalScore += score;
     autoGradedQuestions++;
 
-    // Handle audio upload for SPEAKING or ESSAY audio responses
-    let audio_url = null;
-    if (audioBlob && audioBlob.size > 0) {
-      audio_url = await saveUploadedFile(audioBlob, "student_speaking");
+    if (audio_url === null && data.has_audio) {
+       ai_feedback = "AI Error: Gagal menyimpan rekaman suara ke server.";
+       score = 0;
     }
 
     return {

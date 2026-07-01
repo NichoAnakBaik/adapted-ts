@@ -101,15 +101,20 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
       mediaRecorder.onstop = () => {
         const chunkType = audioChunksRef.current[0]?.type;
         const recorderType = mediaRecorderRef.current?.mimeType;
-        const actualType = chunkType || recorderType || '';
+        const actualType = chunkType || recorderType || 'audio/webm'; // fallback
         const audioBlob = new Blob(audioChunksRef.current, { type: actualType });
         const qId = exam.questions[currentQIndex].id;
+        
         setAudioBlobs(prev => ({ ...prev, [qId]: audioBlob }));
         // Auto-fill answer text to indicate recorded
         setAnswers(prev => ({ ...prev, [qId]: "Recorded Audio" }));
+        
+        // Safely stop tracks after the recorder has fully stopped processing
+        stream.getTracks().forEach(track => track.stop());
       };
 
-      mediaRecorder.start();
+      // Collect data every 250ms to ensure chunks are pushed reliably
+      mediaRecorder.start(250);
       setIsRecording(true);
     } catch (err) {
       setError("Gagal mengakses mikrofon. Pastikan Anda telah memberikan izin.");
@@ -118,15 +123,10 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      try {
-        mediaRecorderRef.current.requestData();
-      } catch (e) {
-        // requestData might throw if state is not recording, safely ignore
-      }
+      // Calling stop will trigger ondataavailable one last time, then onstop
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      // Stop all tracks to release microphone
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+      // Track stopping is now handled inside onstop
     }
   };
 
@@ -160,22 +160,40 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         time_spent_seconds: finalTime
       };
       
+      // Helper function inside handleSubmit
+      
       if (audioBlobs[q.id]) {
-        const typeStr = audioBlobs[q.id].type;
-        const ext = typeStr ? (typeStr.split('/')[1]?.split(';')[0] || 'mp4') : 'mp4';
-        formData.append(`audio_${q.id}`, audioBlobs[q.id], `recording_${q.id}.${ext}`);
+        // We will encode it as base64 and process it in the server
+        answersData[q.id].has_audio = true;
       }
     });
 
+    for (const q of exam.questions) {
+      if (audioBlobs[q.id]) {
+        const reader = new FileReader();
+        const base64Promise = new Promise<string>((resolve) => {
+          reader.onloadend = () => resolve(reader.result as string);
+          reader.readAsDataURL(audioBlobs[q.id]);
+        });
+        const base64 = await base64Promise;
+        formData.append(`audio_b64_${q.id}`, base64);
+      }
+    }
+
     formData.append("answers_json", JSON.stringify(answersData));
 
-    const res = await submitExam(formData);
-    
-    if (res.error) {
-      setError(res.error);
+    try {
+      const res = await submitExam(formData);
+      
+      if (res.error) {
+        setError(res.error);
+        setIsSubmitting(false);
+      } else if (res.success && res.score !== undefined) {
+        setResult({ score: res.score });
+      }
+    } catch (err: any) {
+      setError(err.message || "Gagal mengumpulkan kuis. Pastikan server aktif dan ukuran file tidak terlalu besar.");
       setIsSubmitting(false);
-    } else if (res.success && res.score !== undefined) {
-      setResult({ score: res.score });
     }
   };
 
