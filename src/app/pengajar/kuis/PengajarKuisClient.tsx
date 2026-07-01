@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createExam, updateExam, deleteExam, toggleExamPublish } from "@/app/actions/pengajar";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 
-export default function PengajarKuisClient({ initialExams, classes }: { initialExams: any[], classes: any[] }) {
+export default function PengajarKuisClient({ initialExams, classes, currentClassId }: { initialExams: any[], classes: any[], currentClassId?: string }) {
   const [exams, setExams] = useState(initialExams);
   const [showForm, setShowForm] = useState(false);
   const [editingExam, setEditingExam] = useState<any>(null);
@@ -75,16 +75,23 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
             <ClipboardList className="w-8 h-8 text-namsan-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Kuis Kelas</h1>
-            <p className="text-sm text-namsan-text-muted">Buat dan pantau kuis khusus untuk kelas yang Anda ampu.</p>
+            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Kuis {currentClassId && classes[0] ? `- ${classes[0].name}` : 'Kelas'}</h1>
+            <p className="text-sm text-namsan-text-muted">Buat dan pantau kuis khusus untuk kelas ini.</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          className="bg-namsan-primary hover:bg-namsan-primary/90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
-        >
-          <Plus className="w-5 h-5" /> Buat Kuis Baru
-        </button>
+        <div className="flex items-center gap-3">
+          {currentClassId && (
+            <Link href="/pengajar/kuis" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl font-bold transition-colors">
+              Kembali
+            </Link>
+          )}
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-namsan-primary hover:bg-namsan-primary/90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
+          >
+            <Plus className="w-5 h-5" /> Buat Kuis Baru
+          </button>
+        </div>
       </div>
 
       {showForm && (
@@ -99,7 +106,16 @@ export default function PengajarKuisClient({ initialExams, classes }: { initialE
             <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
-                <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white" defaultValue={editingExam?.class_id || ""} disabled={!!editingExam}>
+                {currentClassId ? (
+                  <input type="hidden" name="class_id" value={currentClassId} />
+                ) : null}
+                <select 
+                  name={currentClassId ? "class_id_dummy" : "class_id"} 
+                  required={!currentClassId} 
+                  className="w-full p-2.5 border rounded-lg bg-white disabled:bg-gray-100" 
+                  defaultValue={editingExam?.class_id || currentClassId || ""} 
+                  disabled={!!editingExam || !!currentClassId}
+                >
                   <option value="">-- Pilih Kelas --</option>
                   {classes.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>

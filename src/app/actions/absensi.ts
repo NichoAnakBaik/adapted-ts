@@ -152,12 +152,15 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
         const result = await model.generateContent(prompt);
         let text = result.response.text();
         
-        // Clean up possible markdown fences
-        text = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+        // Robust extraction: Find the first '[' and last ']'
+        const startIndex = text.indexOf('[');
+        const endIndex = text.lastIndexOf(']');
         
-        const questionsArray = JSON.parse(text);
+        if (startIndex !== -1 && endIndex !== -1) {
+          text = text.substring(startIndex, endIndex + 1);
+          const questionsArray = JSON.parse(text);
 
-        if (Array.isArray(questionsArray) && questionsArray.length > 0) {
+          if (Array.isArray(questionsArray) && questionsArray.length > 0) {
           await prisma.exam.create({
             data: {
               class_id: session.class_id,
@@ -180,6 +183,12 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
               }
             }
           });
+          } else {
+            console.error("AI returned malformed or empty array:", text);
+            // We just log because throwing error would break the save flow
+          }
+        } else {
+          console.error("Could not find JSON array in AI response:", text);
         }
       } catch (error) {
         console.error("Failed to generate AI quiz from attendance:", error);
