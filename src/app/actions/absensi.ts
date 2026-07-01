@@ -3,6 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 async function checkAuth(role?: string) {
   const session = await getSession();
@@ -122,7 +123,7 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
   const description = formData.get("description") as string;
   const title = formData.get("title") as string;
 
-  await prisma.attendanceSession.update({
+  const session = await prisma.attendanceSession.update({
     where: { id: sessionId },
     data: {
       title,
@@ -130,6 +131,61 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
       date: dateStr ? new Date(dateStr) : null
     }
   });
+
+  // AI Quiz Generation logic
+  if (description && description.length > 10) {
+    const examTitle = `Latihan Harian: ${title}`;
+    const existingExam = await prisma.exam.findFirst({
+      where: {
+        class_id: session.class_id,
+        title: examTitle
+      }
+    });
+
+    if (!existingExam) {
+      try {
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        
+        const prompt = `Anda adalah guru bahasa Korea ahli. Berdasarkan deskripsi materi pertemuan berikut ini: "${description}"\n\nBuatkan 5 soal latihan pilihan ganda tingkat dasar yang relevan dengan materi tersebut untuk menguji pemahaman siswa. Jika materi tidak spesifik, buatkan soal bahasa Korea dasar secara umum.\nAnda WAJIB merespons dengan JSON murni tanpa format markdown (tanpa backticks \`\`\`), dalam format array of objects persis seperti ini:\n[\n  {\n    "question_text": "Apa arti kata X?",\n    "option_a": "A",\n    "option_b": "B",\n    "option_c": "C",\n    "option_d": "D",\n    "answer_key": "A"\n  }\n]`;
+
+        const result = await model.generateContent(prompt);
+        let text = result.response.text();
+        
+        // Clean up possible markdown fences
+        text = text.replace(/```json/gi, "").replace(/```/g, "").trim();
+        
+        const questionsArray = JSON.parse(text);
+
+        if (Array.isArray(questionsArray) && questionsArray.length > 0) {
+          await prisma.exam.create({
+            data: {
+              class_id: session.class_id,
+              title: examTitle,
+              description: `Latihan otomatis berdasarkan materi absensi: ${description}`,
+              is_published: true,
+              is_final: false,
+              questions: {
+                create: questionsArray.slice(0, 5).map((q: any) => ({
+                  type: "READING", // Safest type
+                  format: "MULTIPLE_CHOICE",
+                  question_text: q.question_text || "Pertanyaan",
+                  option_a: q.option_a || "A",
+                  option_b: q.option_b || "B",
+                  option_c: q.option_c || "C",
+                  option_d: q.option_d || "D",
+                  answer_key: q.answer_key || "A",
+                  difficulty: 2
+                }))
+              }
+            }
+          });
+        }
+      } catch (error) {
+        console.error("Failed to generate AI quiz from attendance:", error);
+      }
+    }
+  }
 
   return { success: true };
 }
