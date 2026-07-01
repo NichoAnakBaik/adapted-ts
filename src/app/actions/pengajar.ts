@@ -4,6 +4,43 @@ import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import { saveUploadedFile } from "@/lib/upload";
+import fs from "fs/promises";
+import path from "path";
+import crypto from "crypto";
+
+async function saveBase64File(base64String: string, subfolder: string): Promise<string | null> {
+  try {
+    const matches = base64String.match(/^data:(.+);base64,(.+)$/);
+    if (!matches || matches.length !== 3) return null;
+    
+    const mimeType = matches[1];
+    const base64Data = matches[2];
+    
+    // basic extension inference
+    let ext = "bin";
+    if (mimeType.includes("png")) ext = "png";
+    else if (mimeType.includes("jpeg") || mimeType.includes("jpg")) ext = "jpg";
+    else if (mimeType.includes("mp3")) ext = "mp3";
+    else if (mimeType.includes("mp4")) ext = "mp4";
+    else if (mimeType.includes("wav")) ext = "wav";
+    else if (mimeType.includes("webm")) ext = "webm";
+    else ext = mimeType.split('/')[1]?.split(';')[0] || 'bin';
+    
+    const buffer = Buffer.from(base64Data, "base64");
+    const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
+    const uploadsDir = path.join(process.cwd(), "public", "uploads", subfolder);
+    
+    await fs.mkdir(uploadsDir, { recursive: true });
+    const filePath = path.join(uploadsDir, uniqueFilename);
+    await fs.writeFile(filePath, buffer);
+    
+    return `/uploads/${subfolder}/${uniqueFilename}`;
+  } catch (err) {
+    console.error("Failed to save base64 file:", err);
+    return null;
+  }
+}
+
 
 // Basic authorization check for Pengajar
 async function checkPengajarAuth() {
@@ -423,11 +460,19 @@ export async function createQuestion(formData: FormData) {
   const exam = await prisma.exam.findUnique({ where: { id: exam_id }, include: { class: true } });
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
-  const audio_reference = audio_file && audio_file.size > 0 ? await saveUploadedFile(audio_file, "kuis_audio") : null;
-  if (audio_file && audio_file.size > 0 && !audio_reference) return { error: "Sistem gagal menyimpan file audio. Coba gunakan file lain atau pastikan formatnya benar." };
+  let audio_reference = null;
+  const audio_b64 = formData.get("audio_b64") as string | null;
+  if (audio_b64) {
+    audio_reference = await saveBase64File(audio_b64, "kuis_audio");
+    if (!audio_reference) return { error: "Sistem gagal menyimpan file audio." };
+  }
   
-  const image_url = image_file && image_file.size > 0 ? await saveUploadedFile(image_file, "kuis_image") : null;
-  if (image_file && image_file.size > 0 && !image_url) return { error: "Sistem gagal menyimpan file gambar." };
+  let image_url = null;
+  const image_b64 = formData.get("image_b64") as string | null;
+  if (image_b64) {
+    image_url = await saveBase64File(image_b64, "kuis_image");
+    if (!image_url) return { error: "Sistem gagal menyimpan file gambar." };
+  }
 
   await prisma.question.create({
     data: { 
@@ -463,13 +508,16 @@ export async function updateQuestion(formData: FormData) {
     option_a, option_b, option_c, option_d
   };
 
-  if (audio_file && audio_file.size > 0) {
-    const url = await saveUploadedFile(audio_file, "kuis_audio");
+  const audio_b64 = formData.get("audio_b64") as string | null;
+  if (audio_b64) {
+    const url = await saveBase64File(audio_b64, "kuis_audio");
     if (!url) return { error: "Sistem gagal menyimpan file audio. Coba gunakan file lain." };
     updateData.audio_reference = url;
   }
-  if (image_file && image_file.size > 0) {
-    const url = await saveUploadedFile(image_file, "kuis_image");
+  
+  const image_b64 = formData.get("image_b64") as string | null;
+  if (image_b64) {
+    const url = await saveBase64File(image_b64, "kuis_image");
     if (!url) return { error: "Sistem gagal menyimpan file gambar." };
     updateData.image_url = url;
   }

@@ -19,10 +19,26 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const handleCreateQuestion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     formData.append("exam_id", exam.id);
     
     try {
+      // Convert File inputs to Base64 safely
+      const audioFile = formData.get("audio_reference") as File | null;
+      if (audioFile && audioFile.size > 0) {
+        const base64 = await fileToBase64(audioFile);
+        formData.append("audio_b64", base64);
+        formData.delete("audio_reference"); // Remove original file
+      }
+
+      const imageFile = formData.get("image_url") as File | null;
+      if (imageFile && imageFile.size > 0) {
+        const base64 = await fileToBase64(imageFile);
+        formData.append("image_b64", base64);
+        formData.delete("image_url"); // Remove original file
+      }
+
       let res;
       if (editingQuestion) {
         formData.append("id", editingQuestion.id);
@@ -38,8 +54,17 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
         window.location.reload();
       }
     } catch (err: any) {
-      setError(err.message || "Gagal menyimpan soal. Pastikan file tidak terlalu besar (maks 20MB).");
+      setError(err.message || "Gagal menyimpan soal. Pastikan file tidak terlalu besar.");
     }
+  };
+
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = error => reject(error);
+    });
   };
 
   const openEditForm = (q: any) => {
