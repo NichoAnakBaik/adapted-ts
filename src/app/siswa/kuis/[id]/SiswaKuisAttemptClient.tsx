@@ -58,7 +58,6 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
   // Speaking recording state
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
 
   const recordTimeSpent = () => {
     if (startTime === 0) return;
@@ -91,19 +90,18 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       const mediaRecorder = new MediaRecorder(stream);
       mediaRecorderRef.current = mediaRecorder;
-      audioChunksRef.current = [];
+      const chunks: Blob[] = [];
 
       mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
+        if (event.data && event.data.size > 0) {
+          chunks.push(event.data);
         }
       };
 
       mediaRecorder.onstop = () => {
-        const chunkType = audioChunksRef.current[0]?.type;
-        const recorderType = mediaRecorderRef.current?.mimeType;
-        const actualType = chunkType || recorderType || 'audio/webm'; // fallback
-        const audioBlob = new Blob(audioChunksRef.current, { type: actualType });
+        // Build the blob using the mimeType reported by the recorder
+        const mimeType = mediaRecorder.mimeType || 'audio/webm';
+        const audioBlob = new Blob(chunks, { type: mimeType });
         const qId = exam.questions[currentQIndex].id;
         
         setAudioBlobs(prev => ({ ...prev, [qId]: audioBlob }));
@@ -115,8 +113,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         stream.getTracks().forEach(track => track.stop());
       };
 
-      // Collect data every 250ms to ensure chunks are pushed reliably
-      mediaRecorder.start(250);
+      // Start without timeslice to ensure proper file headers (fixes Chrome 0:00 duration issue)
+      mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
       setError("Gagal mengakses mikrofon. Pastikan Anda telah memberikan izin.");
@@ -125,10 +123,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
 
   const stopRecording = () => {
     if (mediaRecorderRef.current && isRecording) {
-      // Calling stop will trigger ondataavailable one last time, then onstop
       mediaRecorderRef.current.stop();
       setIsRecording(false);
-      // Track stopping is now handled inside onstop
     }
   };
 
