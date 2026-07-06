@@ -281,20 +281,6 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
       <div className="flex flex-col lg:flex-row gap-6 items-start">
         {/* Main Content Area */}
         <div className="flex-1 w-full space-y-6">
-          {/* Progress Bar & Header Stats */}
-          <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4">
-        <div className="flex items-center justify-between text-sm font-bold text-namsan-text-muted">
-          <span>Soal {currentQIndex + 1} dari {exam.questions.length}</span>
-          <span>Terjawab: {Object.keys(answers).filter(k => answers[k] !== "").length}</span>
-        </div>
-        {/* Visual Progress Bar */}
-        <div className="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden">
-          <div 
-            className="h-full bg-gradient-to-r from-namsan-primary to-blue-500 transition-all duration-500 ease-out"
-            style={{ width: `${((currentQIndex + 1) / exam.questions.length) * 100}%` }}
-          />
-        </div>
-      </div>
 
       {/* Question Card with Animation */}
       <div 
@@ -451,7 +437,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         </div>
 
         {/* Navigator Grid Panel */}
-        <div className="w-full lg:w-80 shrink-0 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 lg:sticky lg:top-6 order-first lg:order-last">
+        <div className="w-full lg:w-80 shrink-0 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 lg:sticky lg:top-6">
           <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
             <LayoutGrid className="w-5 h-5 text-namsan-primary" /> Navigasi Soal
           </h3>
