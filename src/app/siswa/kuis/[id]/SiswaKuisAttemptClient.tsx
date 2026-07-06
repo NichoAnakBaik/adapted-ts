@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { ArrowLeft, Clock, CheckCircle2, PlayCircle, AlertCircle, ArrowRight, Mic, Square, Timer } from "lucide-react";
+import { ArrowLeft, Clock, CheckCircle2, PlayCircle, AlertCircle, ArrowRight, Mic, Square, Timer, LayoutGrid } from "lucide-react";
 import Link from "next/link";
 import { submitExam } from "@/app/actions/siswa";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
@@ -93,6 +93,13 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
     if (currentQIndex > 0) {
       recordTimeSpent();
       setCurrentQIndex(prev => prev - 1);
+    }
+  };
+
+  const jumpToQuestion = (index: number) => {
+    if (index >= 0 && index < exam.questions.length && index !== currentQIndex) {
+      recordTimeSpent();
+      setCurrentQIndex(index);
     }
   };
 
@@ -271,8 +278,11 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         </div>
       )}
 
-      {/* Progress Bar & Header Stats */}
-      <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4">
+      <div className="flex flex-col lg:flex-row gap-6 items-start">
+        {/* Main Content Area */}
+        <div className="flex-1 w-full space-y-6">
+          {/* Progress Bar & Header Stats */}
+          <div className="bg-white p-4 md:p-6 rounded-2xl shadow-sm border border-gray-100 flex flex-col gap-4">
         <div className="flex items-center justify-between text-sm font-bold text-namsan-text-muted">
           <span>Soal {currentQIndex + 1} dari {exam.questions.length}</span>
           <span>Terjawab: {Object.keys(answers).filter(k => answers[k] !== "").length}</span>
@@ -437,6 +447,53 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
             <span className="hidden sm:inline">Selanjutnya</span> <ArrowRight className="w-5 h-5" />
           </button>
         )}
+      </div>
+        </div>
+
+        {/* Navigator Grid Panel */}
+        <div className="w-full lg:w-80 shrink-0 bg-white p-6 rounded-3xl shadow-sm border border-gray-100 lg:sticky lg:top-6 order-first lg:order-last">
+          <h3 className="font-bold text-gray-800 mb-4 flex items-center gap-2">
+            <LayoutGrid className="w-5 h-5 text-namsan-primary" /> Navigasi Soal
+          </h3>
+          
+          <div className="grid grid-cols-5 sm:grid-cols-8 lg:grid-cols-5 gap-2 md:gap-3">
+            {exam.questions.map((q: any, index: number) => {
+              const isCurrent = index === currentQIndex;
+              const isAnswered = answers[q.id] && answers[q.id].trim() !== "";
+              return (
+                <button
+                  key={q.id}
+                  onClick={() => jumpToQuestion(index)}
+                  className={`relative w-full aspect-square rounded-xl flex items-center justify-center font-bold text-sm transition-all duration-200 
+                    ${isCurrent ? 'ring-4 ring-blue-200 ring-offset-1 scale-105 z-10' : 'hover:scale-105 hover:shadow-sm'}
+                    ${isAnswered 
+                      ? 'bg-namsan-primary text-white shadow-sm' 
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                    }
+                  `}
+                >
+                  {index + 1}
+                  {isCurrent && <div className="absolute -bottom-1 w-4 h-1 bg-blue-500 rounded-full" />}
+                </button>
+              );
+            })}
+          </div>
+          
+          <div className="mt-6 space-y-3 text-xs md:text-sm text-gray-600 font-medium bg-gray-50 p-4 rounded-xl">
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 rounded-md bg-namsan-primary shadow-sm"></div> Sudah Dijawab
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 rounded-md bg-gray-100 border border-gray-200"></div> Belum Dijawab
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-4 h-4 rounded-md border-4 border-blue-200 flex items-center justify-center">
+                <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+              </div> 
+              Posisi Saat Ini
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
