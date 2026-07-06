@@ -267,7 +267,7 @@ export async function submitExam(formData: FormData) {
     let audio_url = null;
     if (audioB64) {
       try {
-        const matches = audioB64.match(/^data:(.+);base64,(.+)$/);
+        const matches = audioB64.match(/^data:(.*?);base64,(.+)$/);
         if (matches && matches.length === 3) {
           const mimeType = matches[1];
           const base64Data = matches[2];
