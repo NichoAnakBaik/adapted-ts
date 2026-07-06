@@ -99,13 +99,20 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
       };
 
       mediaRecorder.onstop = () => {
-        // Build the blob using the mimeType reported by the recorder
         const mimeType = mediaRecorder.mimeType || 'audio/webm';
         const audioBlob = new Blob(chunks, { type: mimeType });
         const qId = exam.questions[currentQIndex].id;
         
         setAudioBlobs(prev => ({ ...prev, [qId]: audioBlob }));
-        setAudioUrls(prev => ({ ...prev, [qId]: URL.createObjectURL(audioBlob) }));
+        
+        // Use FileReader to create a stable base64 Data URL for the preview
+        const reader = new FileReader();
+        reader.readAsDataURL(audioBlob);
+        reader.onloadend = () => {
+          const base64Url = reader.result as string;
+          setAudioUrls(prev => ({ ...prev, [qId]: base64Url }));
+        };
+
         // Auto-fill answer text to indicate recorded
         setAnswers(prev => ({ ...prev, [qId]: "Recorded Audio" }));
         
