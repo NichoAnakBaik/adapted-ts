@@ -59,6 +59,17 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
 
+  // Use refs to avoid stale closures in the timer's auto-submit
+  const answersRef = useRef(answers);
+  const audioBlobsRef = useRef(audioBlobs);
+  const timeSpentRef = useRef(timeSpent);
+  
+  useEffect(() => {
+    answersRef.current = answers;
+    audioBlobsRef.current = audioBlobs;
+    timeSpentRef.current = timeSpent;
+  }, [answers, audioBlobs, timeSpent]);
+
   const recordTimeSpent = () => {
     if (startTime === 0) return;
     const qId = exam.questions[currentQIndex]?.id;
@@ -148,31 +159,27 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
     // Prepare JSON for answers and time
     const answersData: any = {};
     exam.questions.forEach((q: any) => {
-      // Re-calculate the final time for the current question specifically just to be safe
-      let finalTime = timeSpent[q.id] || 0;
+      let finalTime = timeSpentRef.current[q.id] || 0;
       if (q.id === exam.questions[currentQIndex].id) {
         finalTime += Math.floor((Date.now() - startTime) / 1000);
       }
 
       answersData[q.id] = {
-        student_answer: answers[q.id] || "",
+        student_answer: answersRef.current[q.id] || "",
         time_spent_seconds: finalTime
       };
       
-      // Helper function inside handleSubmit
-      
-      if (audioBlobs[q.id]) {
-        // We will encode it as base64 and process it in the server
+      if (audioBlobsRef.current[q.id]) {
         answersData[q.id].has_audio = true;
       }
     });
 
     for (const q of exam.questions) {
-      if (audioBlobs[q.id]) {
+      if (audioBlobsRef.current[q.id]) {
         const reader = new FileReader();
         const base64Promise = new Promise<string>((resolve) => {
           reader.onloadend = () => resolve(reader.result as string);
-          reader.readAsDataURL(audioBlobs[q.id]);
+          reader.readAsDataURL(audioBlobsRef.current[q.id]);
         });
         const base64 = await base64Promise;
         formData.append(`audio_b64_${q.id}`, base64);
