@@ -120,8 +120,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         stream.getTracks().forEach(track => track.stop());
       };
 
-      // Start without timeslice to ensure proper file headers (fixes Chrome 0:00 duration issue)
-      mediaRecorder.start();
+      // Start with timeslice to ensure proper file headers and duration metadata
+      mediaRecorder.start(250);
       setIsRecording(true);
     } catch (err) {
       setError("Gagal mengakses mikrofon. Pastikan Anda telah memberikan izin.");
