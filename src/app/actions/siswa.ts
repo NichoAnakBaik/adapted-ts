@@ -621,7 +621,7 @@ async function processAudioTranscriptionBackground(
   // 6. Recalculate Total Score for the Exam Attempt
   try {
     const allAttempts = await prisma.questionAttempt.findMany({
-      where: { attempt_id: attemptId }
+      where: { exam_attempt_id: attemptId }
     });
     const totalAchieved = allAttempts.reduce((sum, a) => sum + (a.score || 0), 0);
     const maxPossible = allAttempts.length * 10;
