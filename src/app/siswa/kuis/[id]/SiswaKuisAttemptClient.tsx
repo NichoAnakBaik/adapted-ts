@@ -115,8 +115,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         stream.getTracks().forEach(track => track.stop());
       };
 
-      // Do not use timeslice to ensure the final Blob has proper headers and is playable
-      mediaRecorder.start();
+      // Collect data every 250ms to ensure chunks are pushed reliably
+      mediaRecorder.start(250);
       setIsRecording(true);
     } catch (err) {
       setError("Gagal mengakses mikrofon. Pastikan Anda telah memberikan izin.");
