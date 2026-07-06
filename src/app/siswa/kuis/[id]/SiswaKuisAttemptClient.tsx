@@ -382,6 +382,9 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
                     <p className="text-sm font-bold text-gray-800">Rekaman Tersimpan</p>
                   </div>
                   <audio key={audioUrls[currentQ.id] || "new"} controls src={audioUrls[currentQ.id] || ""} className="w-full h-10 outline-none" />
+                  {audioBlobs[currentQ.id] && (
+                    <p className="text-xs text-gray-400 mt-1">Ukuran file: {Math.round(audioBlobs[currentQ.id].size / 1024)} KB</p>
+                  )}
                 </div>
               )}
             </div>
