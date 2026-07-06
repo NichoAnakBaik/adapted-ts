@@ -104,14 +104,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         const qId = exam.questions[currentQIndex].id;
         
         setAudioBlobs(prev => ({ ...prev, [qId]: audioBlob }));
-        
-        // Use FileReader to create a stable base64 Data URL for the preview
-        const reader = new FileReader();
-        reader.readAsDataURL(audioBlob);
-        reader.onloadend = () => {
-          const base64Url = reader.result as string;
-          setAudioUrls(prev => ({ ...prev, [qId]: base64Url }));
-        };
+        setAudioUrls(prev => ({ ...prev, [qId]: URL.createObjectURL(audioBlob) }));
 
         // Auto-fill answer text to indicate recorded
         setAnswers(prev => ({ ...prev, [qId]: "Recorded Audio" }));
