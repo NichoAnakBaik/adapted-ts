@@ -99,7 +99,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
       };
 
       mediaRecorder.onstop = () => {
-        const mimeType = mediaRecorder.mimeType || 'audio/webm';
+        const chunkType = chunks[0]?.type;
+        const mimeType = chunkType || mediaRecorder.mimeType || 'audio/webm';
         const audioBlob = new Blob(chunks, { type: mimeType });
         const qId = exam.questions[currentQIndex].id;
         
