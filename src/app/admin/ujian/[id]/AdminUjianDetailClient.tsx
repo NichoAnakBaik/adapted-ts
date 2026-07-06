@@ -7,6 +7,15 @@ import { createAdminQuestion, updateAdminQuestion, deleteAdminQuestion, assignEx
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
 
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
+};
+
 export default function AdminUjianDetailClient({ exam, initialEligibleStudents }: { exam: any, initialEligibleStudents: any[] }) {
   const [questions, setQuestions] = useState(exam.questions);
   const [activeTab, setActiveTab] = useState<"SPEAKING" | "LISTENING" | "READING" | "WRITING">("READING");
@@ -38,6 +47,21 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
     formData.append("type", activeTab);
 
     try {
+      // Convert File inputs to Base64 safely
+      const audioFile = formData.get("audio_reference") as File | null;
+      if (audioFile && audioFile.size > 0) {
+        const base64 = await fileToBase64(audioFile);
+        formData.append("audio_b64", base64);
+        formData.delete("audio_reference");
+      }
+
+      const imageFile = formData.get("image_url") as File | null;
+      if (imageFile && imageFile.size > 0) {
+        const base64 = await fileToBase64(imageFile);
+        formData.append("image_b64", base64);
+        formData.delete("image_url");
+      }
+
       let res;
       if (editingQuestion) {
         formData.append("id", editingQuestion.id);
@@ -250,6 +274,13 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                         <label className="block text-sm font-bold text-gray-700 mb-2">File Audio {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Wajib untuk Listening)"}</label>
                         <input type="file" accept="audio/*" name="audio_reference" required={!editingQuestion} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
                         {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                      </div>
+                    )}
+                    {activeTab === "READING" && (
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">Gambar Pendukung (Opsional)</label>
+                        <input type="file" accept="image/*" name="image_url" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
+                        {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">Gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
                       </div>
                     )}
                     {activeTab === "SPEAKING" && (

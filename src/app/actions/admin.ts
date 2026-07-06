@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { saveUploadedFile } from "@/lib/upload";
+import { saveUploadedFile, saveBase64File } from "@/lib/upload";
 
 // Basic authorization check
 async function checkAdminAuth() {
@@ -495,7 +495,6 @@ export async function createAdminQuestion(formData: FormData) {
   const format = formData.get("format") as string || "ESSAY";
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
-  const audio_file = formData.get("audio_reference") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
@@ -504,11 +503,23 @@ export async function createAdminQuestion(formData: FormData) {
 
   if (!exam_id || !type || !question_text) return { error: "Data soal tidak lengkap" };
 
-  const audio_reference = audio_file && audio_file.size > 0 ? await saveUploadedFile(audio_file, "ujian_audio") : null;
+  let audio_reference = null;
+  const audio_b64 = formData.get("audio_b64") as string | null;
+  if (audio_b64) {
+    audio_reference = await saveBase64File(audio_b64, "ujian_audio");
+    if (!audio_reference) return { error: "Sistem gagal menyimpan file audio." };
+  }
+
+  let image_url = null;
+  const image_b64 = formData.get("image_b64") as string | null;
+  if (image_b64) {
+    image_url = await saveBase64File(image_b64, "ujian_image");
+    if (!image_url) return { error: "Sistem gagal menyimpan file gambar." };
+  }
 
   await prisma.question.create({
     data: { 
-      exam_id, type, format, question_text, answer_key, audio_reference, difficulty,
+      exam_id, type, format, question_text, answer_key, audio_reference, image_url, difficulty,
       option_a, option_b, option_c, option_d
     }
   });
@@ -527,7 +538,6 @@ export async function updateAdminQuestion(formData: FormData) {
   const format = formData.get("format") as string || "ESSAY";
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
-  const audio_file = formData.get("audio_reference") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
@@ -541,8 +551,16 @@ export async function updateAdminQuestion(formData: FormData) {
     option_a, option_b, option_c, option_d
   };
 
-  if (audio_file && audio_file.size > 0) {
-    updateData.audio_reference = await saveUploadedFile(audio_file, "ujian_audio");
+  const audio_b64 = formData.get("audio_b64") as string | null;
+  if (audio_b64) {
+    const audioRef = await saveBase64File(audio_b64, "ujian_audio");
+    if (audioRef) updateData.audio_reference = audioRef;
+  }
+
+  const image_b64 = formData.get("image_b64") as string | null;
+  if (image_b64) {
+    const imgRef = await saveBase64File(image_b64, "ujian_image");
+    if (imgRef) updateData.image_url = imgRef;
   }
 
   await prisma.question.update({

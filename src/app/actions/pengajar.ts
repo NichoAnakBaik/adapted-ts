@@ -3,43 +3,12 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { saveUploadedFile } from "@/lib/upload";
+import { saveUploadedFile, saveBase64File } from "@/lib/upload";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 
-async function saveBase64File(base64String: string, subfolder: string): Promise<string | null> {
-  try {
-    const matches = base64String.match(/^data:(.*?);base64,(.+)$/);
-    if (!matches || matches.length !== 3) return null;
-    
-    const mimeType = matches[1];
-    const base64Data = matches[2];
-    
-    // basic extension inference
-    let ext = "bin";
-    if (mimeType.includes("png")) ext = "png";
-    else if (mimeType.includes("jpeg") || mimeType.includes("jpg")) ext = "jpg";
-    else if (mimeType.includes("mp3")) ext = "mp3";
-    else if (mimeType.includes("mp4")) ext = "mp4";
-    else if (mimeType.includes("wav")) ext = "wav";
-    else if (mimeType.includes("webm")) ext = "webm";
-    else ext = mimeType.split('/')[1]?.split(';')[0] || 'bin';
-    
-    const buffer = Buffer.from(base64Data, "base64");
-    const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", subfolder);
-    
-    await fs.mkdir(uploadsDir, { recursive: true });
-    const filePath = path.join(uploadsDir, uniqueFilename);
-    await fs.writeFile(filePath, buffer);
-    
-    return `/uploads/${subfolder}/${uniqueFilename}`;
-  } catch (err) {
-    console.error("Failed to save base64 file:", err);
-    return null;
-  }
-}
+// saveBase64File imported from @/lib/upload
 
 
 // Basic authorization check for Pengajar
