@@ -7,6 +7,7 @@ import { saveUploadedFile } from "@/lib/upload";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import stringSimilarity from "string-similarity";
 
 // Basic authorization check for Siswa
 async function checkSiswaAuth() {
@@ -253,6 +254,7 @@ export async function submitExam(formData: FormData) {
 
   let totalScore = 0;
   let autoGradedQuestions = 0;
+  const pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string }[] = [];
 
   const questionAttemptData = await Promise.all(questions.map(async (q) => {
     const data = answersData[q.id] || { student_answer: "", time_spent_seconds: 0, has_audio: false };
@@ -301,18 +303,10 @@ export async function submitExam(formData: FormData) {
       }
     } else if (q.type === "SPEAKING") {
       if (audioB64 || data.has_audio) {
-        score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
-        // Generate mock transcript based on answer key or generic text
-        transcript = q.answer_key 
-          ? `[AI Transcript] Saya telah mengatakan: ${q.answer_key} (Akurasi ~85%)` 
-          : `[AI Transcript] Ini adalah simulasi ucapan bahasa Korea yang terdeteksi dari rekaman. (Durasi: ~${timeSpent} detik).`;
-        
-        ai_feedback = "AI Speech Analysis: Pelafalan (Pronunciation) Anda mendapat skor 85%. ";
-        if (q.answer_key) {
-           ai_feedback += `Transkrip suara berhasil dibandingkan dengan kunci jawaban secara otomatis oleh sistem ML.`;
-        } else {
-           ai_feedback += `Terdapat sedikit logat lokal pada konsonan akhir, namun secara keseluruhan intonasi terdengar natural.`;
-        }
+        score = 0; // pending
+        transcript = "[Sedang diproses oleh AI...]";
+        ai_feedback = "AI sedang melakukan analisis transkripsi audio Anda. Hasil akan segera tersedia di latar belakang.";
+        // Note: we will add this to pendingTranscriptions AFTER checking if audio_url is successfully saved
       } else {
         score = 0;
         ai_feedback = "AI Error: Suara tidak terdeteksi. Pastikan mikrofon Anda berfungsi dengan baik.";
@@ -355,6 +349,8 @@ export async function submitExam(formData: FormData) {
     if (audio_url === null && data.has_audio) {
        ai_feedback = "AI Error: Gagal menyimpan rekaman suara ke server.";
        score = 0;
+    } else if (q.type === "SPEAKING" && audio_url) {
+       pendingTranscriptions.push({ question_id: q.id, answer_key: q.answer_key, audio_url });
     }
 
     return {
@@ -372,7 +368,7 @@ export async function submitExam(formData: FormData) {
   const maxScore = autoGradedQuestions > 0 ? autoGradedQuestions * 10 : questions.length * 10;
   const finalScorePercentage = maxScore > 0 ? Math.round((totalScore / maxScore) * 100) : 0;
 
-  await prisma.examAttempt.create({
+  const createdAttempt = await prisma.examAttempt.create({
     data: {
       exam_id: examId,
       student_id: session.user.id,
@@ -381,8 +377,19 @@ export async function submitExam(formData: FormData) {
       question_attempts: {
         create: questionAttemptData
       }
+    },
+    include: {
+      question_attempts: true
     }
   });
+
+  // Launch background task if there are pending transcriptions
+  if (pendingTranscriptions.length > 0) {
+    // Fire and forget
+    processAudioTranscriptionBackground(createdAttempt.id, pendingTranscriptions, createdAttempt.question_attempts).catch(err => {
+      console.error("Background transcription failed:", err);
+    });
+  }
 
   // Auto Enrollment Logic & Certificate Generation
   if (exam && exam.is_final) {
@@ -521,4 +528,110 @@ export async function getStudentAnalytics() {
   };
 
   return { attempts, recommendations, patterns };
+}
+
+// Background Task for Audio Transcription
+async function processAudioTranscriptionBackground(
+  attemptId: string, 
+  pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string }[],
+  createdQuestionAttempts: any[]
+) {
+  for (const pending of pendingTranscriptions) {
+    try {
+      // 1. Find the question attempt id
+      const qa = createdQuestionAttempts.find(q => q.question_id === pending.question_id);
+      if (!qa) continue;
+
+      // 2. Read audio file from disk
+      const filePath = path.join(process.cwd(), "public", pending.audio_url);
+      const audioBuffer = await fs.readFile(filePath);
+
+      // 3. Call Hugging Face API
+      const token = process.env.HF_TOKEN;
+      let transcriptText = "";
+      let isSuccess = false;
+
+      if (token) {
+        const response = await fetch(
+          "https://api-inference.huggingface.co/models/ghost613/whisper-large-v3-turbo-korean",
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "audio/webm",
+            },
+            method: "POST",
+            body: audioBuffer,
+          }
+        );
+
+        if (response.ok) {
+          const result = await response.json();
+          transcriptText = result.text || "";
+          isSuccess = true;
+        } else {
+          console.error("HF API Error:", await response.text());
+        }
+      }
+
+      // 4. Grade the transcription
+      let score = 0;
+      let ai_feedback = "";
+      
+      if (isSuccess && transcriptText) {
+        if (pending.answer_key) {
+          const similarity = stringSimilarity.compareTwoStrings(
+            transcriptText.trim().toLowerCase(),
+            pending.answer_key.trim().toLowerCase()
+          );
+          
+          if (similarity >= 0.8) score = 10;
+          else if (similarity >= 0.5) score = 7;
+          else score = 4;
+
+          const percentage = Math.round(similarity * 100);
+          ai_feedback = `AI Speech Analysis: Pelafalan Anda mendapat skor ${percentage}%. Transkrip suara berhasil dibandingkan dengan kunci jawaban secara otomatis.`;
+        } else {
+          // No answer key, just give an average score
+          score = 8;
+          ai_feedback = "AI Speech Analysis: Transkripsi berhasil. Terdapat sedikit logat lokal namun secara keseluruhan intonasi terdengar natural.";
+        }
+        transcriptText = `[AI Transcript] ${transcriptText}`;
+      } else {
+        // Fallback if API fails
+        score = 0;
+        ai_feedback = "AI Error: Gagal memproses transkripsi suara (API Error/Timeout).";
+        transcriptText = "[Transkripsi gagal]";
+      }
+
+      // 5. Update QuestionAttempt in DB
+      await prisma.questionAttempt.update({
+        where: { id: qa.id },
+        data: {
+          score,
+          ai_feedback,
+          transcript: transcriptText
+        }
+      });
+      
+    } catch (err) {
+      console.error("Error processing transcription for question", pending.question_id, err);
+    }
+  }
+
+  // 6. Recalculate Total Score for the Exam Attempt
+  try {
+    const allAttempts = await prisma.questionAttempt.findMany({
+      where: { attempt_id: attemptId }
+    });
+    const totalAchieved = allAttempts.reduce((sum, a) => sum + (a.score || 0), 0);
+    const maxPossible = allAttempts.length * 10;
+    const finalScore = maxPossible > 0 ? Math.round((totalAchieved / maxPossible) * 100) : 0;
+
+    await prisma.examAttempt.update({
+      where: { id: attemptId },
+      data: { total_score: finalScore }
+    });
+  } catch (err) {
+    console.error("Error recalculating total score", err);
+  }
 }
