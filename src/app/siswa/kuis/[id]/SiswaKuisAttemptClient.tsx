@@ -115,8 +115,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         stream.getTracks().forEach(track => track.stop());
       };
 
-      // Collect data every 250ms to ensure chunks are pushed reliably
-      mediaRecorder.start(250);
+      // Do not use timeslice to ensure the final Blob has proper headers and is playable
+      mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
       setError("Gagal mengakses mikrofon. Pastikan Anda telah memberikan izin.");
@@ -385,7 +385,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <p className="text-sm font-bold text-gray-800">Rekaman Tersimpan</p>
                   </div>
-                  <audio controls src={audioUrls[currentQ.id] || ""} className="w-full h-10 outline-none" />
+                  <audio key={audioUrls[currentQ.id] || "new"} controls src={audioUrls[currentQ.id] || ""} className="w-full h-10 outline-none" />
                 </div>
               )}
             </div>
