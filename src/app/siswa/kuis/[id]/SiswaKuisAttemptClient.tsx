@@ -13,6 +13,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
   const [answers, setAnswers] = useState<Record<string, string>>({});
   const [timeSpent, setTimeSpent] = useState<Record<string, number>>({});
   const [audioBlobs, setAudioBlobs] = useState<Record<string, Blob>>({});
+  const [audioUrls, setAudioUrls] = useState<Record<string, string>>({});
 
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number } | null>(null);
@@ -106,6 +107,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         const qId = exam.questions[currentQIndex].id;
         
         setAudioBlobs(prev => ({ ...prev, [qId]: audioBlob }));
+        setAudioUrls(prev => ({ ...prev, [qId]: URL.createObjectURL(audioBlob) }));
         // Auto-fill answer text to indicate recorded
         setAnswers(prev => ({ ...prev, [qId]: "Recorded Audio" }));
         
@@ -383,7 +385,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
                     <CheckCircle2 className="w-5 h-5 text-green-500" />
                     <p className="text-sm font-bold text-gray-800">Rekaman Tersimpan</p>
                   </div>
-                  <audio controls src={URL.createObjectURL(audioBlobs[currentQ.id])} className="w-full h-10 outline-none" />
+                  <audio controls src={audioUrls[currentQ.id] || ""} className="w-full h-10 outline-none" />
                 </div>
               )}
             </div>
