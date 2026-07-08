@@ -504,16 +504,16 @@ export async function createAdminQuestion(formData: FormData) {
   if (!exam_id || !type || !question_text) return { error: "Data soal tidak lengkap" };
 
   let audio_reference = null;
-  const audio_b64 = formData.get("audio_b64") as string | null;
-  if (audio_b64) {
-    audio_reference = await saveBase64File(audio_b64, "ujian_audio");
+  const audio_file = formData.get("audio_reference") as File | null;
+  if (audio_file && audio_file.size > 0) {
+    audio_reference = await saveUploadedFile(audio_file, "ujian_audio");
     if (!audio_reference) return { error: "Sistem gagal menyimpan file audio." };
   }
 
   let image_url = null;
-  const image_b64 = formData.get("image_b64") as string | null;
-  if (image_b64) {
-    image_url = await saveBase64File(image_b64, "ujian_image");
+  const image_file = formData.get("image_url") as File | null;
+  if (image_file && image_file.size > 0) {
+    image_url = await saveUploadedFile(image_file, "ujian_image");
     if (!image_url) return { error: "Sistem gagal menyimpan file gambar." };
   }
 
@@ -551,16 +551,18 @@ export async function updateAdminQuestion(formData: FormData) {
     option_a, option_b, option_c, option_d
   };
 
-  const audio_b64 = formData.get("audio_b64") as string | null;
-  if (audio_b64) {
-    const audioRef = await saveBase64File(audio_b64, "ujian_audio");
-    if (audioRef) updateData.audio_reference = audioRef;
+  const audio_file = formData.get("audio_reference") as File | null;
+  if (audio_file && audio_file.size > 0) {
+    const url = await saveUploadedFile(audio_file, "ujian_audio");
+    if (!url) return { error: "Sistem gagal menyimpan file audio." };
+    updateData.audio_reference = url;
   }
 
-  const image_b64 = formData.get("image_b64") as string | null;
-  if (image_b64) {
-    const imgRef = await saveBase64File(image_b64, "ujian_image");
-    if (imgRef) updateData.image_url = imgRef;
+  const image_file = formData.get("image_url") as File | null;
+  if (image_file && image_file.size > 0) {
+    const url = await saveUploadedFile(image_file, "ujian_image");
+    if (!url) return { error: "Sistem gagal menyimpan file gambar." };
+    updateData.image_url = url;
   }
 
   await prisma.question.update({

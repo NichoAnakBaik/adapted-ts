@@ -430,16 +430,14 @@ export async function createQuestion(formData: FormData) {
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
   let audio_reference = null;
-  const audio_b64 = formData.get("audio_b64") as string | null;
-  if (audio_b64) {
-    audio_reference = await saveBase64File(audio_b64, "kuis_audio");
+  if (audio_file && audio_file.size > 0) {
+    audio_reference = await saveUploadedFile(audio_file, "kuis_audio");
     if (!audio_reference) return { error: "Sistem gagal menyimpan file audio." };
   }
   
   let image_url = null;
-  const image_b64 = formData.get("image_b64") as string | null;
-  if (image_b64) {
-    image_url = await saveBase64File(image_b64, "kuis_image");
+  if (image_file && image_file.size > 0) {
+    image_url = await saveUploadedFile(image_file, "kuis_image");
     if (!image_url) return { error: "Sistem gagal menyimpan file gambar." };
   }
 
@@ -477,16 +475,14 @@ export async function updateQuestion(formData: FormData) {
     option_a, option_b, option_c, option_d
   };
 
-  const audio_b64 = formData.get("audio_b64") as string | null;
-  if (audio_b64) {
-    const url = await saveBase64File(audio_b64, "kuis_audio");
+  if (audio_file && audio_file.size > 0) {
+    const url = await saveUploadedFile(audio_file, "kuis_audio");
     if (!url) return { error: "Sistem gagal menyimpan file audio. Coba gunakan file lain." };
     updateData.audio_reference = url;
   }
   
-  const image_b64 = formData.get("image_b64") as string | null;
-  if (image_b64) {
-    const url = await saveBase64File(image_b64, "kuis_image");
+  if (image_file && image_file.size > 0) {
+    const url = await saveUploadedFile(image_file, "kuis_image");
     if (!url) return { error: "Sistem gagal menyimpan file gambar." };
     updateData.image_url = url;
   }

@@ -47,20 +47,8 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
     formData.append("type", activeTab);
 
     try {
-      // Convert File inputs to Base64 safely
-      const audioFile = formData.get("audio_reference") as File | null;
-      if (audioFile && audioFile.size > 0) {
-        const base64 = await fileToBase64(audioFile);
-        formData.append("audio_b64", base64);
-        formData.delete("audio_reference");
-      }
-
-      const imageFile = formData.get("image_url") as File | null;
-      if (imageFile && imageFile.size > 0) {
-        const base64 = await fileToBase64(imageFile);
-        formData.append("image_b64", base64);
-        formData.delete("image_url");
-      }
+      // Let Next.js handle the File uploads natively via multipart/form-data
+      // No need to convert to base64, which bloats the payload and crashes
 
       let res;
       if (editingQuestion) {

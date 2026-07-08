@@ -3,8 +3,8 @@ import PengajarKuisClient from "../../PengajarKuisClient";
 import { getQuizzesByClass, getClassDetails } from "@/app/actions/pengajar";
 import { notFound } from "next/navigation";
 
-export default async function PengajarKuisKelasPage({ params }: { params: { class_id: string } }) {
-  const { class_id } = params;
+export default async function PengajarKuisKelasPage({ params }: { params: Promise<{ class_id: string }> }) {
+  const { class_id } = await params;
   const exams = await getQuizzesByClass(class_id);
   const classData = await getClassDetails(class_id);
 
