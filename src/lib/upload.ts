@@ -33,9 +33,12 @@ export async function saveUploadedFile(file: File, subfolder: string = ""): Prom
     // e.g. /uploads/pdf/uuid.pdf
     const urlPath = path.posix.join("/uploads", subfolder, uniqueFilename);
     return urlPath;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error saving file:", error);
-    return null;
+    try {
+      await fs.writeFile(path.join(process.cwd(), "upload-error.log"), String(error?.stack || error));
+    } catch(e) {}
+    throw new Error(`Upload failed: ${error.message}`);
   }
 }
 

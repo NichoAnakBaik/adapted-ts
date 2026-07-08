@@ -429,24 +429,26 @@ export async function createQuestion(formData: FormData) {
   const exam = await prisma.exam.findUnique({ where: { id: exam_id }, include: { class: true } });
   if (exam?.class?.teacher_id !== session.user.id) return { error: "Akses ditolak" };
 
-  let audio_reference = null;
-  if (audio_file && audio_file.size > 0) {
-    audio_reference = await saveUploadedFile(audio_file, "kuis_audio");
-    if (!audio_reference) return { error: "Sistem gagal menyimpan file audio." };
-  }
-  
-  let image_url = null;
-  if (image_file && image_file.size > 0) {
-    image_url = await saveUploadedFile(image_file, "kuis_image");
-    if (!image_url) return { error: "Sistem gagal menyimpan file gambar." };
-  }
-
-  await prisma.question.create({
-    data: { 
-      exam_id, type, format, question_text, answer_key, audio_reference, image_url, difficulty,
-      option_a, option_b, option_c, option_d
+  try {
+    let audio_reference = null;
+    if (audio_file && audio_file.size > 0) {
+      audio_reference = await saveUploadedFile(audio_file, "kuis_audio");
     }
-  });
+    
+    let image_url = null;
+    if (image_file && image_file.size > 0) {
+      image_url = await saveUploadedFile(image_file, "kuis_image");
+    }
+
+    await prisma.question.create({
+      data: { 
+        exam_id, type, format, question_text, answer_key, audio_reference, image_url, difficulty,
+        option_a, option_b, option_c, option_d
+      }
+    });
+  } catch (err: any) {
+    return { error: err.message || "Gagal menyimpan file ke server." };
+  }
 
   return { success: true };
 }
@@ -475,22 +477,24 @@ export async function updateQuestion(formData: FormData) {
     option_a, option_b, option_c, option_d
   };
 
-  if (audio_file && audio_file.size > 0) {
-    const url = await saveUploadedFile(audio_file, "kuis_audio");
-    if (!url) return { error: "Sistem gagal menyimpan file audio. Coba gunakan file lain." };
-    updateData.audio_reference = url;
-  }
-  
-  if (image_file && image_file.size > 0) {
-    const url = await saveUploadedFile(image_file, "kuis_image");
-    if (!url) return { error: "Sistem gagal menyimpan file gambar." };
-    updateData.image_url = url;
-  }
+  try {
+    if (audio_file && audio_file.size > 0) {
+      const url = await saveUploadedFile(audio_file, "kuis_audio");
+      updateData.audio_reference = url;
+    }
+    
+    if (image_file && image_file.size > 0) {
+      const url = await saveUploadedFile(image_file, "kuis_image");
+      updateData.image_url = url;
+    }
 
-  await prisma.question.update({
-    where: { id },
-    data: updateData
-  });
+    await prisma.question.update({
+      where: { id },
+      data: updateData
+    });
+  } catch (err: any) {
+    return { error: err.message || "Gagal menyimpan perubahan soal ke server." };
+  }
 
   return { success: true };
 }
