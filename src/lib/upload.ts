@@ -1,10 +1,14 @@
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
 
-// Initialize Supabase client
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
-const supabase = createClient(supabaseUrl, supabaseKey);
+function getSupabase() {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  if (!supabaseUrl || !supabaseKey) {
+    throw new Error("Supabase URL or Key is missing in environment variables. Please restart your server if you just added them.");
+  }
+  return createClient(supabaseUrl, supabaseKey);
+}
 
 /**
  * Saves a File object to the Supabase uploads bucket.
@@ -25,6 +29,7 @@ export async function saveUploadedFile(file: File, subfolder: string = ""): Prom
     
     // Construct the path within the bucket
     const filePath = subfolder ? `${subfolder}/${uniqueFilename}` : uniqueFilename;
+    const supabase = getSupabase();
 
     const { error } = await supabase.storage
       .from("uploads")
@@ -81,6 +86,7 @@ export async function saveBase64File(base64String: string, subfolder: string = "
     const filePath = subfolder ? `${subfolder}/${uniqueFilename}` : uniqueFilename;
 
     const mimeType = mimePrefix.replace("data:", "") || "application/octet-stream";
+    const supabase = getSupabase();
 
     const { error } = await supabase.storage
       .from("uploads")
