@@ -11,6 +11,7 @@
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^6.19.3",
+    "@supabase/supabase-js": "^2.109.0",
     "bcryptjs": "^3.0.3",
     "hangul-js": "^0.2.6",
     "jose": "^6.2.3",

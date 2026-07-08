@@ -1,53 +1,55 @@
-import { promises as fs } from "fs";
-import path from "path";
 import crypto from "crypto";
+import { createClient } from "@supabase/supabase-js";
+
+// Initialize Supabase client
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "";
+const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "";
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 /**
- * Saves a File object to the public/uploads directory.
+ * Saves a File object to the Supabase uploads bucket.
  * @param file The File object to save
  * @param subfolder Optional subfolder inside uploads (e.g., 'pdf', 'audio')
- * @returns The relative URL path to access the file (e.g., '/uploads/pdf/filename.ext')
+ * @returns The public URL path to access the file
  */
 export async function saveUploadedFile(file: File, subfolder: string = ""): Promise<string | null> {
   if (!file || file.size === 0) return null;
 
   try {
-    // Read file data
     const arrayBuffer = await file.arrayBuffer();
     const buffer = Buffer.from(arrayBuffer);
 
-    // Ensure uploads directory exists
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", subfolder);
-    await fs.mkdir(uploadsDir, { recursive: true });
-
-    // Generate unique filename
     const originalName = file.name || "uploaded_file";
-    const extension = path.extname(originalName);
+    const extension = originalName.includes(".") ? `.${originalName.split('.').pop()}` : "";
     const uniqueFilename = `${crypto.randomUUID()}${extension}`;
-    const filePath = path.join(uploadsDir, uniqueFilename);
+    
+    // Construct the path within the bucket
+    const filePath = subfolder ? `${subfolder}/${uniqueFilename}` : uniqueFilename;
 
-    // Write file to disk
-    await fs.writeFile(filePath, buffer);
+    const { error } = await supabase.storage
+      .from("uploads")
+      .upload(filePath, buffer, {
+        contentType: file.type || "application/octet-stream",
+        upsert: false,
+      });
 
-    // Return the relative URL
-    // e.g. /uploads/pdf/uuid.pdf
-    const urlPath = path.posix.join("/uploads", subfolder, uniqueFilename);
-    return urlPath;
+    if (error) {
+      throw error;
+    }
+
+    const { data } = supabase.storage.from("uploads").getPublicUrl(filePath);
+    return data.publicUrl;
   } catch (error: any) {
-    console.error("Error saving file:", error);
-    try {
-      await fs.writeFile(path.join(process.cwd(), "upload-error.log"), String(error?.stack || error));
-    } catch(e) {}
+    console.error("Error saving file to Supabase:", error);
     throw new Error(`Upload failed: ${error.message}`);
   }
 }
 
 /**
- * Saves a Base64 string (Data URL) to the public/uploads directory.
- * Optimized to avoid regex crashing on massive base64 strings.
+ * Saves a Base64 string (Data URL) to the Supabase uploads bucket.
  * @param base64String The Data URL string (e.g. data:audio/webm;base64,...)
  * @param subfolder Optional subfolder inside uploads
- * @returns The relative URL path to access the file
+ * @returns The public URL path to access the file
  */
 export async function saveBase64File(base64String: string, subfolder: string = ""): Promise<string | null> {
   if (!base64String) return null;
@@ -68,7 +70,6 @@ export async function saveBase64File(base64String: string, subfolder: string = "
     else if (mimePrefix.includes("wav")) ext = "wav";
     else if (mimePrefix.includes("webm")) ext = "webm";
     else {
-      // e.g. "data:audio/ogg" -> "ogg"
       const parts = mimePrefix.split('/');
       if (parts.length > 1) {
         ext = parts[1].split(';')[0];
@@ -77,15 +78,25 @@ export async function saveBase64File(base64String: string, subfolder: string = "
 
     const buffer = Buffer.from(base64Data, "base64");
     const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
-    const uploadsDir = path.join(process.cwd(), "public", "uploads", subfolder);
+    const filePath = subfolder ? `${subfolder}/${uniqueFilename}` : uniqueFilename;
 
-    await fs.mkdir(uploadsDir, { recursive: true });
-    const filePath = path.join(uploadsDir, uniqueFilename);
-    await fs.writeFile(filePath, buffer);
+    const mimeType = mimePrefix.replace("data:", "") || "application/octet-stream";
 
-    return path.posix.join("/uploads", subfolder, uniqueFilename);
+    const { error } = await supabase.storage
+      .from("uploads")
+      .upload(filePath, buffer, {
+        contentType: mimeType,
+        upsert: false,
+      });
+
+    if (error) {
+      throw error;
+    }
+
+    const { data } = supabase.storage.from("uploads").getPublicUrl(filePath);
+    return data.publicUrl;
   } catch (error) {
-    console.error("Error saving base64 file:", error);
+    console.error("Error saving base64 file to Supabase:", error);
     return null;
   }
 }
