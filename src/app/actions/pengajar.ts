@@ -287,6 +287,23 @@ export async function getFinalExams() {
   });
 }
 
+export async function getFinalExamsByClass(classId: string) {
+  const session = await checkPengajarAuth();
+  
+  return prisma.exam.findMany({
+    where: {
+      class_id: classId,
+      class: { teacher_id: session.user.id },
+      is_final: true
+    },
+    include: {
+      class: { select: { name: true } },
+      _count: { select: { questions: true, exam_attempts: true } }
+    },
+    orderBy: { created_at: 'desc' }
+  });
+}
+
 
 export async function createExam(formData: FormData) {
   const session = await checkPengajarAuth();

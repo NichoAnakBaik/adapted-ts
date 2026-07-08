@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { FileQuestion, AlertCircle, Clock } from "lucide-react";
 import Link from "next/link";
 
-export default function PengajarUjianClient({ exams }: { exams: any[] }) {
+export default function PengajarUjianClient({ exams, currentClassId, classes }: { exams: any[], currentClassId?: string, classes?: any[] }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredExams = exams.filter(ex => 
@@ -19,10 +19,17 @@ export default function PengajarUjianClient({ exams }: { exams: any[] }) {
             <FileQuestion className="w-8 h-8 text-yellow-600" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-namsan-text">Pemantauan Ujian Akhir</h1>
+            <h1 className="text-2xl font-bold text-namsan-text">Pemantauan Ujian Akhir {currentClassId && classes?.[0] ? `- ${classes[0].name}` : ''}</h1>
             <p className="text-sm text-namsan-text-muted">Pantau soal ujian akhir dan hasil tes siswa di kelas Anda.</p>
           </div>
         </div>
+        {currentClassId && (
+          <div className="flex items-center gap-3">
+            <Link href="/pengajar/ujian" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl font-bold transition-colors">
+              Kembali
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="bg-blue-50 p-4 rounded-xl border border-blue-100 flex items-start gap-3">
