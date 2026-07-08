@@ -7,6 +7,7 @@ import { saveUploadedFile, saveBase64File } from "@/lib/upload";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // saveBase64File imported from @/lib/upload
 
@@ -83,7 +84,30 @@ export async function getTeacherDashboardStats() {
   
   let recommendationText = `Sistem AI belum dapat mendeteksi pola karena data masih sedikit.`;
   if (questionAttempts.length > 0) {
-    recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus atau mengunggah modul tambahan terkait ${weakPointName} untuk meningkatkan retensi siswa.`;
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (geminiApiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const prompt = `
+          Kamu adalah asisten AI penasihat akademik (mentor pengajar) untuk Pengajar bahasa Korea bernama ${session.user.username}.
+          Berikut adalah performa murid-murid di seluruh kelasnya:
+          - Total Murid: ${uniqueStudentsCount}
+          - Total Kuis yang Dikelola: ${examsCount}
+          - Titik terlemah mayoritas murid: ${weakPointName}
+          
+          Buatlah 2-3 kalimat rekomendasi pengajaran yang profesional, analitis, dan suportif mengarahkan pengajar untuk merancang strategi menutupi kelemahan murid di bagian tersebut. Gunakan bahasa Indonesia yang sopan.
+        `;
+        const result = await model.generateContent(prompt);
+        recommendationText = result.response.text().trim();
+      } catch (e) {
+        console.error("Gemini Teacher Recommendation Error:", e);
+        // Fallback
+        recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus atau mengunggah modul tambahan terkait ${weakPointName} untuk meningkatkan retensi siswa.`;
+      }
+    } else {
+      recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus atau mengunggah modul tambahan terkait ${weakPointName} untuk meningkatkan retensi siswa.`;
+    }
   }
 
   return {

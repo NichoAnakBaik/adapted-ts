@@ -8,6 +8,7 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import stringSimilarity from "string-similarity";
+import { GoogleGenerativeAI } from "@google/generative-ai";
 
 // Basic authorization check for Siswa
 async function checkSiswaAuth() {
@@ -109,12 +110,29 @@ export async function getDashboardStats() {
 
   let mlRecommendation = `Sistem AI belum dapat mendeteksi pola belajar kamu karena data kuis masih kosong. Ayo kerjakan kuis pertamamu!`;
   if (totalAttempts > 0) {
-    if (masteryPercentage >= 80) {
-      mlRecommendation = `Luar biasa! Tingkat penguasaan materimu sangat baik. Namun, AI mendeteksi kamu bisa lebih tajam lagi pada bagian **${weakPointName}**. Jangan lupa terus berlatih bagian tersebut ya!`;
-    } else if (masteryPercentage >= 60) {
-      mlRecommendation = `Performa belajarmu stabil. Sistem mendeteksi adanya kelemahan minor pada bagian **${weakPointName}**. AI merekomendasikan kamu untuk membaca ulang materi terkait sebelum mengambil ujian akhir.`;
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (geminiApiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const prompt = `
+          Kamu adalah asisten AI guru bahasa Korea untuk siswa bernama ${session.user.username}.
+          Berikut adalah performa siswa ini:
+          - Nilai Rata-rata keseluruhan: ${masteryPercentage}%
+          - Titik terlemah: ${weakPointName}
+          - Total Kuis yang sudah dikerjakan: ${totalAttempts}
+          
+          Buatlah 2-3 kalimat rekomendasi belajar yang personal, menyemangati, dan spesifik mengarahkan mereka untuk memperbaiki titik lemahnya tersebut. Gunakan bahasa Indonesia yang ramah dan hangat layaknya mentor.
+        `;
+        const result = await model.generateContent(prompt);
+        mlRecommendation = result.response.text().trim();
+      } catch (e) {
+        console.error("Gemini Recommendation Error:", e);
+        // Fallback
+        mlRecommendation = `Performa belajarmu stabil dengan nilai rata-rata ${masteryPercentage}%. AI merekomendasikan kamu untuk membaca ulang materi terkait **${weakPointName}** sebelum mengambil ujian akhir.`;
+      }
     } else {
-      mlRecommendation = `Kamu sedang kesulitan ya? AI mendeteksi kamu sangat butuh bantuan pada bagian **${weakPointName}**. Jangan ragu untuk bertanya di Forum Kelas atau menghubungi Pengajar secara langsung.`;
+      mlRecommendation = `Performa belajarmu stabil. Sistem mendeteksi adanya kelemahan minor pada bagian **${weakPointName}**. AI merekomendasikan kamu untuk membaca ulang materi terkait sebelum mengambil ujian akhir.`;
     }
   }
 
@@ -542,34 +560,41 @@ async function processAudioTranscriptionBackground(
       const qa = createdQuestionAttempts.find(q => q.question_id === pending.question_id);
       if (!qa) continue;
 
-      // 2. Read audio file from disk
-      const filePath = path.join(process.cwd(), "public", pending.audio_url);
-      const audioBuffer = await fs.readFile(filePath);
+      // 2. Read audio file from URL (since it's in Supabase now)
+      const fullAudioUrl = pending.audio_url.startsWith('http') 
+        ? pending.audio_url 
+        : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000") + pending.audio_url;
+      
+      const audioRes = await fetch(fullAudioUrl);
+      if (!audioRes.ok) {
+        throw new Error(`Failed to fetch audio from Supabase URL: ${fullAudioUrl}`);
+      }
+      const arrayBuffer = await audioRes.arrayBuffer();
+      const base64Audio = Buffer.from(arrayBuffer).toString("base64");
 
-      // 3. Call Hugging Face API
-      const token = process.env.HF_TOKEN;
       let transcriptText = "";
       let isSuccess = false;
 
-      if (token) {
-        const response = await fetch(
-          "https://api-inference.huggingface.co/models/ghost613/whisper-large-v3-turbo-korean",
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "audio/webm",
+      // 3. Call Gemini API for Transcription (Fallback if HF fails or is missing)
+      const geminiApiKey = process.env.GEMINI_API_KEY;
+      if (geminiApiKey) {
+        try {
+          const genAI = new GoogleGenerativeAI(geminiApiKey);
+          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+          const prompt = "Please transcribe this Korean audio perfectly into Hangul text. Just return the Hangul transcript, nothing else. Do not translate it. If it contains other languages alongside Korean, transcribe them as they are.";
+          const result = await model.generateContent([
+            {
+              inlineData: {
+                mimeType: "audio/webm",
+                data: base64Audio
+              }
             },
-            method: "POST",
-            body: audioBuffer,
-          }
-        );
-
-        if (response.ok) {
-          const result = await response.json();
-          transcriptText = result.text || "";
+            prompt
+          ]);
+          transcriptText = result.response.text().trim();
           isSuccess = true;
-        } else {
-          console.error("HF API Error:", await response.text());
+        } catch (e) {
+          console.error("Gemini Transcription Error:", e);
         }
       }
 
