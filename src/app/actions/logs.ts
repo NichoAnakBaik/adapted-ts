@@ -28,15 +28,32 @@ export async function getActivityLogs(targetRole: "ADMIN" | "PENGAJAR" | "SISWA"
         include: { enrollments: true }
       });
       const studentIds = teacherClasses.flatMap(c => c.enrollments.map(e => e.student_id));
+      const classIds = teacherClasses.map(c => c.id);
 
-      return await prisma.studentActivityLog.findMany({
+      const allLogs = await prisma.studentActivityLog.findMany({
         where: { student_id: { in: studentIds } },
         include: {
           student: { select: { nama_lengkap: true, username: true } }
         },
         orderBy: { created_at: 'desc' },
-        take: 100
+        take: 300 // Ambil lebih banyak untuk difilter di memory
       });
+
+      // Filter: Hanya tampilkan log yang classId-nya milik pengajar ini, 
+      // atau log global (tanpa classId) dari siswa yang diajarnya.
+      const filteredLogs = allLogs.filter(log => {
+        try {
+          const meta = log.metadata ? JSON.parse(log.metadata) : {};
+          if (meta.classId) {
+            return classIds.includes(meta.classId);
+          }
+          return true; // Global logs (e.g. LOGIN)
+        } catch (e) {
+          return true;
+        }
+      });
+
+      return filteredLogs.slice(0, 100);
     }
 
     if (targetRole === "SISWA" && session.user.role === "SISWA") {
