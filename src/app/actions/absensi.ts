@@ -64,6 +64,22 @@ export async function studentMarkAttendance(sessionId: string, notes?: string) {
     }
   });
 
+  // Ambil data sesi kelas untuk notifikasi ke pengajar
+  const attSession = await prisma.attendanceSession.findUnique({
+    where: { id: sessionId },
+    include: { class: true }
+  });
+
+  if (attSession && attSession.class.teacher_id) {
+    const { createNotification } = await import("./notification");
+    await createNotification(
+      attSession.class.teacher_id,
+      "Absensi Diisi",
+      `${session.user.nama_lengkap} telah mengisi absensi untuk ${attSession.title} di kelas ${attSession.class.name}.`,
+      `/pengajar/absensi` // Atau link spesifik jika ada
+    );
+  }
+
   return { success: true };
 }
 
@@ -129,8 +145,21 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
       title,
       description,
       date: dateStr ? new Date(dateStr) : null
-    }
+    },
+    include: { class: { include: { enrollments: true } } }
   });
+
+  // Notifikasi ke siswa bahwa sesi telah diupdate/dibuka
+  const studentIds = session.class.enrollments.map((e: any) => e.student_id);
+  if (studentIds.length > 0) {
+    const { createNotificationsForUsers } = await import("./notification");
+    await createNotificationsForUsers(
+      studentIds,
+      "Absensi Dibuka",
+      `Sesi absensi untuk ${session.title} di kelas ${session.class.name} telah dibuka/diperbarui. Silakan isi kehadiran Anda.`,
+      `/siswa/absensi`
+    );
+  }
 
   // AI Quiz Generation logic
   if (description && description.length > 10) {
@@ -161,7 +190,7 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
           const questionsArray = JSON.parse(text);
 
           if (Array.isArray(questionsArray) && questionsArray.length > 0) {
-          await prisma.exam.create({
+          const newExam = await prisma.exam.create({
             data: {
               class_id: session.class_id,
               title: examTitle,
@@ -183,6 +212,17 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
               }
             }
           });
+          
+          // Notifikasi Kuis AI baru ke siswa
+          if (studentIds.length > 0) {
+            const { createNotificationsForUsers } = await import("./notification");
+            await createNotificationsForUsers(
+              studentIds,
+              "Kuis Baru (AI)",
+              `Kuis latihan harian baru "${examTitle}" telah dibuat secara otomatis untuk kelas ${session.class.name}.`,
+              `/siswa/ujian`
+            );
+          }
           } else {
             console.error("AI returned malformed or empty array:", text);
             // We just log because throwing error would break the save flow
@@ -206,12 +246,24 @@ export async function createSingleAttendanceSession(classId: string) {
     where: { class_id: classId }
   });
 
-  await prisma.attendanceSession.create({
+  const newSession = await prisma.attendanceSession.create({
     data: {
       class_id: classId,
       title: `Sesi Tambahan ${existingCount + 1}`,
-    }
+    },
+    include: { class: { include: { enrollments: true } } }
   });
+
+  const studentIds = newSession.class.enrollments.map((e: any) => e.student_id);
+  if (studentIds.length > 0) {
+    const { createNotificationsForUsers } = await import("./notification");
+    await createNotificationsForUsers(
+      studentIds,
+      "Sesi Absensi Baru",
+      `Pengajar telah membuat sesi absensi baru "${newSession.title}" untuk kelas ${newSession.class.name}.`,
+      `/siswa/absensi`
+    );
+  }
 
   return { success: true };
 }
