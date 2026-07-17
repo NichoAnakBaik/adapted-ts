@@ -562,27 +562,38 @@ async function processAudioTranscriptionBackground(
       let transcriptText = "";
       let isSuccess = false;
 
-      // 3. Call Gemini API for Transcription (Fallback if HF fails or is missing)
-      const geminiApiKey = process.env.GEMINI_API_KEY;
-      if (geminiApiKey) {
+      // 3. Call Hugging Face API for Transcription (Using Whisper Large v3 for best Korean accuracy)
+      const hfApiKey = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
+      if (hfApiKey) {
         try {
-          const genAI = new GoogleGenerativeAI(geminiApiKey);
-          const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-          const prompt = "Please transcribe this Korean audio perfectly into Hangul text. Just return the Hangul transcript, nothing else. Do not translate it. If it contains other languages alongside Korean, transcribe them as they are.";
-          const result = await model.generateContent([
+          const response = await fetch(
+            "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
             {
-              inlineData: {
-                mimeType: "audio/webm",
-                data: base64Audio
-              }
-            },
-            prompt
-          ]);
-          transcriptText = result.response.text().trim();
-          isSuccess = true;
+              headers: {
+                Authorization: `Bearer ${hfApiKey}`,
+                "Content-Type": "application/octet-stream",
+              },
+              method: "POST",
+              body: Buffer.from(arrayBuffer),
+            }
+          );
+          
+          if (!response.ok) {
+            throw new Error(`HF API Error: ${response.status} ${await response.text()}`);
+          }
+          
+          const result = await response.json();
+          if (result && result.text) {
+            transcriptText = result.text.trim();
+            isSuccess = true;
+          } else {
+            console.error("Unexpected HF API response:", result);
+          }
         } catch (e) {
-          console.error("Gemini Transcription Error:", e);
+          console.error("Hugging Face Transcription Error:", e);
         }
+      } else {
+        console.warn("HUGGINGFACE_API_KEY or HF_TOKEN is missing in environment variables.");
       }
 
       // 4. Grade the transcription
