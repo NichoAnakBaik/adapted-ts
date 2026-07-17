@@ -223,9 +223,9 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
               `/siswa/ujian`
             );
           }
+          return { success: true, quizGenerated: true };
           } else {
             console.error("AI returned malformed or empty array:", text);
-            // We just log because throwing error would break the save flow
           }
         } else {
           console.error("Could not find JSON array in AI response:", text);
@@ -233,10 +233,13 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
       } catch (error) {
         console.error("Failed to generate AI quiz from attendance:", error);
       }
+    } else {
+      // Quiz already exists
+      return { success: true, quizGenerated: false, reason: 'exists' };
     }
   }
 
-  return { success: true };
+  return { success: true, quizGenerated: false };
 }
 
 export async function createSingleAttendanceSession(classId: string) {

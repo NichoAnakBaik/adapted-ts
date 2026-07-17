@@ -47,14 +47,27 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
     });
   };
 
+  const [savingEdit, setSavingEdit] = useState(false);
+
   const saveEdit = async (s: any) => {
-    const fd = new FormData();
-    fd.append("title", editData.title);
-    fd.append("date", editData.date);
-    fd.append("description", editData.description);
-    await updateAttendanceSession(s.id, fd);
-    setEditingSession(null);
-    loadSessions();
+    setSavingEdit(true);
+    try {
+      const fd = new FormData();
+      fd.append("title", editData.title);
+      fd.append("date", editData.date);
+      fd.append("description", editData.description);
+      const res = await updateAttendanceSession(s.id, fd);
+      
+      setEditingSession(null);
+      await loadSessions();
+
+      if (res.quizGenerated) {
+        alert("Sesi absensi berhasil diperbarui. 🎉 Kuis latihan harian AI telah otomatis dibuat berdasarkan materi yang Anda masukkan!");
+      }
+    } catch (e) {
+      alert("Gagal menyimpan perubahan");
+    }
+    setSavingEdit(false);
   };
 
   const handleCreateSingle = async () => {
@@ -169,10 +182,10 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
                 <div className="flex items-center gap-2 md:pl-4 md:border-l border-gray-100">
                   {editingSession === s.id ? (
                     <>
-                      <button onClick={() => saveEdit(s)} className="p-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm" title="Simpan Perubahan">
-                        <Save className="w-4 h-4" />
+                      <button disabled={savingEdit} onClick={() => saveEdit(s)} className="p-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors shadow-sm disabled:opacity-50" title="Simpan Perubahan">
+                        {savingEdit ? <RefreshCw className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
                       </button>
-                      <button onClick={() => setEditingSession(null)} className="p-2.5 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors" title="Batal">
+                      <button disabled={savingEdit} onClick={() => setEditingSession(null)} className="p-2.5 bg-gray-200 text-gray-600 rounded-lg hover:bg-gray-300 transition-colors disabled:opacity-50" title="Batal">
                         <X className="w-4 h-4" />
                       </button>
                     </>
