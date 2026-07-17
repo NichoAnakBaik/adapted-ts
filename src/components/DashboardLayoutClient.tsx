@@ -43,7 +43,7 @@ export default function DashboardLayoutClient({
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden min-w-0">
         {/* Topbar Wrapper */}
-        <div className="flex items-center bg-white border-b border-gray-200 shrink-0 h-16 w-full relative z-10 px-4 lg:px-0">
+        <div className="flex items-center bg-white border-b border-gray-200 shrink-0 h-16 w-full relative z-40 px-4 lg:px-0">
           <button
             onClick={() => setIsSidebarOpen(true)}
             className="lg:hidden p-2 -ml-2 mr-3 text-gray-500 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-inset focus:ring-namsan-primary"

@@ -134,7 +134,10 @@ export async function toggleForumReaction(messageId: string, emoji: string) {
   const session = await getSession();
   if (!session) return { error: "Akses ditolak" };
 
-  const message = await prisma.forumMessage.findUnique({ where: { id: messageId } });
+  const message = await prisma.forumMessage.findUnique({ 
+    where: { id: messageId },
+    include: { forum: true } 
+  });
   if (!message) return { error: "Pesan tidak ditemukan" };
 
   let reactionsObj: Record<string, string[]> = {};
@@ -151,6 +154,7 @@ export async function toggleForumReaction(messageId: string, emoji: string) {
 
   const userId = session.user.id;
   const userIndex = reactionsObj[emoji].indexOf(userId);
+  let added = false;
 
   if (userIndex > -1) {
     // Remove reaction
@@ -158,6 +162,7 @@ export async function toggleForumReaction(messageId: string, emoji: string) {
   } else {
     // Add reaction
     reactionsObj[emoji].push(userId);
+    added = true;
   }
 
   // Clean up empty emoji keys
@@ -169,6 +174,19 @@ export async function toggleForumReaction(messageId: string, emoji: string) {
     where: { id: messageId },
     data: { reactions: JSON.stringify(reactionsObj) }
   });
+
+  if (added && message.user_id !== session.user.id) {
+    const { createNotificationsForUsers } = await import("./notification");
+    // Gunakan generic link /siswa, /pengajar, dll akan direplace otomatis saat di-fetch oleh getUserNotifications
+    const linkPath = `/siswa/forum/${message.forum.class_id}`;
+    
+    await createNotificationsForUsers(
+      [message.user_id],
+      "Reaksi Baru",
+      `${session.user.nama_lengkap} memberikan reaksi ${emoji} pada pesan Anda di forum.`,
+      linkPath
+    );
+  }
 
   return { success: true };
 }
