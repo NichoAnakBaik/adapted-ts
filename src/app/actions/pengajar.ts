@@ -8,8 +8,7 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-
-// saveBase64File imported from @/lib/upload
+import { saveUploadedFile, saveBase64File } from "@/lib/upload";
 
 
 // Basic authorization check for Pengajar
@@ -454,12 +453,8 @@ export async function createQuestion(formData: FormData) {
   const format = formData.get("format") as string || "ESSAY";
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
-  const audio_file = formData.get("audio_reference") as File | null;
-  const image_file = formData.get("image_url") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
   
-  console.log(`[DEBUG] createQuestion - audio_file:`, !!audio_file, audio_file?.size, audio_file?.type, audio_file?.name);
-  console.log(`[DEBUG] createQuestion - image_file:`, !!image_file, image_file?.size, image_file?.type, image_file?.name);
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
   const option_c = formData.get("option_c") as string | null;
@@ -472,11 +467,13 @@ export async function createQuestion(formData: FormData) {
 
   try {
     let audio_reference = null;
+    const audio_file = formData.get("audio_reference") as File | null;
     if (audio_file && audio_file.size > 0) {
       audio_reference = await saveUploadedFile(audio_file, "kuis_audio");
     }
     
     let image_url = null;
+    const image_file = formData.get("image_url") as File | null;
     if (image_file && image_file.size > 0) {
       image_url = await saveUploadedFile(image_file, "kuis_image");
     }
@@ -500,8 +497,6 @@ export async function updateQuestion(formData: FormData) {
   const format = formData.get("format") as string || "ESSAY";
   const question_text = formData.get("question_text") as string;
   const answer_key = formData.get("answer_key") as string;
-  const audio_file = formData.get("audio_reference") as File | null;
-  const image_file = formData.get("image_url") as File | null;
   const difficulty = parseInt(formData.get("difficulty") as string) || 1;
   const option_a = formData.get("option_a") as string | null;
   const option_b = formData.get("option_b") as string | null;
@@ -519,14 +514,16 @@ export async function updateQuestion(formData: FormData) {
   };
 
   try {
+    const audio_file = formData.get("audio_reference") as File | null;
     if (audio_file && audio_file.size > 0) {
       const url = await saveUploadedFile(audio_file, "kuis_audio");
-      updateData.audio_reference = url;
+      if (url) updateData.audio_reference = url;
     }
     
+    const image_file = formData.get("image_url") as File | null;
     if (image_file && image_file.size > 0) {
       const url = await saveUploadedFile(image_file, "kuis_image");
-      updateData.image_url = url;
+      if (url) updateData.image_url = url;
     }
 
     await prisma.question.update({

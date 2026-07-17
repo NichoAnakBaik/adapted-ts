@@ -36,7 +36,6 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
       // Let Next.js handle the File uploads natively via multipart/form-data
       // No need to convert to base64, which bloats the payload and crashes
 
-
       let res;
       if (editingQuestion) {
         formData.append("id", editingQuestion.id);
