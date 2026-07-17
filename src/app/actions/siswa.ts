@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
-import { saveUploadedFile } from "@/lib/upload";
+import { saveUploadedFile, saveBase64File } from "@/lib/upload";
 import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
@@ -287,25 +287,12 @@ export async function submitExam(formData: FormData) {
     let audio_url = null;
     if (audioB64) {
       try {
-        const matches = audioB64.match(/^data:(.*?);base64,(.+)$/);
-        if (matches && matches.length === 3) {
-          const mimeType = matches[1];
-          const base64Data = matches[2];
-          const ext = mimeType.split('/')[1]?.split(';')[0] || 'webm';
-          
-          const buffer = Buffer.from(base64Data, "base64");
-          const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
-          const subfolder = "student_speaking";
-          const uploadsDir = path.join(process.cwd(), "public", "uploads", subfolder);
-          
-          await fs.mkdir(uploadsDir, { recursive: true });
-          const filePath = path.join(uploadsDir, uniqueFilename);
-          await fs.writeFile(filePath, buffer);
-          
-          audio_url = `/uploads/${subfolder}/${uniqueFilename}`;
+        const publicUrl = await saveBase64File(audioB64, "student_speaking");
+        if (publicUrl) {
+          audio_url = publicUrl;
         }
       } catch (err) {
-        console.error("Failed to decode and save base64 audio:", err);
+        console.error("Failed to decode and save base64 audio to Supabase:", err);
       }
     }
 
