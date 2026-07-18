@@ -3,9 +3,16 @@ export const dynamic = 'force-dynamic';
 import { Users, BookOpen, ShieldAlert, Award, Database, Settings, ShieldCheck, BarChart4 } from "lucide-react";
 import { getDashboardStats } from "@/app/actions/admin";
 import Link from "next/link";
+import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboardPage() {
   const { totalSiswa, totalPengajar, totalKelas } = await getDashboardStats();
+
+  const recentLogs = await prisma.studentActivityLog.findMany({
+    include: { student: { select: { nama_lengkap: true } } },
+    orderBy: { created_at: 'desc' },
+    take: 5
+  });
 
   return (
     <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
@@ -84,28 +91,36 @@ export default async function AdminDashboardPage() {
         {/* System Logs */}
         <div className="bg-namsan-dark rounded-2xl p-5 md:p-6 flex flex-col shadow-lg mt-4 lg:mt-0">
           <div className="flex items-center justify-center lg:justify-start gap-3 mb-4 md:mb-6">
-            <Database className="w-6 h-6 md:w-8 md:h-8 text-namsan-primary" />
-            <h2 className="text-lg md:text-xl font-bold text-namsan-primary">Status Database</h2>
+            <ShieldAlert className="w-6 h-6 md:w-8 md:h-8 text-namsan-primary" />
+            <h2 className="text-lg md:text-xl font-bold text-namsan-primary">Aktivitas Terbaru</h2>
           </div>
           
-          <div className="space-y-3 md:space-y-4 flex-1">
-            <div className="flex justify-between items-center border-b border-white/10 pb-2">
-              <span className="text-gray-400 text-xs md:text-sm">Server Koneksi</span>
-              <span className="text-green-400 text-xs md:text-sm font-bold">Stabil (12ms)</span>
-            </div>
-            <div className="flex justify-between items-center border-b border-white/10 pb-2">
-              <span className="text-gray-400 text-xs md:text-sm">Penggunaan Storage</span>
-              <span className="text-yellow-400 text-xs md:text-sm font-bold">45% (Aman)</span>
-            </div>
-            <div className="flex justify-between items-center border-b border-white/10 pb-2">
-              <span className="text-gray-400 text-xs md:text-sm">Last Backup</span>
-              <span className="text-gray-200 text-xs md:text-sm font-bold">Hari ini, 03:00 AM</span>
-            </div>
+          <div className="space-y-3 md:space-y-4 flex-1 overflow-hidden">
+            {recentLogs.map((log) => {
+              const meta = log.metadata ? JSON.parse(log.metadata) : {};
+              return (
+                <div key={log.id} className="flex flex-col border-b border-white/10 pb-3 last:border-0 last:pb-0">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-white text-xs font-bold truncate pr-2">
+                      {log.student?.nama_lengkap || "Siswa"}
+                    </span>
+                    <span className="text-gray-400 text-[10px] shrink-0">
+                      {new Date(log.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                  <span className="text-gray-300 text-xs line-clamp-2">
+                    <span className="text-namsan-primary">{log.action_type}</span>: {meta.targetName || log.action_type}
+                  </span>
+                </div>
+              );
+            })}
+            {recentLogs.length === 0 && (
+              <div className="text-center text-gray-500 text-xs py-4">Tidak ada aktivitas.</div>
+            )}
           </div>
 
-          <Link href="/admin/logs" className="mt-6 md:mt-8 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
-            <ShieldAlert className="w-4 h-4 md:w-5 md:h-5" />
-            Cek Keamanan Log
+          <Link href="/admin/logs" className="mt-6 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
+            Lihat Semua Log
           </Link>
         </div>
 
