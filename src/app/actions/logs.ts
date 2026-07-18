@@ -42,14 +42,17 @@ export async function getActivityLogs(targetRole: "ADMIN" | "PENGAJAR" | "SISWA"
       // Filter: Hanya tampilkan log yang classId-nya milik pengajar ini, 
       // atau log global (tanpa classId) dari siswa yang diajarnya.
       const filteredLogs = allLogs.filter(log => {
+        // Jangan tampilkan log umum (LOGIN/LOGOUT) untuk pengajar, karena kurang relevan
+        if (log.action_type === "LOGIN" || log.action_type === "LOGOUT") return false;
+
         try {
           const meta = log.metadata ? JSON.parse(log.metadata) : {};
           if (meta.classId) {
             return classIds.includes(meta.classId);
           }
-          return true; // Global logs (e.g. LOGIN)
+          return false; // Jangan tampilkan log jika classId-nya tidak ada/tidak cocok
         } catch (e) {
-          return true;
+          return false;
         }
       });
 
