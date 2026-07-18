@@ -1,10 +1,10 @@
 "use client";
 
 import React, { useState } from "react";
-import { ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 
-export default function SiswaKuisClient({ exams }: { exams: any[] }) {
+export default function SiswaKuisClient({ exams, className }: { exams: any[], className?: string }) {
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredExams = exams.filter(ex => 
@@ -13,13 +13,16 @@ export default function SiswaKuisClient({ exams }: { exams: any[] }) {
   );
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      <Link href="/siswa/kuis" className="inline-flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-bold text-sm mb-4 transition-colors">
+        <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kelas
+      </Link>
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-red-50 rounded-xl">
             <ClipboardList className="w-8 h-8 text-red-500" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-namsan-text">Kuis & Ujian</h1>
+            <h1 className="text-2xl font-bold text-namsan-text">Kuis {className ? `- Kelas ${className}` : ''}</h1>
             <p className="text-sm text-namsan-text-muted">Uji kemampuan bahasa Koreamu melalui kuis interaktif.</p>
           </div>
         </div>
