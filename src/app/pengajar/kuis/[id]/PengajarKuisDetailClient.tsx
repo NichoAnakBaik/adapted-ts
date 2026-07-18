@@ -339,46 +339,36 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
       )}
 
       {activeTab === "HASIL" && (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-          <div className="w-full overflow-x-auto">
-            <div className="min-w-[600px] inline-block align-middle">
-              <table className="min-w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100 text-sm">
-                    <th className="p-4 font-bold text-namsan-text-muted">Nama Siswa</th>
-                    <th className="p-4 font-bold text-namsan-text-muted text-center">Skor</th>
-                    <th className="p-4 font-bold text-namsan-text-muted">Waktu Selesai</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {exam.exam_attempts?.map((attempt: any) => (
-                    <tr key={attempt.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="p-4 font-bold text-gray-900">{attempt.student.nama_lengkap || attempt.student.username}</td>
-                      <td className="p-4 text-center">
-                        <span className="inline-flex items-center justify-center px-3 py-1 rounded-full font-bold bg-blue-100 text-blue-700">
-                          {attempt.total_score !== null ? attempt.total_score : '-'} / 100
-                        </span>
-                      </td>
-                      <td className="p-4 text-sm text-gray-500 flex items-center gap-4 justify-between">
-                        <span>{new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}</span>
-                        <button 
-                          onClick={() => { setSelectedAttempt(attempt); setActiveTab("HASIL_DETAIL"); }}
-                          className="text-namsan-primary font-bold hover:underline"
-                        >
-                          Lihat Detail
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                  {(!exam.exam_attempts || exam.exam_attempts.length === 0) && (
-                    <tr>
-                      <td colSpan={3} className="p-8 text-center text-gray-500">Belum ada siswa yang mengerjakan kuis ini.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {exam.exam_attempts?.map((attempt: any) => (
+            <div key={attempt.id} className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center justify-between hover:shadow-md transition-all group">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold shrink-0">
+                  {(attempt.student.nama_lengkap || attempt.student.username).charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p className="font-bold text-namsan-text">{attempt.student.nama_lengkap || attempt.student.username}</p>
+                  <p className="text-xs text-gray-500">{new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}</p>
+                </div>
+              </div>
+              <div className="flex flex-col items-end gap-1">
+                <span className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700">
+                  {attempt.total_score !== null ? attempt.total_score : '-'} / 100
+                </span>
+                <button 
+                  onClick={() => { setSelectedAttempt(attempt); setActiveTab("HASIL_DETAIL"); }}
+                  className="text-xs font-bold text-namsan-primary hover:underline opacity-0 group-hover:opacity-100 transition-opacity"
+                >
+                  Lihat Detail
+                </button>
+              </div>
             </div>
-          </div>
+          ))}
+          {(!exam.exam_attempts || exam.exam_attempts.length === 0) && (
+            <div className="col-span-full text-center p-8 bg-white border border-gray-100 border-dashed rounded-xl text-gray-500">
+              Belum ada siswa yang menyelesaikan kuis ini.
+            </div>
+          )}
         </div>
       )}
 

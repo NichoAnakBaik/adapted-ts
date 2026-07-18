@@ -202,44 +202,45 @@ export default function ClassDetailClient({ classData, teachers, allStudents }: 
 
             {/* Enrolled Students List */}
             {classData.enrollments.length > 0 ? (
-              <div className="border border-gray-100 rounded-xl overflow-hidden w-full overflow-x-auto">
-                <table className="w-full text-left border-collapse min-w-[500px]">
-                  <tbody>
-                    {classData.enrollments.map((e: any) => (
-                      <tr key={e.id} className="border-b border-gray-50 last:border-b-0 hover:bg-gray-50 transition-colors">
-                        <td className="p-4">
-                          <p className="font-bold text-namsan-text">{e.student.nama_lengkap}</p>
-                          <p className="text-xs text-gray-500">@{e.student.username}</p>
-                          {e.status === 'PENDING' && (
-                            <span className="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold rounded-full">
-                              MENUNGGU PERSETUJUAN
-                            </span>
-                          )}
-                        </td>
-                        <td className="p-4 text-right flex items-center justify-end gap-2">
-                          {e.status === 'PENDING' && (
-                            <button 
-                              onClick={async () => {
-                                const { updateEnrollmentStatus } = await import("@/app/actions/admin");
-                                const res = await updateEnrollmentStatus(e.id, 'APPROVED');
-                                if (res.success) window.location.reload();
-                              }}
-                              className="px-3 py-1.5 text-xs font-bold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
-                            >
-                              Terima
-                            </button>
-                          )}
-                          <button 
-                            onClick={() => handleUnenroll(e.id)}
-                            className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Keluarkan'"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {classData.enrollments.map((e: any) => (
+                  <div key={e.id} className="flex items-center justify-between p-4 bg-white border border-gray-100 rounded-xl shadow-sm hover:shadow-md transition-all group">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-gray-600 font-bold shrink-0">
+                        {e.student.nama_lengkap.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="truncate">
+                        <p className="font-bold text-sm text-namsan-text truncate">{e.student.nama_lengkap}</p>
+                        <p className="text-xs text-gray-500 truncate">@{e.student.username}</p>
+                        {e.status === 'PENDING' && (
+                          <span className="inline-block mt-1 px-2 py-0.5 bg-yellow-100 text-yellow-800 text-[10px] font-bold rounded-full">
+                            MENUNGGU
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0 ml-2 opacity-100 md:opacity-0 group-hover:opacity-100 transition-opacity">
+                      {e.status === 'PENDING' && (
+                        <button 
+                          onClick={async () => {
+                            const { updateEnrollmentStatus } = await import("@/app/actions/admin");
+                            const res = await updateEnrollmentStatus(e.id, 'APPROVED');
+                            if (res.success) window.location.reload();
+                          }}
+                          className="px-3 py-1.5 text-xs font-bold text-white bg-green-500 hover:bg-green-600 rounded-lg transition-colors"
+                        >
+                          Terima
+                        </button>
+                      )}
+                      <button 
+                        onClick={() => handleUnenroll(e.id)}
+                        className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Keluarkan'"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : (
               <div className="text-center p-8 border border-gray-100 border-dashed rounded-xl">

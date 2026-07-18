@@ -132,63 +132,52 @@ export default function UserManagementPage({ initialUsers }: { initialUsers: any
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <input 
-            type="text" 
-            placeholder="Cari nama atau username..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:max-w-xs p-2.5 border rounded-lg text-sm bg-white focus:border-namsan-primary outline-none"
-          />
-        </div>
-        <div className="w-full overflow-x-auto">
-          <div className="min-w-full inline-block align-middle">
-            <table className="min-w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-50 border-b border-gray-100 text-[10px] md:text-sm">
-                  <th className="p-3 md:p-4 font-bold text-namsan-text-muted whitespace-nowrap">Nama Lengkap</th>
-                  <th className="p-3 md:p-4 font-bold text-namsan-text-muted whitespace-nowrap">Username</th>
-                  <th className="p-3 md:p-4 font-bold text-namsan-text-muted whitespace-nowrap">Role</th>
-                  <th className="p-3 md:p-4 font-bold text-namsan-text-muted text-right whitespace-nowrap">Aksi</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredUsers.map((u) => (
-                  <tr key={u.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors text-xs md:text-base">
-                    <td className="p-3 md:p-4 font-medium text-namsan-text whitespace-nowrap">{u.nama_lengkap}</td>
-                    <td className="p-3 md:p-4 text-gray-500 whitespace-nowrap">{u.username}</td>
-                    <td className="p-3 md:p-4 whitespace-nowrap">
-                      <span className={`px-2 md:px-3 py-1 rounded-full text-[10px] md:text-xs font-bold ${
-                        u.role === 'ADMIN' ? 'bg-red-100 text-red-700' :
-                        u.role === 'PENGAJAR' ? 'bg-blue-100 text-blue-700' :
-                        'bg-green-100 text-green-700'
-                      }`}>
-                        {u.role}
-                      </span>
-                    </td>
-                    <td className="p-3 md:p-4 text-right whitespace-nowrap flex justify-end gap-1 md:gap-2">
-                      <button onClick={() => handleResetPassword(u.id)} className="p-1 md:p-2 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors title='Reset Password (123456)'">
-                        <Key className="w-4 h-4 md:w-5 md:h-5" />
-                      </button>
-                      <button onClick={() => handleEditClick(u)} className="p-1 md:p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors title='Edit Pengguna'">
-                        <Edit className="w-4 h-4 md:w-5 md:h-5" />
-                      </button>
-                      <button onClick={() => handleDelete(u.id)} className="p-1 md:p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Hapus Pengguna'">
-                        <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-                {filteredUsers.length === 0 && (
-                  <tr>
-                    <td colSpan={4} className="p-6 md:p-8 text-center text-xs md:text-sm text-gray-500">Belum ada pengguna.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <input 
+          type="text" 
+          placeholder="Cari nama atau username..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredUsers.map((u) => (
+          <div key={u.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col hover:shadow-md transition-all">
+            <div className="flex justify-between items-start mb-3">
+              <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center text-lg font-bold text-gray-600">
+                {u.nama_lengkap.charAt(0).toUpperCase()}
+              </div>
+              <span className={`px-2 py-1 rounded-md text-[10px] md:text-xs font-bold ${
+                u.role === 'ADMIN' ? 'bg-red-100 text-red-700' :
+                u.role === 'PENGAJAR' ? 'bg-blue-100 text-blue-700' :
+                'bg-green-100 text-green-700'
+              }`}>
+                {u.role}
+              </span>
+            </div>
+            <h3 className="font-bold text-lg text-namsan-text">{u.nama_lengkap}</h3>
+            <p className="text-sm text-gray-500 mb-4">@{u.username}</p>
+            
+            <div className="mt-auto pt-4 border-t border-gray-50 flex justify-end gap-2">
+              <button onClick={() => handleResetPassword(u.id)} className="p-2 text-orange-500 hover:bg-orange-50 rounded-lg transition-colors flex items-center justify-center title='Reset Password (123456)'">
+                <Key className="w-4 h-4" />
+              </button>
+              <button onClick={() => handleEditClick(u)} className="p-2 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center title='Edit Pengguna'">
+                <Edit className="w-4 h-4" />
+              </button>
+              <button onClick={() => handleDelete(u.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center title='Hapus Pengguna'">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
           </div>
-        </div>
+        ))}
+        {filteredUsers.length === 0 && (
+          <div className="col-span-full p-8 text-center text-gray-500 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+            Belum ada pengguna.
+          </div>
+        )}
       </div>
     </div>
   );

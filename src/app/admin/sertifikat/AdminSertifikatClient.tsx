@@ -120,74 +120,76 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <input 
-            type="text" 
-            placeholder="Cari nama siswa atau kelas..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:max-w-xs p-2.5 border rounded-lg text-sm bg-white focus:border-namsan-primary outline-none"
-          />
-        </div>
-        <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[700px] text-left border-collapse">
-            <thead>
-            <tr className="bg-gray-50 border-b border-gray-100 text-sm">
-              <th className="p-4 font-bold text-namsan-text-muted">Nama Siswa</th>
-              <th className="p-4 font-bold text-namsan-text-muted">Kelas</th>
-              <th className="p-4 font-bold text-namsan-text-muted">Status</th>
-              <th className="p-4 font-bold text-namsan-text-muted">Sertifikat</th>
-              <th className="p-4 font-bold text-namsan-text-muted text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredCertificates.map((cert) => (
-              <tr key={cert.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td className="p-4 font-medium text-namsan-text">
-                  {cert.student.nama_lengkap}
-                  <div className="text-xs text-gray-400 font-normal">@{cert.student.username}</div>
-                </td>
-                <td className="p-4 text-gray-600 font-medium">{cert.class.name}</td>
-                <td className="p-4">
-                  <select 
-                    value={cert.status}
-                    onChange={(e) => handleUpdateStatus(cert.id, e.target.value)}
-                    className={`p-1.5 border rounded-md text-xs font-bold ${
-                      cert.status === 'APPROVED' ? 'bg-green-100 text-green-700 border-green-200' :
-                      cert.status === 'REJECTED' ? 'bg-red-100 text-red-700 border-red-200' :
-                      'bg-orange-100 text-orange-700 border-orange-200'
-                    }`}
-                  >
-                    <option value="PENDING">PENDING</option>
-                    <option value="APPROVED">APPROVED</option>
-                    <option value="REJECTED">REJECTED</option>
-                  </select>
-                </td>
-                <td className="p-4">
-                  {cert.file_url ? (
-                    <a href={cert.file_url} target="_blank" rel="noreferrer" className="text-sm font-bold text-blue-500 hover:underline flex items-center gap-1">
-                      <Download className="w-4 h-4" /> Buka
-                    </a>
-                  ) : (
-                    <span className="text-sm text-gray-400">Belum diunggah</span>
-                  )}
-                </td>
-                <td className="p-4 text-right">
-                  <button onClick={() => handleDelete(cert.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors title='Hapus'">
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </td>
-              </tr>
-            ))}
-            {filteredCertificates.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-gray-500">Belum ada sertifikat yang diterbitkan.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <input 
+          type="text" 
+          placeholder="Cari nama siswa atau kelas..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {filteredCertificates.map((cert) => (
+          <div key={cert.id} className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col hover:border-namsan-primary hover:shadow-md transition-all group">
+            <div className="flex justify-between items-start mb-3 md:mb-4">
+              <span className={`px-2.5 py-1 rounded-md text-[10px] md:text-xs font-bold ${
+                cert.status === 'APPROVED' ? 'bg-green-100 text-green-700' :
+                cert.status === 'REJECTED' ? 'bg-red-100 text-red-700' :
+                'bg-orange-100 text-orange-700'
+              }`}>
+                {cert.status}
+              </span>
+              <select 
+                value={cert.status}
+                onChange={(e) => handleUpdateStatus(cert.id, e.target.value)}
+                className="p-1 border rounded bg-gray-50 text-[10px] md:text-xs font-medium text-gray-600 outline-none hover:bg-gray-100 cursor-pointer"
+                title="Ubah Status"
+              >
+                <option value="PENDING">PENDING</option>
+                <option value="APPROVED">APPROVED</option>
+                <option value="REJECTED">REJECTED</option>
+              </select>
+            </div>
+            
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg font-bold text-gray-600 shrink-0">
+                {cert.student.nama_lengkap.charAt(0).toUpperCase()}
+              </div>
+              <div className="flex-1 truncate">
+                <h3 className="font-bold text-base md:text-lg text-namsan-text truncate">{cert.student.nama_lengkap}</h3>
+                <p className="text-xs text-gray-500 truncate">@{cert.student.username}</p>
+              </div>
+            </div>
+            
+            <div className="space-y-2 flex-1 mb-4">
+              <div className="flex items-start gap-2 text-xs md:text-sm">
+                <span className="font-medium text-gray-700 block w-16">Kelas:</span>
+                <span className="text-gray-600 line-clamp-2">{cert.class.name}</span>
+              </div>
+            </div>
+            
+            <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
+              <button onClick={() => handleDelete(cert.id)} className="p-2 md:p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center title='Hapus'">
+                <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+              
+              {cert.file_url ? (
+                <a href={cert.file_url} target="_blank" rel="noreferrer" className="bg-namsan-soft hover:bg-namsan-primary text-namsan-dark font-bold py-2 md:py-2.5 px-4 rounded-xl flex items-center gap-2 text-sm md:text-base transition-colors flex-1 justify-center">
+                  <Download className="w-4 h-4 md:w-5 md:h-5" /> Lihat Dokumen
+                </a>
+              ) : (
+                <span className="text-sm text-gray-400 italic text-center flex-1">Belum diunggah</span>
+              )}
+            </div>
+          </div>
+        ))}
+        {filteredCertificates.length === 0 && (
+          <div className="col-span-full p-8 md:p-12 text-center text-gray-500 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+            Belum ada pengajuan sertifikat.
+          </div>
+        )}
       </div>
     </div>
   );

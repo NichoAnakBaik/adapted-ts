@@ -233,31 +233,27 @@ export default function PengajarAbsensiClient({ classes }: { classes: any[] }) {
                   <p className="text-gray-500 text-sm">Belum ada siswa yang melakukan absen pada sesi ini.</p>
                 </div>
               ) : (
-                <table className="w-full text-left border-collapse text-sm">
-                  <thead className="bg-white sticky top-0 border-b border-gray-100 shadow-sm z-10">
-                    <tr>
-                      <th className="p-4 font-bold text-gray-500 uppercase text-[10px] tracking-wider">Nama Siswa</th>
-                      <th className="p-4 font-bold text-gray-500 uppercase text-[10px] tracking-wider text-center">Waktu Absen</th>
-                      <th className="p-4 font-bold text-gray-500 uppercase text-[10px] tracking-wider">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-50">
-                    {attendances.map(a => (
-                      <tr key={a.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
+                  {attendances.map(a => (
+                    <div key={a.id} className="bg-white p-4 rounded-xl border border-gray-100 shadow-sm flex items-center justify-between hover:shadow-md transition-all">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg font-bold text-gray-600 shrink-0">
+                          {a.student.nama_lengkap.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
                           <div className="font-bold text-gray-900">{a.student.nama_lengkap}</div>
                           <div className="text-xs text-gray-400">@{a.student.username}</div>
-                        </td>
-                        <td className="p-4 text-gray-600 text-center font-medium">
+                        </div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1">
+                        <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded-md text-[10px] font-bold border border-green-100 uppercase tracking-wider">Hadir</span>
+                        <span className="text-xs font-medium text-gray-500">
                           {new Date(a.check_in_time).toLocaleTimeString('id-ID', { timeStyle: 'short' })}
-                        </td>
-                        <td className="p-4">
-                          <span className="bg-green-50 text-green-700 px-2.5 py-1 rounded-md text-xs font-bold border border-green-100">Hadir</span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </div>
           </div>

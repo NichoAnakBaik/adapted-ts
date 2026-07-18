@@ -115,71 +115,60 @@ export default function ClassManagementClient({ initialClasses, teachers, studen
         </div>
       )}
 
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-gray-100 bg-gray-50/50">
-          <input 
-            type="text" 
-            placeholder="Cari nama kelas..." 
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full md:max-w-xs p-2.5 border rounded-lg text-sm bg-white focus:border-namsan-primary outline-none"
-          />
-        </div>
-        <div className="w-full overflow-x-auto">
-          <table className="w-full min-w-[800px] text-left border-collapse">
-          <thead>
-            <tr className="bg-gray-50 border-b border-gray-100 text-sm">
-              <th className="p-4 font-bold text-namsan-text-muted">Nama Kelas</th>
-              <th className="p-4 font-bold text-namsan-text-muted">Tipe</th>
-              <th className="p-4 font-bold text-namsan-text-muted">Pengajar</th>
-              <th className="p-4 font-bold text-namsan-text-muted text-center">Siswa Terdaftar</th>
-              <th className="p-4 font-bold text-namsan-text-muted text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filteredClasses.map((c) => (
-              <tr key={c.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                <td className="p-4 font-medium text-namsan-text">{c.name}</td>
-                <td className="p-4">
-                  <span className={`px-3 py-1 rounded-full text-xs font-bold ${
-                    c.type === 'ONLINE' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
-                  }`}>
-                    {c.type}
-                  </span>
-                </td>
-                <td className="p-4">
-                  {c.teacher?.nama_lengkap ? (
-                    <span className="font-medium text-gray-700">{c.teacher.nama_lengkap}</span>
-                  ) : (
-                    <span className="text-gray-400 italic text-sm">Belum ada pengajar</span>
-                  )}
-                </td>
-                <td className="p-4 text-center">
-                  <div className="flex items-center justify-center gap-2 text-namsan-text-muted font-medium">
-                    <Users className="w-4 h-4" />
-                    {c._count?.enrollments || 0}
-                  </div>
-                </td>
-                <td className="p-4 text-right">
-                  <div className="flex justify-end gap-2">
-                    <Link href={`/admin/kelas/${c.id}`} className="bg-namsan-soft hover:bg-namsan-primary text-namsan-dark font-bold py-2 px-3 rounded-lg flex items-center gap-1 text-sm transition-colors">
-                      Kelola <ArrowRight className="w-4 h-4" />
-                    </Link>
-                    <button onClick={() => handleDelete(c.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-            {filteredClasses.length === 0 && (
-              <tr>
-                <td colSpan={5} className="p-8 text-center text-gray-500">Belum ada kelas yang dibuat.</td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-        </div>
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 mb-6">
+        <input 
+          type="text" 
+          placeholder="Cari nama kelas..." 
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className="w-full md:max-w-md p-2.5 border rounded-lg text-sm bg-gray-50 focus:bg-white focus:border-namsan-primary outline-none transition-colors"
+        />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+        {filteredClasses.map((c) => (
+          <div key={c.id} className="bg-white p-5 md:p-6 rounded-2xl border border-gray-100 shadow-sm flex flex-col hover:border-namsan-primary hover:shadow-md transition-all group">
+            <div className="flex justify-between items-start mb-3 md:mb-4">
+              <span className={`px-2.5 py-1 rounded-md text-[10px] md:text-xs font-bold ${
+                c.type === 'ONLINE' ? 'bg-blue-100 text-blue-700' : 'bg-purple-100 text-purple-700'
+              }`}>
+                {c.type}
+              </span>
+              <div className="flex items-center gap-1 text-gray-500 text-xs md:text-sm font-medium bg-gray-50 px-2 py-1 rounded-lg">
+                <Users className="w-3 h-3 md:w-4 md:h-4" />
+                {c._count?.enrollments || 0} Siswa
+              </div>
+            </div>
+            
+            <h3 className="font-bold text-lg md:text-xl text-namsan-text group-hover:text-namsan-primary transition-colors line-clamp-2">{c.name}</h3>
+            
+            <div className="mt-3 md:mt-4 space-y-2 flex-1">
+              <div className="flex items-start gap-2 text-xs md:text-sm">
+                <div className="w-5 md:w-6 flex justify-center shrink-0 mt-0.5">
+                  <span className="w-2 h-2 rounded-full bg-gray-300"></span>
+                </div>
+                <div className="text-gray-500 line-clamp-2">
+                  <span className="font-medium text-gray-700 block">Pengajar:</span>
+                  {c.teacher?.nama_lengkap ? c.teacher.nama_lengkap : <span className="italic">Belum ada pengajar</span>}
+                </div>
+              </div>
+            </div>
+            
+            <div className="mt-4 md:mt-6 pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
+              <button onClick={() => handleDelete(c.id)} className="p-2 md:p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center title='Hapus Kelas'">
+                <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+              </button>
+              <Link href={`/admin/kelas/${c.id}`} className="bg-namsan-soft hover:bg-namsan-primary text-namsan-dark font-bold py-2 md:py-2.5 px-4 rounded-xl flex items-center gap-2 text-sm md:text-base transition-colors flex-1 justify-center">
+                Kelola Kelas <ArrowRight className="w-4 h-4 md:w-5 md:h-5" />
+              </Link>
+            </div>
+          </div>
+        ))}
+        {filteredClasses.length === 0 && (
+          <div className="col-span-full p-8 md:p-12 text-center text-gray-500 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+            Belum ada kelas yang dibuat.
+          </div>
+        )}
       </div>
     </div>
   );

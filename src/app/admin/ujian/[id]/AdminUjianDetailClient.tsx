@@ -373,61 +373,56 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
             </button>
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="w-full overflow-x-auto">
-              <table className="w-full min-w-[700px] text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50 text-gray-500 text-sm">
-                    <th className="p-4 font-bold rounded-tl-2xl">Nama Siswa</th>
-                    <th className="p-4 font-bold text-center">Kehadiran (Sesi)</th>
-                    <th className="p-4 font-bold text-center">Persentase</th>
-                    <th className="p-4 font-bold rounded-tr-2xl text-right">Aksi</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-50">
-                  {eligibleStudents.map((s, idx) => (
-                    <tr key={s.student.id} className="hover:bg-gray-50 transition-colors">
-                      <td className="p-4">
-                        <div className="font-bold text-namsan-text">{s.student.nama_lengkap}</div>
-                        <div className="text-xs text-gray-500">@{s.student.username}</div>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className="font-medium text-gray-700">{s.presentCount}</span> / <span className="text-gray-400">{s.totalSessions}</span>
-                      </td>
-                      <td className="p-4 text-center">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold border ${
-                          s.attendanceRate >= 75 ? "bg-green-50 text-green-700 border-green-100" : "bg-red-50 text-red-600 border-red-100"
-                        }`}>
-                          {s.attendanceRate.toFixed(0)}%
-                        </span>
-                      </td>
-                      <td className="p-4 text-right">
-                        {s.isAssigned ? (
-                          <span className="inline-flex items-center gap-1.5 text-sm font-bold text-teal-600 bg-teal-50 px-3 py-1.5 rounded-lg border border-teal-100">
-                            <CheckCircle className="w-4 h-4" /> Ter-assign
-                          </span>
-                        ) : (
-                          <button
-                            onClick={() => handleAssignSingle(s.student.id)}
-                            className="px-4 py-1.5 border-2 border-namsan-primary text-namsan-primary hover:bg-namsan-primary hover:text-white rounded-lg text-sm font-bold transition-colors"
-                          >
-                            Assign Siswa
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                  {eligibleStudents.length === 0 && (
-                    <tr>
-                      <td colSpan={4} className="p-8 text-center text-gray-500">
-                        <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        Belum ada siswa terdaftar di kelas ini.
-                      </td>
-                    </tr>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {eligibleStudents.map((s, idx) => (
+              <div key={s.student.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col hover:shadow-md transition-all">
+                <div className="flex items-center gap-3 mb-4 border-b border-gray-50 pb-3">
+                  <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg font-bold text-gray-600 shrink-0">
+                    {s.student.nama_lengkap.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 truncate">
+                    <div className="font-bold text-namsan-text truncate">{s.student.nama_lengkap}</div>
+                    <div className="text-xs text-gray-500 truncate">@{s.student.username}</div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2 flex-1 mb-4">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-gray-500">Sesi Hadir:</span>
+                    <span className="font-medium text-gray-700">{s.presentCount} / {s.totalSessions}</span>
+                  </div>
+                  <div className="flex justify-between text-sm items-center">
+                    <span className="text-gray-500">Tingkat Absensi:</span>
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] md:text-xs font-bold border ${
+                      s.attendanceRate >= 75 ? "bg-green-50 text-green-700 border-green-100" : "bg-red-50 text-red-600 border-red-100"
+                    }`}>
+                      {s.attendanceRate.toFixed(0)}%
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-end">
+                  {s.isAssigned ? (
+                    <span className="inline-flex items-center gap-1.5 text-sm font-bold text-teal-600 bg-teal-50 px-4 py-2 rounded-xl border border-teal-100 w-full justify-center">
+                      <CheckCircle className="w-4 h-4" /> Ter-assign
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => handleAssignSingle(s.student.id)}
+                      className="w-full px-4 py-2 border-2 border-namsan-primary text-namsan-primary hover:bg-namsan-primary hover:text-white rounded-xl text-sm font-bold transition-colors"
+                    >
+                      Assign Siswa
+                    </button>
                   )}
-                </tbody>
-              </table>
-            </div>
+                </div>
+              </div>
+            ))}
+            {eligibleStudents.length === 0 && (
+              <div className="col-span-full p-8 text-center text-gray-500 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                Belum ada siswa terdaftar di kelas ini.
+              </div>
+            )}
           </div>
         </div>
       ) : viewMode === "HASIL" ? (
@@ -442,81 +437,74 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
             />
           </div>
 
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-            <div className="w-full overflow-x-auto">
-              <table className="w-full min-w-[700px] text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50/50 text-gray-500 text-sm">
-                    <th className="p-4 font-bold rounded-tl-2xl">Siswa</th>
-                    <th className="p-4 font-bold">Waktu Mulai</th>
-                    <th className="p-4 font-bold">Waktu Selesai & Durasi</th>
-                    <th className="p-4 font-bold rounded-tr-2xl">Nilai Akhir</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {exam.exam_attempts?.filter((a: any) => 
-                    a.student.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    a.student.username.toLowerCase().includes(searchQuery.toLowerCase())
-                  ).map((attempt: any) => {
-                    const start = new Date(attempt.start_time);
-                    const end = attempt.end_time ? new Date(attempt.end_time) : null;
-                    const duration = end ? Math.round((end.getTime() - start.getTime()) / 60000) : null;
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {exam.exam_attempts?.filter((a: any) => 
+              a.student.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              a.student.username.toLowerCase().includes(searchQuery.toLowerCase())
+            ).map((attempt: any) => {
+              const start = new Date(attempt.start_time);
+              const end = attempt.end_time ? new Date(attempt.end_time) : null;
+              const duration = end ? Math.round((end.getTime() - start.getTime()) / 60000) : null;
 
-                    return (
-                      <tr key={attempt.id} className="border-b border-gray-50 hover:bg-gray-50 transition-colors">
-                        <td className="p-4">
-                          <div className="font-bold text-namsan-text">{attempt.student.nama_lengkap}</div>
-                          <div className="text-xs text-gray-500">@{attempt.student.username}</div>
-                        </td>
-                        <td className="p-4 text-sm text-gray-600">
-                          {start.toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' })}
-                        </td>
-                        <td className="p-4 text-sm text-gray-600">
-                          {end ? (
-                            <div>
-                              <div>{end.toLocaleTimeString('id-ID', { timeStyle: 'short' })}</div>
-                              <div className="text-xs text-namsan-primary font-bold mt-0.5">{duration} menit</div>
-                            </div>
-                          ) : (
-                            <span className="text-orange-500 text-xs font-bold px-2 py-1 bg-orange-50 rounded-lg">Sedang Mengerjakan</span>
-                          )}
-                        </td>
-                        <td className="p-4">
-                          {attempt.end_time ? (
-                            <div className="flex items-center gap-4">
-                              <div className={`w-12 h-10 flex items-center justify-center rounded-xl font-black ${
-                                (attempt.total_score || 0) >= 70 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                              }`}>
-                                {attempt.total_score || 0}
-                              </div>
-                              <button 
-                                onClick={() => { setSelectedAttempt(attempt); setViewMode("HASIL_DETAIL"); }}
-                                className="text-sm font-bold text-namsan-primary hover:underline"
-                              >
-                                Lihat Detail
-                              </button>
-                            </div>
-                          ) : (
-                            <span className="text-gray-400 text-sm">-</span>
-                          )}
-                        </td>
-                      </tr>
-                    );
-                  })}
-                  {(!exam.exam_attempts || exam.exam_attempts.filter((a: any) => 
-                    a.student.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                    a.student.username.toLowerCase().includes(searchQuery.toLowerCase())
-                  ).length === 0) && (
-                    <tr>
-                      <td colSpan={4} className="p-8 text-center text-gray-500">
-                        <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-                        Belum ada data hasil ujian siswa yang cocok.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+              return (
+                <div key={attempt.id} className="bg-white p-5 rounded-2xl border border-gray-100 shadow-sm flex flex-col hover:shadow-md transition-all group">
+                  <div className="flex items-center gap-3 mb-4 border-b border-gray-50 pb-3">
+                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center text-lg font-bold text-gray-600 shrink-0">
+                      {attempt.student.nama_lengkap.charAt(0).toUpperCase()}
+                    </div>
+                    <div className="flex-1 truncate">
+                      <div className="font-bold text-namsan-text truncate">{attempt.student.nama_lengkap}</div>
+                      <div className="text-xs text-gray-500 truncate">@{attempt.student.username}</div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-2 mb-4 flex-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-500">Mulai:</span>
+                      <span className="text-gray-700 font-medium">{start.toLocaleString('id-ID', { dateStyle: 'short', timeStyle: 'short' })}</span>
+                    </div>
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-gray-500">Durasi:</span>
+                      {end ? (
+                        <span className="text-namsan-primary font-bold">{duration} menit</span>
+                      ) : (
+                        <span className="text-orange-500 text-[10px] font-bold px-2 py-0.5 bg-orange-50 rounded-lg">Sedang Mengerjakan</span>
+                      )}
+                    </div>
+                  </div>
+                  
+                  <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
+                    {attempt.end_time ? (
+                      <>
+                        <div className={`px-4 py-2 flex items-center justify-center rounded-xl font-black ${
+                          (attempt.total_score || 0) >= 70 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
+                        }`}>
+                          Skor: {attempt.total_score || 0}
+                        </div>
+                        <button 
+                          onClick={() => { setSelectedAttempt(attempt); setViewMode("HASIL_DETAIL"); }}
+                          className="bg-gray-100 hover:bg-gray-200 text-gray-700 text-sm font-bold py-2 px-4 rounded-xl transition-colors"
+                        >
+                          Detail
+                        </button>
+                      </>
+                    ) : (
+                      <span className="text-gray-400 text-sm italic w-full text-center">Menunggu selesai...</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+            
+            {(!exam.exam_attempts || exam.exam_attempts.filter((a: any) => 
+              a.student.nama_lengkap.toLowerCase().includes(searchQuery.toLowerCase()) ||
+              a.student.username.toLowerCase().includes(searchQuery.toLowerCase())
+            ).length === 0) && (
+              <div className="col-span-full p-8 text-center text-gray-500 bg-white rounded-2xl border-2 border-dashed border-gray-200">
+                <Users className="w-8 h-8 text-gray-300 mx-auto mb-2" />
+                Belum ada data hasil ujian siswa yang cocok.
+              </div>
+            )}
           </div>
         </div>
       ) : viewMode === "HASIL_DETAIL" && selectedAttempt ? (
