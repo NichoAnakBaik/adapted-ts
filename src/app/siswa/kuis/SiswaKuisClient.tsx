@@ -13,10 +13,7 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
   );
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      <Link href="/siswa/kuis" className="inline-flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-bold text-sm mb-4 transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kelas
-      </Link>
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-red-50 rounded-xl">
             <ClipboardList className="w-8 h-8 text-red-500" />
@@ -26,6 +23,13 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
             <p className="text-sm text-namsan-text-muted">Uji kemampuan bahasa Koreamu melalui kuis interaktif.</p>
           </div>
         </div>
+        {className && (
+          <div className="flex items-center gap-3">
+            <Link href="/siswa/kuis" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl font-bold transition-colors">
+              Kembali
+            </Link>
+          </div>
+        )}
       </div>
 
       <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">

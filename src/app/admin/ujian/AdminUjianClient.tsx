@@ -48,12 +48,7 @@ export default function AdminUjianClient({ initialExams, classes, className, cla
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      {classId && (
-        <Link href="/admin/ujian" className="inline-flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-bold text-sm mb-4 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kelas
-        </Link>
-      )}
-      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-red-50 rounded-xl">
             <PenTool className="w-8 h-8 text-namsan-red" />
@@ -63,12 +58,19 @@ export default function AdminUjianClient({ initialExams, classes, className, cla
             <p className="text-sm text-namsan-text-muted">Buat dan kelola Ujian Akhir (Final Exam) khusus dengan 4 format soal bahasa.</p>
           </div>
         </div>
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="bg-namsan-red hover:bg-namsan-red/90 text-white font-bold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-colors"
-        >
-          {showForm ? "Batal" : <><Plus className="w-5 h-5" /> Buat Ujian Baru</>}
-        </button>
+        <div className="flex items-center gap-3">
+          {classId && (
+            <Link href="/admin/ujian" className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-5 py-2.5 rounded-xl font-bold transition-colors">
+              Kembali
+            </Link>
+          )}
+          <button
+            onClick={() => setShowForm(true)}
+            className="bg-namsan-primary hover:bg-namsan-primary/90 text-white px-5 py-2.5 rounded-xl font-bold flex items-center gap-2 transition-colors shadow-sm"
+          >
+            <Plus className="w-5 h-5" /> Buat Ujian Baru
+          </button>
+        </div>
       </div>
 
       {showForm && (
