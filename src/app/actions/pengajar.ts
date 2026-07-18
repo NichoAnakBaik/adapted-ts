@@ -36,7 +36,10 @@ export async function getTeacherDashboardStats() {
   const uniqueStudentsCount = new Set(students.map(s => s.student_id)).size;
 
   const examsCount = await prisma.exam.count({
-    where: { class: { teacher_id: teacherId } }
+    where: { 
+      class: { teacher_id: teacherId },
+      is_final: false
+    }
   });
 
   // ML Engine: Aggregate weak points
@@ -134,7 +137,14 @@ export async function getTeacherClasses() {
   return prisma.class.findMany({
     where: { teacher_id: session.user.id },
     include: {
-      _count: { select: { enrollments: true, exams: true } }
+      _count: { 
+        select: { 
+          enrollments: true, 
+          exams: {
+            where: { is_final: false }
+          }
+        } 
+      }
     },
     orderBy: { created_at: 'desc' }
   });

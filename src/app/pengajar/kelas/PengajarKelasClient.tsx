@@ -65,10 +65,10 @@ export default function PengajarKelasClient({ classes }: { classes: any[] }) {
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-xs text-namsan-text-muted font-bold tracking-wider">MODUL</span>
+                <span className="text-xs text-namsan-text-muted font-bold tracking-wider">KUIS</span>
                 <div className="flex items-center gap-1.5 text-namsan-text font-bold">
                   <BookOpen className="w-4 h-4 text-green-600" />
-                  {c._count?.modules || 0}
+                  {c._count?.exams || 0}
                 </div>
               </div>
             </div>
