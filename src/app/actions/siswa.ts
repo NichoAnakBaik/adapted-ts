@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
+import { AdaptEdAI } from "@/lib/aiEvaluator";
 import { redirect } from "next/navigation";
 import { saveUploadedFile, saveBase64File } from "@/lib/upload";
 import fs from "fs/promises";
@@ -310,55 +311,47 @@ export async function submitExam(formData: FormData) {
     }
 
     let transcript = null;
-    // Auto grading AI Simulation for ALL formats (Enhanced Mock)
+    
+    // Auto grading AI (Dynamic & Multi-modal)
+    const ai = new AdaptEdAI(process.env.GEMINI_API_KEY || "");
+    
+    // Prepare question data with base64 image if exists
+    let image_base64 = undefined;
+    if (q.image_url) {
+      try {
+        const response = await fetch(q.image_url);
+        const arrayBuffer = await response.arrayBuffer();
+        image_base64 = Buffer.from(arrayBuffer).toString('base64');
+      } catch (e) {
+        console.error("Gagal mendownload gambar untuk evaluasi AI:", e);
+      }
+    }
+
     if (q.type === "MULTIPLE_CHOICE" || q.format === "MULTIPLE_CHOICE") {
+      // Untuk Pilihan Ganda, kita cek benar/salah secara eksak dulu
       if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
         score = 10;
-        ai_feedback = "Tepat sekali! Pilihan Anda sangat akurat.";
+        ai_feedback = "Tepat sekali! Jawaban Anda sangat akurat.";
       } else {
         score = 0;
-        ai_feedback = `Jawaban kurang tepat. Pilihan Anda tidak sesuai konteks. Coba tinjau ulang materi ini.`;
+        // Panggil AI untuk menjelaskan kenapa salah
+        const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64 }, studentAnswer);
+        ai_feedback = evalResult.feedback;
       }
     } else if (q.type === "SPEAKING") {
       if (audioB64 || data.has_audio) {
         score = 0; // pending
         transcript = "[Sedang diproses oleh AI...]";
         ai_feedback = "AI sedang melakukan analisis transkripsi audio Anda. Hasil akan segera tersedia di latar belakang.";
-        // Note: we will add this to pendingTranscriptions AFTER checking if audio_url is successfully saved
       } else {
         score = 0;
         ai_feedback = "AI Error: Suara tidak terdeteksi. Pastikan mikrofon Anda berfungsi dengan baik.";
       }
-    } else if (q.type === "WRITING") {
-      if (studentAnswer.length > 50) {
-        score = Math.floor(Math.random() * 3) + 7; // 7, 8, 9
-        ai_feedback = "AI Text Analysis: Struktur gramatika Anda (Level B1) sudah terbentuk dengan baik. Variasi kosakata yang digunakan cukup luas. Saran perbaikan: Hindari pengulangan kata hubung '그리고' terlalu sering.";
-      } else if (studentAnswer.length > 10) {
-        score = 5;
-        ai_feedback = "AI Text Analysis: Kalimat dapat dipahami secara konteks, namun struktur subjek-objek-predikat masih kaku. Tingkatkan penggunaan partikel '-은/는' dan '-이/가'.";
-      } else {
-        score = 0;
-        ai_feedback = "AI Text Analysis: Jawaban terlalu singkat untuk memvalidasi kemampuan menulis Anda secara akurat.";
-      }
-    } else if (q.type === "LISTENING") {
-      if (studentAnswer.length > 15) {
-        score = 8;
-        ai_feedback = "AI Comprehension: Pemahaman audio Anda sangat baik. Anda berhasil menangkap kata kunci tersembunyi pada dialog dengan tempo cepat.";
-      } else {
-        score = 0;
-        ai_feedback = "AI Comprehension: Anda melewatkan inti informasi dari rekaman audio. Latih pendengaran Anda dengan tempo bicara normal.";
-      }
-    } else if (q.type === "READING") {
-      if (studentAnswer.length > 20) {
-        score = 8;
-        ai_feedback = "AI NLP Analysis: Kemampuan literasi membaca Anda memuaskan. Kesimpulan yang Anda tarik selaras dengan gagasan utama (Main Idea) paragraf kedua.";
-      } else {
-        score = 0;
-        ai_feedback = "AI NLP Analysis: Analisis bacaan Anda keliru atau terlalu dangkal. Bacalah dengan teknik 'skimming' untuk mencari inti gagasan terlebih dahulu.";
-      }
     } else {
-      score = studentAnswer.length > 5 ? 7 : 0;
-      ai_feedback = "AI Analysis: Jawaban telah dievaluasi dengan skor menengah.";
+      // ESSAY, WRITING, LISTENING, READING yang berupa teks
+      const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64 }, studentAnswer);
+      score = evalResult.skor;
+      ai_feedback = evalResult.feedback;
     }
 
     totalScore += score;
