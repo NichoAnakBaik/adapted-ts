@@ -21,6 +21,7 @@
     "react": "19.2.4",
     "react-dom": "19.2.4",
     "react-simple-keyboard": "^3.8.221",
+    "react-textarea-autosize": "^8.5.9",
     "simple-keyboard-layouts": "^3.4.222",
     "string-similarity": "^4.0.4"
   },

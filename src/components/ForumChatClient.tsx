@@ -11,6 +11,53 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [expandedThreads, setExpandedThreads] = useState<string[]>([]);
+  
+  const [mentionState, setMentionState] = useState<{
+    active: boolean;
+    query: string;
+    type: 'main' | 'reply';
+    parentId?: string;
+  } | null>(null);
+
+  const handleTextChange = (e: React.ChangeEvent<HTMLTextAreaElement>, type: 'main' | 'reply', parentId?: string) => {
+    const val = e.target.value;
+    if (type === 'main') setNewMessage(val);
+    else setReplyText(val);
+
+    const cursor = e.target.selectionStart;
+    const textBeforeCursor = val.slice(0, cursor);
+    const match = textBeforeCursor.match(/@([a-zA-Z0-9_]*)$/);
+    
+    if (match) {
+      setMentionState({ active: true, query: match[1], type, parentId });
+    } else {
+      setMentionState(null);
+    }
+  };
+
+  const handleSelectMention = (username: string) => {
+    if (!mentionState) return;
+    const replacement = `@${username} `;
+    
+    if (mentionState.type === 'main') {
+      const matchPos = newMessage.lastIndexOf(`@${mentionState.query}`);
+      if (matchPos !== -1) {
+        setNewMessage(newMessage.substring(0, matchPos) + replacement + newMessage.substring(matchPos + mentionState.query.length + 1));
+      }
+    } else {
+      const matchPos = replyText.lastIndexOf(`@${mentionState.query}`);
+      if (matchPos !== -1) {
+        setReplyText(replyText.substring(0, matchPos) + replacement + replyText.substring(matchPos + mentionState.query.length + 1));
+      }
+    }
+    setMentionState(null);
+  };
+
+  const filteredMembers = (forumData.members || []).filter((m: any) => 
+    m.username.toLowerCase().includes(mentionState?.query.toLowerCase() || '') ||
+    m.nama_lengkap.toLowerCase().includes(mentionState?.query.toLowerCase() || '')
+  ).slice(0, 5); // Max 5 suggestions
+
 
   const handleSend = async (e: React.FormEvent, parentId: string | null = null) => {
     e.preventDefault();
@@ -207,13 +254,36 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                 <User className="w-3 h-3 md:w-4 md:h-4" />
               </div>
               <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all shadow-sm">
-                <textarea 
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder={`Balas @${msg.user?.username || 'user'}...`}
-                  className="w-full p-2.5 outline-none text-sm resize-none min-h-[60px]"
-                  autoFocus
-                />
+                <div className="relative">
+                  <textarea 
+                    value={replyText}
+                    onChange={(e) => handleTextChange(e, 'reply', msg.id)}
+                    placeholder={`Balas @${msg.user?.username || 'user'}...`}
+                    className="w-full p-2.5 outline-none text-sm resize-none min-h-[60px]"
+                    autoFocus
+                  />
+                  {/* Mention Dropdown for Reply */}
+                  {mentionState?.active && mentionState.type === 'reply' && mentionState.parentId === msg.id && filteredMembers.length > 0 && (
+                    <div className="absolute bottom-full left-0 mb-1 w-64 bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden z-30 animate-in fade-in zoom-in-95">
+                      {filteredMembers.map((member: any) => (
+                        <button
+                          key={member.id}
+                          type="button"
+                          onClick={() => handleSelectMention(member.username)}
+                          className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left transition-colors border-b border-gray-50 last:border-0"
+                        >
+                          <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
+                            {member.nama_lengkap.charAt(0)}
+                          </div>
+                          <div className="flex-1 truncate">
+                            <div className="text-sm font-bold text-gray-900 truncate">{member.nama_lengkap}</div>
+                            <div className="text-xs text-gray-500 truncate">@{member.username}</div>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
                 <div className="flex justify-between items-center px-2 pb-2">
                   <div className="text-[10px] md:text-xs text-blue-500 px-1 cursor-pointer font-medium hover:underline">
                     Gunakan @ untuk _mention_ teman
@@ -275,12 +345,35 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
               <User className="w-4 h-4 md:w-5 md:h-5 text-gray-500" />
             </div>
             <div className="flex-1">
-              <textarea 
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Apa yang sedang terjadi di kelas ini?"
-                className="w-full text-[13px] outline-none resize-none min-h-[40px] bg-transparent text-gray-900 placeholder-gray-400 py-1"
-              />
+              <div className="relative">
+                <textarea 
+                  value={newMessage}
+                  onChange={(e) => handleTextChange(e, 'main')}
+                  placeholder="Apa yang sedang terjadi di kelas ini?"
+                  className="w-full text-[13px] outline-none resize-none min-h-[40px] bg-transparent text-gray-900 placeholder-gray-400 py-1"
+                />
+                {/* Mention Dropdown for Main Compose */}
+                {mentionState?.active && mentionState.type === 'main' && filteredMembers.length > 0 && (
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden z-30 animate-in fade-in zoom-in-95">
+                    {filteredMembers.map((member: any) => (
+                      <button
+                        key={member.id}
+                        type="button"
+                        onClick={() => handleSelectMention(member.username)}
+                        className="w-full flex items-center gap-2 px-3 py-2 hover:bg-gray-50 text-left transition-colors border-b border-gray-50 last:border-0"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-xs font-bold text-blue-700 flex-shrink-0">
+                          {member.nama_lengkap.charAt(0)}
+                        </div>
+                        <div className="flex-1 truncate">
+                          <div className="text-sm font-bold text-gray-900 truncate">{member.nama_lengkap}</div>
+                          <div className="text-xs text-gray-500 truncate">@{member.username}</div>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
               <div className="border-t border-gray-200/50 pt-2 flex justify-between items-center mt-1">
                 <div className="text-[10px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
                   Gunakan @ untuk _mention_

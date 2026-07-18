@@ -27,7 +27,28 @@ export async function getClassForum(classId: string) {
     orderBy: { created_at: 'asc' }
   });
 
-  return { forum, messages };
+  // Fetch class members for tagging
+  const classData = await prisma.class.findUnique({
+    where: { id: classId },
+    include: {
+      teacher: { select: { id: true, nama_lengkap: true, username: true, role: true } },
+      enrollments: {
+        include: {
+          student: { select: { id: true, nama_lengkap: true, username: true, role: true } }
+        }
+      }
+    }
+  });
+
+  const members = [];
+  if (classData?.teacher) {
+    members.push(classData.teacher);
+  }
+  if (classData?.enrollments) {
+    members.push(...classData.enrollments.map((e: any) => e.student));
+  }
+
+  return { forum, messages, members };
 }
 
 export async function postMessage(forumId: string, message: string, parentId?: string) {
@@ -177,13 +198,21 @@ export async function toggleForumReaction(messageId: string, emoji: string) {
 
   if (added && message.user_id !== session.user.id) {
     const { createNotificationsForUsers } = await import("./notification");
+    
+    // Fetch the user's name since session doesn't store nama_lengkap
+    const currentUser = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: { nama_lengkap: true }
+    });
+    const fullName = currentUser?.nama_lengkap || session.user.username;
+
     // Gunakan generic link /siswa, /pengajar, dll akan direplace otomatis saat di-fetch oleh getUserNotifications
     const linkPath = `/siswa/forum/${message.forum.class_id}`;
     
     await createNotificationsForUsers(
       [message.user_id],
       "Reaksi Baru",
-      `${session.user.nama_lengkap} memberikan reaksi ${emoji} pada pesan Anda di forum.`,
+      `${fullName} memberikan reaksi ${emoji} pada pesan Anda di forum.`,
       linkPath
     );
   }
