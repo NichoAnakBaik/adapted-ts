@@ -8,7 +8,6 @@ import fs from "fs/promises";
 import path from "path";
 import crypto from "crypto";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { saveUploadedFile, saveBase64File } from "@/lib/upload";
 
 
 // Basic authorization check for Pengajar
