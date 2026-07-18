@@ -52,6 +52,12 @@ export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: a
                     <span className="text-xs font-bold text-namsan-text-muted uppercase tracking-wider">{q.type.replace('_', ' ')}</span>
                     <p className="text-lg text-namsan-text font-medium mt-1 whitespace-pre-wrap">{q.question_text}</p>
                   </div>
+                  
+                  {q.image_url && (
+                    <div className="mb-4">
+                      <img src={q.image_url} alt="Soal Image" className="max-w-md rounded-xl border border-gray-200 shadow-sm" />
+                    </div>
+                  )}
 
                   {q.audio_reference && (
                     <div className="mb-4 bg-blue-50 p-4 rounded-xl">
