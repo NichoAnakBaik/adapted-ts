@@ -3,13 +3,15 @@ import SiswaUjianClient from "../../SiswaUjianClient";
 import { getAvailableFinalExams } from "@/app/actions/siswa";
 import { prisma } from "@/lib/prisma";
 
-export default async function SiswaUjianKelasPage({ params }: { params: { class_id: string } }) {
+export default async function SiswaUjianKelasPage({ params }: { params: Promise<{ class_id: string }> }) {
+  const resolvedParams = await params;
+  
   // Fetch only final exams for this specific class
   const allExams = await getAvailableFinalExams();
-  const classExams = allExams.filter(ex => ex.class_id === params.class_id);
+  const classExams = allExams.filter(ex => ex.class_id === resolvedParams.class_id);
   
   const classData = await prisma.class.findUnique({
-    where: { id: params.class_id },
+    where: { id: resolvedParams.class_id },
     select: { name: true }
   });
 
