@@ -124,19 +124,18 @@ export async function getDashboardStats() {
         const genAI = new GoogleGenerativeAI(geminiApiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
         const prompt = `
-          Kamu adalah asisten AI guru bahasa Korea untuk siswa bernama ${session.user.username}.
-          Berikut adalah performa siswa ini:
+          Kamu adalah teman belajar dan asisten AI bahasa Korea untuk siswa bernama ${session.user.username}.
+          Berikut adalah performa terkininya:
           - Nilai Rata-rata Kuis: ${masteryPercentage}%
-          - Tingkat Kehadiran (Absensi): ${attendanceRate}% (dari ${totalAttendances} sesi tercatat)
-          - Titik terlemah: ${weakPointName}
-          - Total Kuis yang sudah dikerjakan: ${totalAttempts} (kuis harian absensi termasuk di sini)
+          - Kehadiran (Absensi): ${attendanceRate}% (dari ${totalAttendances} sesi)
+          - Kelemahan Utama: ${weakPointName}
+          - Total Kuis Selesai: ${totalAttempts}
           
-          Buatlah 2-3 kalimat rekomendasi belajar yang personal dan menyemangati. 
+          Buatlah 2-3 kalimat rekomendasi belajar yang SANGAT KASUAL, gaul, asyik, dan suportif (layaknya teman atau mentor gaul). 
           Instruksi Khusus:
-          1. Analisis apakah siswa ini "rajin" atau "kurang rajin" berdasarkan Tingkat Kehadiran dan seberapa sering ia mengerjakan kuis.
-          2. Berikan apresiasi jika ia rajin, atau motivasi lembut jika kurang rajin.
-          3. Secara spesifik arahkan ia untuk memperbaiki kelemahannya (${weakPointName}).
-          4. Gunakan bahasa Indonesia yang ramah dan hangat layaknya mentor.
+          1. Evaluasi kerajinan siswa dari Absensi dan Total Kuis secara natural (jangan kaku). Kalau rajin puji dengan antusias, kalau jarang absen/kuis berikan semangat yang relate.
+          2. Selipkan tips singkat dan fleksibel untuk mengatasi kelemahannya di ${weakPointName}.
+          3. Gunakan bahasa Indonesia santai (aku/kamu, boleh pakai singkatan wajar) dan sertakan 1-2 emoji biar hidup! Jangan terlihat seperti robot.
         `;
         const result = await model.generateContent(prompt);
         mlRecommendation = result.response.text().trim();

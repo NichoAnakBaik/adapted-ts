@@ -1,4 +1,5 @@
 import React from "react";
+export const dynamic = 'force-dynamic';
 import SiswaAnalitikClient from "./SiswaAnalitikClient";
 import { getStudentAnalytics } from "@/app/actions/siswa";
 

@@ -1,4 +1,5 @@
 import React from "react";
+export const dynamic = 'force-dynamic';
 import { BookOpen, CheckCircle2, Clock, MapPin, Video, PenTool, MessageSquare, CalendarCheck, Award, Bot, ChevronRight } from "lucide-react";
 import { getDashboardStats } from "@/app/actions/siswa";
 import Link from "next/link";

@@ -99,14 +99,14 @@ export async function getTeacherDashboardStats() {
           Berikut adalah performa murid-murid di seluruh kelasnya:
           - Total Murid: ${uniqueStudentsCount}
           - Rata-rata Kehadiran Murid (Absensi): ${globalAttendanceRate}%
-          - Total Kuis yang Dikelola (Termasuk Kuis Harian AI): ${examsCount}
+          - Total Kuis yang Dikelola: ${examsCount}
           - Titik terlemah mayoritas murid: ${weakPointName}
           
-          Buatlah 2-3 kalimat rekomendasi pengajaran yang profesional, analitis, dan suportif. 
+          Buatlah 2-3 kalimat rekomendasi pengajaran yang SANGAT KASUAL, fleksibel, namun tetap informatif layaknya rekan kerja sesama guru (ngobrol santai). 
           Instruksi Khusus:
-          1. Beri masukan tentang tingkat kerajinan/kehadiran murid secara keseluruhan, dan sarankan cara meningkatkannya jika rendah.
-          2. Arahkan pengajar untuk merancang strategi menutupi kelemahan murid di bagian ${weakPointName}.
-          3. Gunakan bahasa Indonesia yang sopan.
+          1. Beri masukan tentang tingkat kehadiran/kerajinan murid. Jika rendah, sarankan cara seru meningkatkannya; jika tinggi, apresiasi kinerjanya.
+          2. Selipkan ide asyik atau out-of-the-box untuk membantu murid menutupi kelemahan di bagian ${weakPointName}.
+          3. Gunakan bahasa Indonesia santai (boleh pakai kata sapaan akrab, singkatan wajar) dan sertakan 1-2 emoji agar tidak kaku!
         `;
         const result = await model.generateContent(prompt);
         recommendationText = result.response.text().trim();
