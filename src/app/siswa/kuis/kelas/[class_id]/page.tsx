@@ -1,5 +1,5 @@
 import React from "react";
-import SiswaKuisClient from "../../../SiswaKuisClient";
+import SiswaKuisClient from "../../SiswaKuisClient";
 import { getAvailableQuizzes } from "@/app/actions/siswa";
 import { prisma } from "@/lib/prisma";
 
