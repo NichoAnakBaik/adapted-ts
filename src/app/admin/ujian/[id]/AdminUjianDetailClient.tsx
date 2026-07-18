@@ -213,6 +213,22 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                     <label className="block text-sm font-bold text-gray-700 mb-2">Teks Soal / Pertanyaan</label>
                     <KoreanTextarea name="question_text" defaultValue={editingQuestion?.question_text || ""} required rows={3} placeholder="Masukkan soal dalam bahasa Indonesia atau Korea..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none" />
                   </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Soal {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Opsional)"}</label>
+                      <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
+                      {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">File Audio MP3 {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Opsional / Wajib untuk Listening)"}</label>
+                      <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
+                      {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                    </div>
+                  </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
@@ -300,15 +316,24 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                   {idx + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-gray-900 font-medium mb-3 whitespace-pre-wrap">{q.question_text}</p>
-
+                  <h3 className="text-lg font-bold text-gray-900 mb-2 whitespace-pre-wrap">{q.question_text}</h3>
+                  
                   {q.image_url && (
                     <div className="mb-4">
-                      <img src={q.image_url} alt="Soal Image" className="max-w-md rounded-xl border border-gray-200 shadow-sm" />
+                      <img src={q.image_url} alt="Gambar Soal" className="max-w-xs md:max-w-md rounded-xl border border-gray-200" />
                     </div>
                   )}
 
-                  {(q.option_a || q.option_b || q.option_c || q.option_d) && (
+                  {q.audio_reference && (
+                    <div className="mb-4">
+                      <audio controls className="w-full max-w-md">
+                        <source src={q.audio_reference} type="audio/mpeg" />
+                        Browser Anda tidak mendukung elemen audio.
+                      </audio>
+                    </div>
+                  )}
+
+                  {q.format === "MULTIPLE_CHOICE" && (q.option_a || q.option_b || q.option_c || q.option_d) && (
                     <div className="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <div><span className="font-bold">A.</span> {q.option_a}</div>
                       <div><span className="font-bold">B.</span> {q.option_b}</div>
