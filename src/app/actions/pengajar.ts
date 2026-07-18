@@ -434,6 +434,21 @@ export async function deleteExam(id: string) {
   return { success: true };
 }
 
+export async function deletePengajarQuestion(id: string) {
+  const session = await checkPengajarAuth();
+  const question = await prisma.question.findUnique({ 
+    where: { id },
+    include: { exam: { include: { class: true } } }
+  });
+  
+  if (!question || question.exam?.class?.teacher_id !== session.user.id) {
+    return { error: "Akses ditolak" };
+  }
+
+  await prisma.question.delete({ where: { id } });
+  return { success: true };
+}
+
 export async function getExamDetails(id: string) {
   const session = await checkPengajarAuth();
   const exam = await prisma.exam.findUnique({
