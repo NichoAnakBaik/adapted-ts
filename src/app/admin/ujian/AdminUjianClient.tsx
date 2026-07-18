@@ -1,11 +1,11 @@
 "use client";
 
 import React, { useState } from "react";
-import { PenTool, Plus, Trash2, ArrowRight, Clock, FileQuestion } from "lucide-react";
+import { ArrowLeft, PenTool, Plus, Trash2, ArrowRight, Clock, FileQuestion } from "lucide-react";
 import Link from "next/link";
 import { createAdminExam, deleteAdminExam, toggleAdminExamPublish } from "@/app/actions/admin";
 
-export default function AdminUjianClient({ initialExams, classes }: { initialExams: any[], classes: any[] }) {
+export default function AdminUjianClient({ initialExams, classes, className, classId }: { initialExams: any[], classes: any[], className?: string, classId?: string }) {
   const [exams, setExams] = useState(initialExams);
   const [showForm, setShowForm] = useState(false);
   const [error, setError] = useState("");
@@ -20,17 +20,18 @@ export default function AdminUjianClient({ initialExams, classes }: { initialExa
     e.preventDefault();
     setError("");
     const formData = new FormData(e.currentTarget);
+    if (classId) formData.set("class_id", classId); // Force class_id if in class view
     const res = await createAdminExam(formData);
     if (res.error) {
       setError(res.error);
-    } else {
+    } else if (res.exam) {
+      setExams([res.exam, ...exams]);
       setShowForm(false);
-      window.location.reload();
     }
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm("Yakin ingin menghapus ujian akhir ini secara permanen?")) return;
+    if (!confirm("Yakin ingin menghapus ujian ini beserta seluruh pertanyaannya?")) return;
     const res = await deleteAdminExam(id);
     if (res.success) {
       setExams(exams.filter(e => e.id !== id));
@@ -47,13 +48,18 @@ export default function AdminUjianClient({ initialExams, classes }: { initialExa
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
+      {classId && (
+        <Link href="/admin/ujian" className="inline-flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-bold text-sm mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kelas
+        </Link>
+      )}
       <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-red-50 rounded-xl">
             <PenTool className="w-8 h-8 text-namsan-red" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Ujian Bahasa</h1>
+            <h1 className="text-2xl font-bold text-namsan-text">Manajemen Ujian Bahasa {className ? `- Kelas ${className}` : ''}</h1>
             <p className="text-sm text-namsan-text-muted">Buat dan kelola Ujian Akhir (Final Exam) khusus dengan 4 format soal bahasa.</p>
           </div>
         </div>

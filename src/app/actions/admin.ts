@@ -326,10 +326,11 @@ export async function createAdminExam(formData: FormData) {
 
   if (!class_id || !title) return { error: "Kelas dan Judul wajib diisi" };
 
-  await prisma.exam.create({
-    data: { class_id, title, description, time_limit, is_final, is_published: false }
+  const newExam = await prisma.exam.create({
+    data: { class_id, title, description, time_limit, is_final, is_published: false },
+    include: { class: true, _count: { select: { questions: true } } }
   });
-  return { success: true };
+  return { success: true, exam: newExam };
 }
 
 export async function deleteAdminExam(id: string) {
