@@ -64,6 +64,14 @@ export async function getDashboardStats() {
     orderBy: { created_at: 'desc' }
   });
 
+  // Calculate Attendance Rate for diligence analysis
+  const attendances = await prisma.attendance.findMany({
+    where: { student_id: userId }
+  });
+  const presentCount = attendances.filter((a: any) => a.status === 'PRESENT' || a.status === 'LATE').length;
+  const attendanceRate = attendances.length > 0 ? Math.round((presentCount / attendances.length) * 100) : 0;
+  const totalAttendances = attendances.length;
+
   // 4. ML Engine: Calculate Mastery and Weak Points
   const attempts = await prisma.examAttempt.findMany({
     where: { student_id: userId },
@@ -74,11 +82,11 @@ export async function getDashboardStats() {
   let totalAttempts = 0;
   const scoresByType: Record<string, { totalScore: number, count: number }> = {};
 
-  attempts.forEach(attempt => {
+  attempts.forEach((attempt: any) => {
     totalScoreSum += (attempt.total_score || 0);
     totalAttempts += 1;
 
-    attempt.question_attempts.forEach(qa => {
+    attempt.question_attempts.forEach((qa: any) => {
       const t = qa.question.type;
       if (!scoresByType[t]) scoresByType[t] = { totalScore: 0, count: 0 };
       scoresByType[t].totalScore += (qa.score || 0);
@@ -109,7 +117,7 @@ export async function getDashboardStats() {
   const weakPointName = typeLabels[weakType] || weakType;
 
   let mlRecommendation = `Sistem AI belum dapat mendeteksi pola belajar kamu karena data kuis masih kosong. Ayo kerjakan kuis pertamamu!`;
-  if (totalAttempts > 0) {
+  if (totalAttempts > 0 || totalAttendances > 0) {
     const geminiApiKey = process.env.GEMINI_API_KEY;
     if (geminiApiKey) {
       try {
@@ -118,11 +126,17 @@ export async function getDashboardStats() {
         const prompt = `
           Kamu adalah asisten AI guru bahasa Korea untuk siswa bernama ${session.user.username}.
           Berikut adalah performa siswa ini:
-          - Nilai Rata-rata keseluruhan: ${masteryPercentage}%
+          - Nilai Rata-rata Kuis: ${masteryPercentage}%
+          - Tingkat Kehadiran (Absensi): ${attendanceRate}% (dari ${totalAttendances} sesi tercatat)
           - Titik terlemah: ${weakPointName}
-          - Total Kuis yang sudah dikerjakan: ${totalAttempts}
+          - Total Kuis yang sudah dikerjakan: ${totalAttempts} (kuis harian absensi termasuk di sini)
           
-          Buatlah 2-3 kalimat rekomendasi belajar yang personal, menyemangati, dan spesifik mengarahkan mereka untuk memperbaiki titik lemahnya tersebut. Gunakan bahasa Indonesia yang ramah dan hangat layaknya mentor.
+          Buatlah 2-3 kalimat rekomendasi belajar yang personal dan menyemangati. 
+          Instruksi Khusus:
+          1. Analisis apakah siswa ini "rajin" atau "kurang rajin" berdasarkan Tingkat Kehadiran dan seberapa sering ia mengerjakan kuis.
+          2. Berikan apresiasi jika ia rajin, atau motivasi lembut jika kurang rajin.
+          3. Secara spesifik arahkan ia untuk memperbaiki kelemahannya (${weakPointName}).
+          4. Gunakan bahasa Indonesia yang ramah dan hangat layaknya mentor.
         `;
         const result = await model.generateContent(prompt);
         mlRecommendation = result.response.text().trim();

@@ -81,8 +81,15 @@ export async function getTeacherDashboardStats() {
 
   const weakPointName = typeLabels[weakType] || weakType;
   
+  // Calculate average attendance for all students in teacher's classes
+  const attendances = await prisma.attendance.findMany({
+    where: { session: { class: { teacher_id: teacherId } } }
+  });
+  const presentCount = attendances.filter((a: any) => a.status === 'PRESENT' || a.status === 'LATE').length;
+  const globalAttendanceRate = attendances.length > 0 ? Math.round((presentCount / attendances.length) * 100) : 0;
+  
   let recommendationText = `Sistem AI belum dapat mendeteksi pola karena data masih sedikit.`;
-  if (questionAttempts.length > 0) {
+  if (questionAttempts.length > 0 || attendances.length > 0) {
     const geminiApiKey = process.env.GEMINI_API_KEY;
     if (geminiApiKey) {
       try {
@@ -92,20 +99,25 @@ export async function getTeacherDashboardStats() {
           Kamu adalah asisten AI penasihat akademik (mentor pengajar) untuk Pengajar bahasa Korea bernama ${session.user.username}.
           Berikut adalah performa murid-murid di seluruh kelasnya:
           - Total Murid: ${uniqueStudentsCount}
-          - Total Kuis yang Dikelola: ${examsCount}
+          - Rata-rata Kehadiran Murid (Absensi): ${globalAttendanceRate}%
+          - Total Kuis yang Dikelola (Termasuk Kuis Harian AI): ${examsCount}
           - Titik terlemah mayoritas murid: ${weakPointName}
           
-          Buatlah 2-3 kalimat rekomendasi pengajaran yang profesional, analitis, dan suportif mengarahkan pengajar untuk merancang strategi menutupi kelemahan murid di bagian tersebut. Gunakan bahasa Indonesia yang sopan.
+          Buatlah 2-3 kalimat rekomendasi pengajaran yang profesional, analitis, dan suportif. 
+          Instruksi Khusus:
+          1. Beri masukan tentang tingkat kerajinan/kehadiran murid secara keseluruhan, dan sarankan cara meningkatkannya jika rendah.
+          2. Arahkan pengajar untuk merancang strategi menutupi kelemahan murid di bagian ${weakPointName}.
+          3. Gunakan bahasa Indonesia yang sopan.
         `;
         const result = await model.generateContent(prompt);
         recommendationText = result.response.text().trim();
       } catch (e) {
         console.error("Gemini Teacher Recommendation Error:", e);
         // Fallback
-        recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus atau mengunggah modul tambahan terkait ${weakPointName} untuk meningkatkan retensi siswa.`;
+        recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. Tingkat kehadiran rata-rata adalah ${globalAttendanceRate}%. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus terkait ${weakPointName}.`;
       }
     } else {
-      recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus atau mengunggah modul tambahan terkait ${weakPointName} untuk meningkatkan retensi siswa.`;
+      recommendationText = `Berdasarkan hasil analisis AI pada seluruh kuis terbaru, sebagian besar siswa Anda paling banyak kehilangan poin pada bagian **${weakPointName}**. Tingkat kehadiran rata-rata adalah ${globalAttendanceRate}%. AI merekomendasikan Anda untuk menambahkan sesi latihan khusus terkait ${weakPointName}.`;
     }
   }
 
