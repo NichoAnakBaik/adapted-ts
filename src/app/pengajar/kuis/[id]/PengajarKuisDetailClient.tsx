@@ -116,8 +116,8 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-        <Link href="/pengajar/kuis" className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-namsan-primary mb-4 transition-colors">
-          <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kuis
+        <Link href={`/pengajar/kuis/kelas/${exam.class_id}`} className="inline-flex items-center gap-2 text-sm text-gray-500 hover:text-namsan-primary mb-4 transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kuis Kelas
         </Link>
         <div className="flex items-start justify-between">
           <div>
@@ -280,10 +280,6 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                   <div className="space-y-3">
                     <p className="text-xs text-gray-500 mb-2">Pilih gambar yang sudah pernah diupload di soal lain pada kuis ini.</p>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50">
-                      <label className="relative cursor-pointer group flex items-center justify-center border-2 border-gray-200 rounded-xl transition-all aspect-square bg-white hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
-                        <input type="radio" name="existing_image_url" value="" className="peer sr-only" defaultChecked />
-                        <span className="text-xs text-gray-500 font-bold text-center p-2">Tidak Memilih / Batal</span>
-                      </label>
                       {existingImages.map((url: any, idx) => (
                         <label key={idx} className="relative cursor-pointer group flex">
                           <input type="radio" name="existing_image_url" value={url} className="peer sr-only" />

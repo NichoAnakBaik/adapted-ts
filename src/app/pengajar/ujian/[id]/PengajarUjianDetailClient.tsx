@@ -13,7 +13,7 @@ export default function PengajarUjianDetailClient({ exam }: { exam: any }) {
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="flex items-center gap-4">
-        <Link href="/pengajar/ujian" className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+        <Link href={`/pengajar/ujian/kelas/${exam.class_id}`} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
           <ArrowLeft className="w-6 h-6 text-gray-600" />
         </Link>
         <div>

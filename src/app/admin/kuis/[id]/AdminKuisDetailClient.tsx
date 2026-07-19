@@ -23,8 +23,8 @@ export default function AdminKuisDetailClient({ exam }: { exam: any }) {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6 pb-12">
-      <Link href="/admin/kuis" className="inline-flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-medium transition-colors">
-        <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kuis
+      <Link href={`/admin/kuis/kelas/${exam.class_id}`} className="inline-flex items-center gap-2 text-gray-500 hover:text-namsan-primary font-medium transition-colors">
+        <ArrowLeft className="w-4 h-4" /> Kembali ke Daftar Kuis Kelas
       </Link>
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-start">
