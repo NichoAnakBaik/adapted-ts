@@ -62,6 +62,7 @@ export default function SiswaSertifikatClient({ certificates }: { certificates: 
                       href={cert.file_url || "#"} 
                       target="_blank" 
                       rel="noreferrer"
+                      download={`${cert.class.name}_Certificate.pdf`}
                       className="w-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors"
                     >
                       <Download className="w-4 h-4" /> Unduh Sertifikat

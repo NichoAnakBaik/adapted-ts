@@ -205,7 +205,12 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
           {/* Action Buttons */}
           <div className="flex items-center gap-4 text-gray-500">
             <button 
-              onClick={() => setReplyingTo(replyingTo === msg.id ? null : msg.id)}
+              onClick={() => {
+                setReplyingTo(replyingTo === msg.id ? null : msg.id);
+                if (!expandedThreads.includes(msg.id)) {
+                  setExpandedThreads(prev => [...prev, msg.id]);
+                }
+              }}
               className="flex items-center gap-1 text-xs hover:text-blue-500 group transition-colors"
             >
               <div className="p-1.5 rounded-full group-hover:bg-blue-50 transition-colors">
@@ -306,16 +311,16 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
               {!isExpanded ? (
                 <button 
                   onClick={toggleExpand}
-                  className="text-xs text-blue-600 font-medium hover:underline flex items-center gap-1 mt-1"
+                  className="text-[13px] md:text-xs text-blue-600 font-bold hover:underline flex items-center gap-2 mt-2 py-2 px-3 bg-blue-50 rounded-xl md:bg-transparent md:p-0 md:rounded-none transition-colors"
                 >
-                  <MessageCircle className="w-3.5 h-3.5" />
-                  Lihat {replies.length} balasan
+                  <MessageCircle className="w-4 h-4 md:w-3.5 md:h-3.5" />
+                  Lihat {replies.length} balasan lainnya
                 </button>
               ) : (
                 <>
                   <button 
                     onClick={toggleExpand}
-                    className="text-xs text-gray-500 font-medium hover:underline flex items-center gap-1 mt-1 mb-2"
+                    className="text-[13px] md:text-xs text-gray-500 font-bold hover:underline flex items-center gap-2 mt-2 mb-3 py-2 px-3 bg-gray-50 rounded-xl md:bg-transparent md:p-0 md:rounded-none transition-colors"
                   >
                     Sembunyikan balasan
                   </button>
