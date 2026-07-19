@@ -429,6 +429,38 @@ export async function submitExam(formData: FormData) {
     });
   }
 
+  // Record Activity Log
+  try {
+    const isQuiz = !exam?.is_final;
+    let durationSeconds = 0;
+    
+    // Calculate total time spent from answers
+    Object.values(answersData).forEach(ans => {
+      if (ans.time_spent_seconds) durationSeconds += ans.time_spent_seconds;
+    });
+
+    if (durationSeconds === 0) {
+      durationSeconds = Math.floor((new Date().getTime() - new Date(createdAttempt.start_time).getTime()) / 1000) || 60;
+    }
+
+    await prisma.studentActivityLog.create({
+      data: {
+        student_id: session.user.id,
+        action_type: isQuiz ? "QUIZ_ATTEMPT" : "EXAM_ATTEMPT",
+        duration: durationSeconds > 0 ? durationSeconds : null,
+        metadata: JSON.stringify({
+          examId: examId,
+          examTitle: exam?.title,
+          classId: exam?.class_id,
+          className: exam?.class?.name,
+          score: finalScorePercentage
+        })
+      }
+    });
+  } catch (logErr) {
+    console.error("Failed to log activity:", logErr);
+  }
+
   // Auto Enrollment Logic & Certificate Generation
   if (exam && exam.is_final) {
     const currentClass = await prisma.class.findUnique({ where: { id: exam.class_id } });

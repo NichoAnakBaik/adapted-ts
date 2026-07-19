@@ -96,7 +96,15 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
                           </span>
                         </div>
                         <div className="text-[15px] md:text-base font-bold text-gray-900 leading-snug">
-                          {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "Aktivitas Sistem Umum"}
+                          {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || 
+                           (log.action_type === "LOGIN" ? "Siswa berhasil masuk ke sistem" : 
+                            log.action_type === "LOGOUT" ? "Siswa keluar dari sistem" :
+                            log.action_type === "QUIZ_ATTEMPT" ? "Menyelesaikan Kuis/Latihan" :
+                            log.action_type === "EXAM_ATTEMPT" ? "Mengerjakan Ujian Akhir" :
+                            log.action_type === "FORUM_PARTICIPATION" ? "Berpartisipasi dalam Forum Kelas" :
+                            log.action_type === "MODULE_ACCESS" ? "Membaca Materi Pembelajaran" : 
+                            log.action_type === "ATTENDANCE_MARKED" ? "Tanda Kehadiran (Absensi)" :
+                            "Aktivitas Sistem Umum")}
                         </div>
                       </div>
 
