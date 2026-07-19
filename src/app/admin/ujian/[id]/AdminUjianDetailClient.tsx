@@ -204,7 +204,13 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
             return (
               <button
                 key={tab.id}
-                onClick={() => { setActiveTab(tab.id as any); setShowForm(false); setError(""); }}
+                onClick={() => { 
+                  setActiveTab(tab.id as any); 
+                  setShowForm(false); 
+                  setError(""); 
+                  if (tab.id === "SPEAKING") setQuestionFormat("ESSAY");
+                  else setQuestionFormat("MULTIPLE_CHOICE");
+                }}
                 className={`flex-1 min-w-[150px] flex items-center justify-center gap-2 py-4 px-4 font-bold text-sm transition-all border-b-2 ${
                   isActive ? `border-${tab.color.split('-')[1]}-500 ${tab.color} bg-gray-50` : 'border-transparent text-gray-400 hover:bg-gray-50 hover:text-gray-600'
                 }`}
@@ -360,7 +366,9 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                     <div className="md:col-span-2">
                       <label className="block text-sm font-bold text-gray-700 mb-2">Format Soal</label>
                       <select name="format" value={questionFormat} onChange={(e) => setQuestionFormat(e.target.value)} required className="w-full p-3 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="MULTIPLE_CHOICE">Pilihan Ganda (A/B/C/D)</option>
+                        {activeTab !== "SPEAKING" && (
+                          <option value="MULTIPLE_CHOICE">Pilihan Ganda (A/B/C/D)</option>
+                        )}
                         <option value="ESSAY">Isian (Esai / Text Panjang)</option>
                       </select>
                     </div>

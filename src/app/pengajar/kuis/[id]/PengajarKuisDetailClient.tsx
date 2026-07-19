@@ -196,7 +196,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                   onChange={(e) => {
                     const newType = e.target.value;
                     setQuestionType(newType);
-                    if (newType === "SPEAKING" || newType === "WRITING") {
+                    if (newType === "SPEAKING") {
                       setQuestionFormat("ESSAY");
                     } else {
                       setQuestionFormat("MULTIPLE_CHOICE");
@@ -220,7 +220,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                   required 
                   className="w-full p-2.5 border rounded-lg bg-white"
                 >
-                  {(questionType === "READING" || questionType === "LISTENING") && (
+                  {(questionType !== "SPEAKING") && (
                     <option value="MULTIPLE_CHOICE">Pilihan Ganda (A, B, C, D)</option>
                   )}
                   <option value="ESSAY">Isian Bebas / Esai / Perekaman</option>
