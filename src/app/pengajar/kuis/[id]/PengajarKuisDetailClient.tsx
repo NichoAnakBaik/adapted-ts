@@ -95,6 +95,16 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
     setError("");
   };
 
+  const handleDeleteQuestion = async (id: string) => {
+    if (!confirm("Hapus soal ini?")) return;
+    const res = await deleteQuestion(id);
+    if (res.success) {
+      window.location.reload();
+    } else {
+      alert("Gagal menghapus soal");
+    }
+  };
+
   return (
     <div className="max-w-4xl mx-auto space-y-6">
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
@@ -412,6 +422,13 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 title="Edit Soal"
               >
                 <Pencil className="w-5 h-5" />
+              </button>
+              <button 
+                onClick={() => handleDeleteQuestion(q.id)}
+                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-colors"
+                title="Hapus Soal"
+              >
+                <Trash2 className="w-5 h-5" />
               </button>
             </div>
           </div>
