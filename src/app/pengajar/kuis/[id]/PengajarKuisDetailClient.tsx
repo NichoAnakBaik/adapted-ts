@@ -7,6 +7,7 @@ import { createQuestion, updateQuestion, deleteQuestion } from "@/app/actions/pe
 import { useRouter } from "next/navigation";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -54,16 +55,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
     const formData = new FormData(e.currentTarget);
     formData.append("exam_id", exam.id);
     
-    // Convert audio to base64 to avoid Next.js Server Action file parsing bugs
-    const audioFile = formData.get("audio_reference") as File | null;
-    if (audioFile && audioFile.size > 0) {
-      try {
-        const b64 = await fileToBase64(audioFile);
-        formData.set("audio_b64", b64);
-      } catch (err) {
-        console.error("Gagal membaca file audio", err);
-      }
-    }
+    // Removed Base64 conversion for audio since it's now a URL string
     
     try {
       let res;
@@ -317,12 +309,12 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 {audioUploadType === "NEW" ? (
                   <>
                     <div className="flex gap-2 items-center">
-                      <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={questionType === "LISTENING" && !editingQuestion} />
+                      <input type="url" placeholder="https://drive.google.com/..." name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={questionType === "LISTENING" && !editingQuestion} />
                       <button type="button" onClick={(e) => { const input = e.currentTarget.previousElementSibling as HTMLInputElement; if (input) input.value = ''; }} className="px-3 py-2 text-sm text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg whitespace-nowrap" title="Batal Pilih">Batal</button>
                     </div>
                     {editingQuestion?.audio_reference && (
                       <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
-                        <p className="text-xs text-blue-700 font-medium">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>
+                        <p className="text-xs text-blue-700 font-medium">Link audio saat ini sudah ada. Isi baru untuk mengganti.</p>
                         <label className="flex items-center gap-1.5 text-sm text-red-600 font-bold cursor-pointer">
                           <input type="checkbox" name="remove_audio" value="true" className="w-4 h-4 text-red-600 rounded" />
                           Hapus Audio
@@ -428,9 +420,8 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               )}
 
               {q.audio_reference && (
-                <div className="mt-3">
-                  <span className="text-sm text-gray-500 block mb-1">Audio:</span>
-                  <audio controls src={q.audio_reference} className="w-full max-w-md h-10" />
+                <div className="mt-2 mb-3">
+                  <AudioPlayer src={q.audio_reference} className="max-w-md" />
                 </div>
               )}
 

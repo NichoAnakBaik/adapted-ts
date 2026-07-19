@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { FileQuestion, ArrowLeft, Headphones, BookOpen, PenTool, MessageCircle, Users } from "lucide-react";
 import Link from "next/link";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 export default function AdminKuisDetailClient({ exam }: { exam: any }) {
   const [questions] = useState(exam.questions);
@@ -124,9 +125,9 @@ export default function AdminKuisDetailClient({ exam }: { exam: any }) {
                         </div>
                       )}
                       {q.audio_reference && (
-                        <a href={q.audio_reference} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg">
-                          <Headphones className="w-4 h-4" /> Dengar Audio
-                        </a>
+                        <div className="w-full mt-2">
+                          <AudioPlayer src={q.audio_reference} className="max-w-xs" />
+                        </div>
                       )}
                       <div className="flex items-center gap-1 text-gray-500">
                         Kesulitan: <span className="font-bold text-gray-700">Level {q.difficulty}</span>

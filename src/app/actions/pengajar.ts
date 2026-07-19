@@ -504,19 +504,11 @@ export async function createQuestion(formData: FormData) {
   try {
     let audio_reference = null;
     const existing_audio = formData.get("existing_audio_reference") as string | null;
-    const audio_file = formData.get("audio_reference") as File | null;
-    const audio_b64 = formData.get("audio_b64") as string | null;
-    console.log("[createPengajarQuestion] audio_file:", audio_file, "size:", audio_file?.size, "b64:", !!audio_b64);
-    if (audio_b64) {
-      console.log("[createPengajarQuestion] Uploading base64 audio...");
-      audio_reference = await saveBase64File(audio_b64, "kuis_audio");
-      console.log("[createPengajarQuestion] Upload result URL:", audio_reference);
-    } else if (audio_file && audio_file.size > 0) {
-      console.log("[createPengajarQuestion] Uploading new audio file...");
-      audio_reference = await saveUploadedFile(audio_file, "kuis_audio");
-      console.log("[createPengajarQuestion] Upload result URL:", audio_reference);
+    const audio_input = formData.get("audio_reference") as string | null;
+    
+    if (audio_input && audio_input.trim() !== "") {
+      audio_reference = audio_input.trim();
     } else if (existing_audio) {
-      console.log("[createPengajarQuestion] Using existing audio:", existing_audio);
       audio_reference = existing_audio;
     }
     
@@ -567,23 +559,13 @@ export async function updateQuestion(formData: FormData) {
   try {
     const remove_audio = formData.get("remove_audio") === "true";
     const existing_audio = formData.get("existing_audio_reference") as string | null;
-    const audio_file = formData.get("audio_reference") as File | null;
-    const audio_b64 = formData.get("audio_b64") as string | null;
-    console.log("[updatePengajarQuestion] audio_file:", audio_file, "size:", audio_file?.size, "b64:", !!audio_b64);
+    const audio_input = formData.get("audio_reference") as string | null;
+    
     if (remove_audio) {
       updateData.audio_reference = null;
-    } else if (audio_b64) {
-      console.log("[updatePengajarQuestion] Uploading base64 audio...");
-      const url = await saveBase64File(audio_b64, "kuis_audio");
-      console.log("[updatePengajarQuestion] Upload result URL:", url);
-      if (url) updateData.audio_reference = url;
-    } else if (audio_file && audio_file.size > 0) {
-      console.log("[updatePengajarQuestion] Uploading new audio file...");
-      const url = await saveUploadedFile(audio_file, "kuis_audio");
-      console.log("[updatePengajarQuestion] Upload result URL:", url);
-      if (url) updateData.audio_reference = url;
+    } else if (audio_input && audio_input.trim() !== "") {
+      updateData.audio_reference = audio_input.trim();
     } else if (existing_audio) {
-      console.log("[updatePengajarQuestion] Using existing audio:", existing_audio);
       updateData.audio_reference = existing_audio;
     }
     

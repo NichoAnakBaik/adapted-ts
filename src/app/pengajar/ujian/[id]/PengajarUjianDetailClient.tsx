@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { ArrowLeft, Clock, FileQuestion, Users, CheckCircle } from "lucide-react";
 import Link from "next/link";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 export default function PengajarUjianDetailClient({ exam }: { exam: any }) {
   const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL" | "HASIL_DETAIL">("SOAL");
@@ -84,8 +85,8 @@ export default function PengajarUjianDetailClient({ exam }: { exam: any }) {
                   )}
 
                   {q.audio_reference && (
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg text-sm text-blue-800 flex items-center gap-2">
-                      <Clock className="w-4 h-4" /> File Audio Terlampir
+                    <div className="mt-3">
+                      <AudioPlayer src={q.audio_reference} className="max-w-md" />
                     </div>
                   )}
 

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createAdminQuestion, updateAdminQuestion, deleteAdminQuestion, assignExamToStudent, assignAllEligibleStudents } from "@/app/actions/admin";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
+import { AudioPlayer } from "@/components/AudioPlayer";
 import { useRouter } from "next/navigation";
 
 const fileToBase64 = (file: File): Promise<string> => {
@@ -331,12 +332,12 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                       {audioUploadType === "NEW" ? (
                         <>
                           <div className="flex gap-2 items-center">
-                            <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
+                            <input type="url" placeholder="https://drive.google.com/..." name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
                             <button type="button" onClick={(e) => { const input = e.currentTarget.previousElementSibling as HTMLInputElement; if (input) input.value = ''; }} className="px-3 py-2 text-sm text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg whitespace-nowrap" title="Batal Pilih">Batal</button>
                           </div>
                           {editingQuestion?.audio_reference && (
                             <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
-                              <p className="text-xs text-blue-700 font-medium">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>
+                              <p className="text-xs text-blue-700 font-medium">Link audio saat ini sudah ada. Isi baru untuk mengganti.</p>
                               <label className="flex items-center gap-1.5 text-sm text-red-600 font-bold cursor-pointer">
                                 <input type="checkbox" name="remove_audio" value="true" className="w-4 h-4 text-red-600 rounded" />
                                 Hapus Audio
@@ -437,11 +438,8 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                   )}
 
                   {q.audio_reference && (
-                    <div className="mb-4">
-                      <audio controls className="w-full max-w-md">
-                        <source src={q.audio_reference} type="audio/mpeg" />
-                        Browser Anda tidak mendukung elemen audio.
-                      </audio>
+                    <div className="mt-3 mb-4">
+                      <AudioPlayer src={q.audio_reference} className="max-w-md" />
                     </div>
                   )}
 
@@ -461,9 +459,9 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                       </div>
                     )}
                     {q.audio_reference && (
-                      <a href={q.audio_reference} target="_blank" rel="noreferrer" className="flex items-center gap-1.5 text-blue-600 hover:text-blue-800 bg-blue-50 px-3 py-1.5 rounded-lg">
-                        <Headphones className="w-4 h-4" /> Dengar Audio
-                      </a>
+                      <div className="w-full">
+                        <AudioPlayer src={q.audio_reference} className="max-w-xs" />
+                      </div>
                     )}
                     <div className="flex items-center gap-1 text-gray-500">
                       Kesulitan: <span className="font-bold text-gray-700">Level {q.difficulty}</span>

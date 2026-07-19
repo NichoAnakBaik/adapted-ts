@@ -3,6 +3,7 @@
 import React from "react";
 import { ArrowLeft, CheckCircle2, XCircle, BrainCircuit, MessageSquareText, PlayCircle } from "lucide-react";
 import Link from "next/link";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: any, hideBackLink?: boolean }) {
   const { exam, question_attempts } = attempt;
@@ -62,7 +63,7 @@ export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: a
                   {q.audio_reference && (
                     <div className="mb-4 bg-blue-50 p-4 rounded-xl">
                       <span className="text-sm font-bold text-blue-800 flex items-center gap-2 mb-2"><PlayCircle className="w-5 h-5" /> Audio Listening</span>
-                      <audio controls src={q.audio_reference} className="w-full max-w-md h-10" />
+                      <AudioPlayer src={q.audio_reference} className="max-w-md" />
                     </div>
                   )}
 
@@ -98,7 +99,7 @@ export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: a
                         {qa?.audio_url && (
                           <div className="mt-2 mb-3">
                             <span className="text-sm font-bold text-blue-800 flex items-center gap-2 mb-2"><PlayCircle className="w-4 h-4" /> Audio Jawaban Anda</span>
-                            <audio controls src={qa.audio_url} className="w-full max-w-md h-10" />
+                            <AudioPlayer src={qa.audio_url} className="max-w-md" />
                           </div>
                         )}
 

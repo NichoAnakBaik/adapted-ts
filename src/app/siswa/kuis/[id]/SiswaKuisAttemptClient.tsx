@@ -5,6 +5,7 @@ import { ArrowLeft, Clock, CheckCircle2, PlayCircle, AlertCircle, ArrowRight, Mi
 import Link from "next/link";
 import { submitExam } from "@/app/actions/siswa";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
+import { AudioPlayer } from "@/components/AudioPlayer";
 
 export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
   const [currentQIndex, setCurrentQIndex] = useState(0);
@@ -313,7 +314,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
             <span className="text-sm font-bold text-purple-800 flex items-center gap-2 mb-3">
               <PlayCircle className="w-5 h-5 animate-pulse" /> Putar Audio Pendengaran
             </span>
-            <audio controls src={currentQ.audio_reference} className="w-full h-12 outline-none" />
+            <AudioPlayer src={currentQ.audio_reference} />
           </div>
         )}
 
