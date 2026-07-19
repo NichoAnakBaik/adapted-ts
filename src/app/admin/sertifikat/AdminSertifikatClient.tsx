@@ -1,12 +1,13 @@
 "use client";
 
 import React, { useState } from "react";
-import { Award, Plus, Trash2, CheckCircle2, XCircle, Clock, ArrowRight, Download } from "lucide-react";
+import { Award, Plus, Trash2, Pencil, CheckCircle2, XCircle, Clock, ArrowRight, Download } from "lucide-react";
 import { createOrUpdateCertificate, deleteCertificate } from "@/app/actions/admin";
 
 export default function AdminSertifikatClient({ initialCertificates, students, classes }: { initialCertificates: any[], students: any[], classes: any[] }) {
   const [certificates, setCertificates] = useState(initialCertificates);
   const [showForm, setShowForm] = useState(false);
+  const [editingCert, setEditingCert] = useState<any>(null);
   const [error, setError] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -32,9 +33,20 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
     if (res.error) {
       setError(res.error);
     } else {
-      setShowForm(false);
+      closeForm();
       window.location.reload();
     }
+  };
+
+  const openEditForm = (cert: any) => {
+    setEditingCert(cert);
+    setShowForm(true);
+  };
+
+  const closeForm = () => {
+    setShowForm(false);
+    setEditingCert(null);
+    setError("");
   };
 
   const handleUpdateStatus = async (id: string, newStatus: string) => {
@@ -60,7 +72,7 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
           </div>
         </div>
         <button
-          onClick={() => setShowForm(!showForm)}
+          onClick={() => showForm ? closeForm() : setShowForm(true)}
           className="bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 px-5 rounded-lg flex items-center gap-2 transition-colors"
         >
           {showForm ? "Batal" : <><Plus className="w-5 h-5" /> Buat Sertifikat</>}
@@ -71,15 +83,16 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-in fade-in duration-200">
           <div className="bg-white p-6 rounded-2xl shadow-xl w-full max-w-2xl animate-in zoom-in-95 duration-200 max-h-[90vh] overflow-y-auto">
             <div className="flex justify-between items-center mb-4 border-b pb-3">
-              <h2 className="text-xl font-bold text-gray-800">Terbitkan Sertifikat Baru</h2>
-              <button type="button" onClick={() => setShowForm(false)} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
+              <h2 className="text-xl font-bold text-gray-800">{editingCert ? "Edit Sertifikat" : "Terbitkan Sertifikat Baru"}</h2>
+              <button type="button" onClick={closeForm} className="text-gray-400 hover:text-red-500 transition-colors p-1 text-2xl leading-none">&times;</button>
             </div>
             {error && <div className="p-3 mb-4 text-sm text-red-600 bg-red-50 rounded-lg">{error}</div>}
             
             <form onSubmit={handleCreate} className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {editingCert && <input type="hidden" name="id" value={editingCert.id} />}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Siswa</label>
-                <select name="student_id" required className="w-full p-2.5 border rounded-lg bg-white">
+                <select name="student_id" required className="w-full p-2.5 border rounded-lg bg-white" defaultValue={editingCert?.student_id || ""}>
                   <option value="">-- Pilih Siswa --</option>
                   {students.map((s) => (
                     <option key={s.id} value={s.id}>{s.nama_lengkap} (@{s.username})</option>
@@ -88,7 +101,7 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Pilih Kelas</label>
-                <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white">
+                <select name="class_id" required className="w-full p-2.5 border rounded-lg bg-white" defaultValue={editingCert?.class_id || ""}>
                   <option value="">-- Pilih Kelas Lulus --</option>
                   {classes.map((c) => (
                     <option key={c.id} value={c.id}>{c.name}</option>
@@ -96,23 +109,24 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
                 </select>
               </div>
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">Upload File Sertifikat (PDF/Image)</label>
-                <input type="file" accept="application/pdf,image/*" name="file_url" required className="w-full p-2.5 border rounded-lg bg-white" />
+                <label className="block text-sm font-medium text-gray-700 mb-1">Upload File Sertifikat (PDF/Image) {editingCert ? "(Opsional jika tidak diubah)" : ""}</label>
+                <input type="file" accept="application/pdf,image/*" name="file_url" required={!editingCert} className="w-full p-2.5 border rounded-lg bg-white" />
+                {editingCert?.file_url && <p className="text-xs text-blue-600 mt-2">File sertifikat saat ini sudah ada. Upload baru untuk mengganti.</p>}
               </div>
               <div className="md:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-1">Status Awal</label>
-                <select name="status" required className="w-full p-2.5 border rounded-lg bg-white">
+                <select name="status" required className="w-full p-2.5 border rounded-lg bg-white" defaultValue={editingCert?.status || "APPROVED"}>
                   <option value="APPROVED">APPROVED (Selesai & Lulus)</option>
                   <option value="PENDING">PENDING (Menunggu Validasi)</option>
                   <option value="REJECTED">REJECTED (Tidak Lulus/Revisi)</option>
                 </select>
               </div>
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                <button type="button" onClick={() => setShowForm(false)} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                <button type="button" onClick={closeForm} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
                   Batal
                 </button>
                 <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                  Simpan & Terbitkan Sertifikat
+                  {editingCert ? "Simpan Perubahan" : "Simpan & Terbitkan Sertifikat"}
                 </button>
               </div>
             </form>
@@ -171,9 +185,14 @@ export default function AdminSertifikatClient({ initialCertificates, students, c
             </div>
             
             <div className="mt-auto pt-4 border-t border-gray-50 flex items-center justify-between gap-2">
-              <button onClick={() => handleDelete(cert.id)} className="p-2 md:p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center title='Hapus'">
-                <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
-              </button>
+              <div className="flex items-center gap-1">
+                <button onClick={() => openEditForm(cert)} className="p-2 md:p-2.5 text-blue-500 hover:bg-blue-50 rounded-lg transition-colors flex items-center justify-center title='Edit'">
+                  <Pencil className="w-4 h-4 md:w-5 md:h-5" />
+                </button>
+                <button onClick={() => handleDelete(cert.id)} className="p-2 md:p-2.5 text-red-500 hover:bg-red-50 rounded-lg transition-colors flex items-center justify-center title='Hapus'">
+                  <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                </button>
+              </div>
               
               {cert.file_url ? (
                 <a href={cert.file_url} target="_blank" rel="noreferrer" className="bg-namsan-soft hover:bg-namsan-primary text-namsan-dark font-bold py-2 md:py-2.5 px-4 rounded-xl flex items-center gap-2 text-sm md:text-base transition-colors flex-1 justify-center">

@@ -271,7 +271,12 @@ export async function createOrUpdateCertificate(formData: FormData) {
     // Update existing
     await prisma.certificate.update({
       where: { id },
-      data: { file_url: file_url || undefined, status }
+      data: { 
+        file_url: file_url || undefined, 
+        status: status || undefined,
+        student_id: student_id || undefined,
+        class_id: class_id || undefined
+      }
     });
   } else {
     // Create new
