@@ -639,7 +639,7 @@ async function processAudioTranscriptionBackground(
         while (retries > 0 && !isSuccess) {
           try {
             const response = await fetch(
-              "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
+              "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3",
               {
                 headers: {
                   Authorization: `Bearer ${hfApiKey}`,
