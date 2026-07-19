@@ -228,8 +228,8 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
             </p>
           </div>
 
-          <Link href={exam.is_final ? "/siswa/ujian" : "/siswa/kuis"} className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-8 rounded-xl transition-colors">
-            Kembali ke Daftar {exam.is_final ? 'Ujian' : 'Kuis'}
+          <Link href={exam.is_final ? `/siswa/ujian/${exam.id}/hasil` : `/siswa/kuis/${exam.id}/hasil`} className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-3 px-8 rounded-xl transition-colors">
+            Cek Hasil Jawaban
           </Link>
         </div>
       </div>

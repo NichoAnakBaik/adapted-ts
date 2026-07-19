@@ -13,22 +13,7 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
     return () => setClickedId(null);
   }, []);
 
-  const handleRetake = async (examId: string) => {
-    setClickedId(`retake-${examId}`);
-    try {
-      const res = await retakeKuis(examId);
-      if (res && res.success) {
-        window.location.href = `/siswa/kuis/${examId}`;
-      } else {
-        alert(res?.error || "Gagal mengulang kuis.");
-        setClickedId(null);
-      }
-    } catch (e) {
-      console.error(e);
-      alert("Terjadi kesalahan.");
-      setClickedId(null);
-    }
-  };
+
 
   const filteredExams = exams.filter(ex => 
     ex.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -107,9 +92,9 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
                       <span className="text-lg font-bold text-green-600">{attempt.total_score}</span>
                     </div>
                     <div className="flex gap-2">
-                      <button 
-                        onClick={() => handleRetake(ex.id)}
-                        disabled={clickedId !== null}
+                      <Link 
+                        href={`/siswa/kuis/${ex.id}?retake=true`}
+                        onClick={() => setClickedId(`retake-${ex.id}`)}
                         title="Kerjakan Ulang"
                         className="flex items-center justify-center w-10 h-10 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg transition-colors"
                       >
@@ -118,7 +103,7 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
                         ) : (
                           <RefreshCcw className="w-4 h-4" />
                         )}
-                      </button>
+                      </Link>
                       <Link 
                         href={`/siswa/kuis/${ex.id}/hasil`}
                         onClick={() => setClickedId(`hasil-${ex.id}`)}

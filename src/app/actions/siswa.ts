@@ -210,6 +210,7 @@ export async function getAvailableQuizzes() {
       _count: { select: { questions: true } },
       exam_attempts: {
         where: { student_id: session.user.id },
+        orderBy: { created_at: 'desc' },
         include: { question_attempts: true }
       }
     },
@@ -238,6 +239,7 @@ export async function getAvailableFinalExams() {
       _count: { select: { questions: true } },
       exam_attempts: {
         where: { student_id: session.user.id },
+        orderBy: { created_at: 'desc' },
         include: { question_attempts: true }
       }
     },
@@ -284,26 +286,6 @@ export async function getExamToTake(id: string) {
   // Basic security check: must be published OR explicitly assigned
   if (!exam || (!exam.is_published && !isAssigned)) return null;
   return exam;
-}
-
-export async function retakeKuis(examId: string) {
-  const session = await checkSiswaAuth();
-  if (!session) return { error: "Unauthorized" };
-
-  try {
-    await prisma.examAttempt.deleteMany({
-      where: {
-        exam_id: examId,
-        student_id: session.user.id
-      }
-    });
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to retake quiz:", error);
-    return { error: "Gagal memproses pengerjaan ulang." };
-  }
-}
-
 export async function submitExam(formData: FormData) {
   const session = await checkSiswaAuth();
   
@@ -312,15 +294,6 @@ export async function submitExam(formData: FormData) {
   if (!examId || !answersJsonString) return { error: "Data tidak lengkap." };
 
   const answersData: Record<string, { student_answer: string, time_spent_seconds: number, has_audio?: boolean }> = JSON.parse(answersJsonString);
-
-  // Prevent duplicate submissions
-  const existingAttempt = await prisma.examAttempt.findFirst({
-    where: { exam_id: examId, student_id: session.user.id }
-  });
-
-  if (existingAttempt) {
-    return { error: "Anda sudah mengerjakan ujian ini." };
-  }
 
   // Fetch actual questions with answer_key to grade
   const questions = await prisma.question.findMany({
@@ -524,6 +497,7 @@ export async function getExamAttemptDetails(examId: string) {
   
   const attempt = await prisma.examAttempt.findFirst({
     where: { exam_id: examId, student_id: session.user.id },
+    orderBy: { created_at: 'desc' },
     include: {
       exam: {
         include: {
