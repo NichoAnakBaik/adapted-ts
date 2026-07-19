@@ -43,13 +43,19 @@ export class AdaptEdAI {
       
       Aturan Penilaian (SKOR 0-10):
       1. Jika tipe soal adalah ESSAY / WRITING, nilai berdasarkan akurasi grammar, konteks kalimat, dan ejaan.
-      2. Jika tipe soal adalah Pilihan Ganda (MULTIPLE_CHOICE) yang salah dijawab, berikan SKOR 0, namun jelaskan MENGAPA pilihan siswa tersebut salah berdasarkan konteks soal (jangan hanya template).
+      2. Jika tipe soal adalah Pilihan Ganda (MULTIPLE_CHOICE):
+         - Jika jawaban SALAH (SKOR 0), jelaskan secara detail mengapa pilihan tersebut salah dan apa alasan dari jawaban yang benar.
+         - Jika jawaban BENAR (SKOR 10), jangan hanya bilang "akurat". Jelaskan secara edukatif MENGAPA jawaban itu benar untuk menguatkan pemahaman.
       3. Jika tipe soal SPEAKING/LISTENING (dari transkripsi teks), nilai berdasarkan kemiripan arti/struktur dengan kunci jawaban.
       
+      GAYA BAHASA & STRUKTUR:
+      - Gunakan bahasa yang santai, ramah, dan tidak kaku (seperti tutor asyik yang sedang ngobrol dengan muridnya, gunakan sapaan santai).
+      - Di bagian akhir penjelasan, SELALU berikan 1-2 kalimat rekomendasi topik materi yang relevan dengan konteks soal/jawaban agar siswa tahu apa yang perlu dipelajari atau di-review selanjutnya.
+
       Berikan format balasan SECARA STRICT dalam bentuk JSON (tanpa tag \`\`\`json):
       {
         "skor": [angka 0-10, mewakili bobot kebenaran],
-        "feedback": "[Evaluasi mendetail dalam bahasa Indonesia, tunjukkan letak kesalahan secara presisi, bagaimana perbaikannya, dan berikan dorongan semangat. Jika ada gambar, deskripsikan apa yang salah secara visual dari jawaban siswa]"
+        "feedback": "[Penjelasan santai dan asyik, penjelasan mengapa benar/salah, ditutup dengan rekomendasi materi yang relevan]"
       }
     `;
 

@@ -351,16 +351,13 @@ export async function submitExam(formData: FormData) {
     }
 
     if (q.type === "MULTIPLE_CHOICE" || q.format === "MULTIPLE_CHOICE") {
-      // Untuk Pilihan Ganda, kita cek benar/salah secara eksak dulu
-      if (q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase()) {
-        score = 10;
-        ai_feedback = "Tepat sekali! Jawaban Anda sangat akurat.";
-      } else {
-        score = 0;
-        // Panggil AI untuk menjelaskan kenapa salah
-        const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64 }, studentAnswer);
-        ai_feedback = evalResult.feedback;
-      }
+      // Tentukan benar/salah secara statis terlebih dahulu
+      const isCorrect = q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase();
+      score = isCorrect ? 10 : 0;
+      
+      // Panggil AI untuk memberikan penjelasan edukatif dan rekomendasi
+      const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64 }, studentAnswer);
+      ai_feedback = evalResult.feedback;
     } else if (q.type === "SPEAKING") {
       if (audioB64 || data.has_audio) {
         score = 0; // pending
