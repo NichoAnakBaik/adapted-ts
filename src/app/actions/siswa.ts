@@ -286,6 +286,8 @@ export async function getExamToTake(id: string) {
   // Basic security check: must be published OR explicitly assigned
   if (!exam || (!exam.is_published && !isAssigned)) return null;
   return exam;
+}
+
 export async function submitExam(formData: FormData) {
   const session = await checkSiswaAuth();
   
@@ -492,11 +494,15 @@ export async function submitExam(formData: FormData) {
   return { success: true, score: finalScorePercentage };
 }
 
-export async function getExamAttemptDetails(examId: string) {
+export async function getExamAttemptDetails(examId: string, attemptId?: string) {
   const session = await checkSiswaAuth();
   
   const attempt = await prisma.examAttempt.findFirst({
-    where: { exam_id: examId, student_id: session.user.id },
+    where: { 
+      exam_id: examId, 
+      student_id: session.user.id,
+      ...(attemptId ? { id: attemptId } : {})
+    },
     orderBy: { created_at: 'desc' },
     include: {
       exam: {

@@ -5,8 +5,11 @@ import { ArrowLeft, CheckCircle2, XCircle, BrainCircuit, MessageSquareText, Play
 import Link from "next/link";
 import { AudioPlayer } from "@/components/AudioPlayer";
 
-export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: any, hideBackLink?: boolean }) {
+import { useRouter } from "next/navigation";
+
+export default function SiswaHasilClient({ attempt, allAttempts, hideBackLink }: { attempt: any, allAttempts?: any[], hideBackLink?: boolean }) {
   const { exam, question_attempts } = attempt;
+  const router = useRouter();
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -22,7 +25,26 @@ export default function SiswaHasilClient({ attempt, hideBackLink }: { attempt: a
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
           <div>
             <h1 className="text-3xl font-bold text-namsan-text mb-2">Hasil: {exam.title}</h1>
-            <p className="text-sm text-gray-500">Waktu penyelesaian: {new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}</p>
+            <p className="text-sm text-gray-500 mb-4">Waktu penyelesaian: {new Date(attempt.end_time || attempt.created_at).toLocaleString('id-ID')}</p>
+            
+            {allAttempts && allAttempts.length > 1 && (
+              <div className="flex items-center gap-2">
+                <span className="text-sm font-bold text-gray-600">Riwayat Percobaan:</span>
+                <select 
+                  className="bg-white border border-gray-200 text-gray-700 rounded-lg px-3 py-1.5 text-sm focus:ring-2 focus:ring-namsan-primary focus:border-namsan-primary"
+                  value={attempt.id}
+                  onChange={(e) => {
+                    router.push(exam.is_final ? `/siswa/ujian/${exam.id}/hasil?attemptId=${e.target.value}` : `/siswa/kuis/${exam.id}/hasil?attemptId=${e.target.value}`);
+                  }}
+                >
+                  {allAttempts.map((a: any, idx: number) => (
+                    <option key={a.id} value={a.id}>
+                      Percobaan {allAttempts.length - idx} - Nilai: {a.total_score} ({new Date(a.created_at).toLocaleDateString('id-ID')})
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           
           <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-100 min-w-[120px]">

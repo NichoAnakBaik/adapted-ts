@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from "react";
 import { ArrowLeft, ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2, Loader2, RefreshCcw } from "lucide-react";
 import Link from "next/link";
-import { retakeKuis } from "@/app/actions/siswa";
 
 export default function SiswaKuisClient({ exams, className }: { exams: any[], className?: string }) {
   const [searchQuery, setSearchQuery] = useState("");
