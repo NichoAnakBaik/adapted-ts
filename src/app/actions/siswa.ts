@@ -309,7 +309,7 @@ export async function submitExam(formData: FormData) {
 
   let totalScore = 0;
   let autoGradedQuestions = 0;
-  const pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string, audioB64?: string }[] = [];
+  const pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string, audioB64?: string | null }[] = [];
 
   const questionAttemptData = await Promise.all(questions.map(async (q) => {
     const data = answersData[q.id] || { student_answer: "", time_spent_seconds: 0, has_audio: false };
@@ -601,7 +601,7 @@ export async function getStudentAnalytics() {
 // Background Task for Audio Transcription
 async function processAudioTranscriptionBackground(
   attemptId: string, 
-  pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string, audioB64?: string }[],
+  pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string, audioB64?: string | null }[],
   createdQuestionAttempts: any[]
 ) {
   for (const pending of pendingTranscriptions) {
