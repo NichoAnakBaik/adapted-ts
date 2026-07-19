@@ -26,6 +26,7 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
   const [viewMode, setViewMode] = useState<"SOAL" | "HASIL" | "ELIGIBILITY" | "HASIL_DETAIL">("SOAL");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedAttempt, setSelectedAttempt] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [eligibleStudents, setEligibleStudents] = useState(initialEligibleStudents);
   const [assigningAll, setAssigningAll] = useState(false);
@@ -54,6 +55,7 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
   const handleCreateQuestion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
     const formData = new FormData(e.currentTarget);
     formData.append("exam_id", exam.id);
     formData.append("type", activeTab);
@@ -77,6 +79,8 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
       }
     } catch (err: any) {
       setError(err.message || "Gagal menyimpan soal. Pastikan file tidak terlalu besar (maks 50MB).");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 

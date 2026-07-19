@@ -24,6 +24,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL" | "HASIL_DETAIL">("SOAL");
   const [selectedAttempt, setSelectedAttempt] = useState<any>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageUploadType, setImageUploadType] = useState<"NEW" | "EXISTING">("NEW");
   const [audioUploadType, setAudioUploadType] = useState<"NEW" | "EXISTING">("NEW");
 
@@ -40,6 +41,7 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const handleCreateQuestion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
+    setIsSubmitting(true);
     const form = e.currentTarget;
     const formData = new FormData(form);
     formData.append("exam_id", exam.id);
@@ -64,6 +66,8 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
       }
     } catch (err: any) {
       setError(err.message || "Gagal menyimpan soal. Pastikan file tidak terlalu besar.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -327,8 +331,13 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 <button type="button" onClick={closeForm} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
                   Batal
                 </button>
-                <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                  {editingQuestion ? "Simpan Perubahan" : "Simpan Soal"}
+                <button type="submit" disabled={isSubmitting} className="bg-namsan-text hover:bg-namsan-text/90 disabled:opacity-50 text-white font-bold py-2.5 px-6 rounded-lg transition-colors flex items-center gap-2">
+                  {isSubmitting ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      Menyimpan...
+                    </>
+                  ) : editingQuestion ? "Simpan Perubahan" : "Simpan Soal"}
                 </button>
               </div>
             </form>
