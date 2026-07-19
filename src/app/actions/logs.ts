@@ -14,7 +14,13 @@ export async function getActivityLogs(targetRole: "ADMIN" | "PENGAJAR" | "SISWA"
       // Admin sees everything
       return await prisma.studentActivityLog.findMany({
         include: {
-          student: { select: { nama_lengkap: true, username: true } }
+          student: { 
+            select: { 
+              nama_lengkap: true, 
+              username: true,
+              enrollments: { include: { class: { select: { name: true } } } }
+            } 
+          }
         },
         orderBy: { created_at: 'desc' },
         take: 100 // Limit to last 100 logs
@@ -33,7 +39,13 @@ export async function getActivityLogs(targetRole: "ADMIN" | "PENGAJAR" | "SISWA"
       const allLogs = await prisma.studentActivityLog.findMany({
         where: { student_id: { in: studentIds } },
         include: {
-          student: { select: { nama_lengkap: true, username: true } }
+          student: { 
+            select: { 
+              nama_lengkap: true, 
+              username: true,
+              enrollments: { include: { class: { select: { name: true } } } }
+            } 
+          }
         },
         orderBy: { created_at: 'desc' },
         take: 300 // Ambil lebih banyak untuk difilter di memory
@@ -68,7 +80,13 @@ export async function getActivityLogs(targetRole: "ADMIN" | "PENGAJAR" | "SISWA"
       return await prisma.studentActivityLog.findMany({
         where: { student_id: userId },
         include: {
-          student: { select: { nama_lengkap: true, username: true } }
+          student: { 
+            select: { 
+              nama_lengkap: true, 
+              username: true,
+              enrollments: { include: { class: { select: { name: true } } } }
+            } 
+          }
         },
         orderBy: { created_at: 'desc' },
         take: 100

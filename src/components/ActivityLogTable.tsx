@@ -78,6 +78,7 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
               const actionInfo = getActionInfo(log.action_type);
               const Icon = actionInfo.icon;
               const dur = formatDuration(log.duration);
+              const fallbackClassName = meta.className || log.student?.enrollments?.[0]?.class?.name;
 
               return (
                 <div key={log.id} className="relative ml-[60px] group">
@@ -128,9 +129,9 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
                     </div>
 
                     <div className="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-gray-50">
-                      {meta.className && (
-                        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-                          <BookOpen className="w-3.5 h-3.5" /> Kelas: <span className="font-bold text-gray-700">{meta.className}</span>
+                      {fallbackClassName && (
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium group-hover:text-blue-600 transition-colors">
+                          <BookOpen className="w-3.5 h-3.5" /> Kelas: <span className="font-bold text-gray-700 group-hover:text-blue-700">{fallbackClassName}</span>
                         </div>
                       )}
                       {dur && (
