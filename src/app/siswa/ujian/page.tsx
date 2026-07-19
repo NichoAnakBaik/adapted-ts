@@ -1,5 +1,5 @@
 import React from "react";
-import { GraduationCap, ArrowRight } from "lucide-react";
+import { GraduationCap, ArrowRight, LayoutDashboard, Users, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import { getSession } from "@/lib/auth";
@@ -11,34 +11,67 @@ export default async function SiswaUjianIndexPage() {
 
   const enrollments = await prisma.enrollment.findMany({
     where: { student_id: session.user.id },
-    include: { class: true }
+    include: {
+      class: {
+        include: {
+          _count: {
+            select: { exams: true, enrollments: true }
+          }
+        }
+      }
+    }
   });
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      <div className="bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
-        <div className="w-16 h-16 bg-blue-50 rounded-full flex items-center justify-center mx-auto mb-4">
-          <GraduationCap className="w-8 h-8 text-blue-500" />
+    <div className="max-w-6xl mx-auto space-y-6">
+      <div className="flex justify-between items-center bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div className="flex items-center gap-4">
+          <div className="p-3 bg-purple-50 rounded-xl">
+            <GraduationCap className="w-8 h-8 text-purple-500" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-bold text-namsan-text">Pilih Kelas untuk Ujian</h1>
+            <p className="text-sm text-namsan-text-muted">Pilih kelas di bawah ini untuk melihat daftar ujian yang tersedia.</p>
+          </div>
         </div>
-        <h1 className="text-3xl font-bold text-namsan-text mb-2">Pilih Kelas untuk Ujian</h1>
-        <p className="text-gray-500 mb-8 max-w-md mx-auto">Pilih kelas di bawah ini untuk melihat daftar ujian yang tersedia.</p>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-left">
-          {enrollments.map((e) => (
-            <Link key={e.class.id} href={`/siswa/ujian/kelas/${e.class.id}`} className="block p-6 rounded-2xl border border-gray-200 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-xs font-bold bg-gray-100 text-gray-600 px-2 py-1 rounded">{e.class.type}</span>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {enrollments.map((e) => (
+          <div key={e.class.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:border-namsan-primary transition-colors group">
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center text-purple-600">
+                <LayoutDashboard className="w-6 h-6" />
               </div>
-              <h3 className="font-bold text-lg text-namsan-text group-hover:text-namsan-primary transition-colors">{e.class.name}</h3>
-              <div className="mt-4 flex items-center gap-1 text-sm font-bold text-namsan-primary group-hover:gap-2 transition-all">
-                Lihat Ujian <ArrowRight className="w-4 h-4" />
+              <div>
+                <h3 className="font-bold text-lg text-namsan-text group-hover:text-namsan-primary transition-colors">{e.class.name}</h3>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-gray-100 text-gray-500 uppercase tracking-wider">
+                  {e.class.type}
+                </span>
               </div>
+            </div>
+
+            <div className="flex items-center gap-4 mb-6">
+              <div className="flex items-center gap-2 text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                <ClipboardList className="w-4 h-4 text-gray-400" />
+                {e.class._count?.exams || 0} Ujian
+              </div>
+              <div className="flex items-center gap-2 text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                <Users className="w-4 h-4 text-gray-400" />
+                {e.class._count?.enrollments || 0} Siswa
+              </div>
+            </div>
+
+            <Link href={`/siswa/ujian/kelas/${e.class.id}`} className="mt-auto w-full bg-purple-50 hover:bg-purple-500 text-purple-600 hover:text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors">
+              Lihat Ujian <ArrowRight className="w-4 h-4" />
             </Link>
-          ))}
-          {enrollments.length === 0 && (
-            <div className="col-span-full p-6 text-center text-gray-400">Anda belum terdaftar di kelas manapun.</div>
-          )}
-        </div>
+          </div>
+        ))}
+        {enrollments.length === 0 && (
+          <div className="col-span-full p-6 text-center text-gray-400 bg-white rounded-2xl border border-gray-100">
+            Anda belum terdaftar di kelas manapun.
+          </div>
+        )}
       </div>
     </div>
   );
