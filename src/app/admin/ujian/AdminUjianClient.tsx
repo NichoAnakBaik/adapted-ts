@@ -129,41 +129,53 @@ export default function AdminUjianClient({ initialExams, classes, className, cla
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredExams.map((exam) => (
-          <div key={exam.id} className={`bg-white rounded-2xl shadow-sm border ${exam.is_published ? 'border-namsan-primary' : 'border-gray-200'} overflow-hidden flex flex-col transition-all hover:shadow-md`}>
-            <div className="p-5 border-b border-gray-50 flex-1">
-              <div className="flex justify-between items-start mb-3">
-                <span className="text-xs font-bold px-2.5 py-1 rounded-md bg-red-50 text-namsan-red">
-                  Ujian Akhir
-                </span>
-                <button 
-                  onClick={() => handleTogglePublish(exam.id, exam.is_published)}
-                  className={`text-xs font-bold px-3 py-1 rounded-full transition-colors ${exam.is_published ? 'bg-namsan-primary text-namsan-dark hover:bg-yellow-400' : 'bg-gray-100 text-gray-500 hover:bg-gray-200'}`}
-                >
-                  {exam.is_published ? '✓ Terpublikasi' : 'Draft'}
+          <div key={exam.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:border-namsan-primary transition-colors group">
+            <div className="flex justify-between items-start mb-4">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                {exam.class.name}
+              </span>
+              <div className="flex gap-2">
+                <button onClick={() => handleDelete(exam.id)} className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                  <Trash2 className="w-4 h-4" />
                 </button>
-              </div>
-              <h3 className="text-lg font-bold text-namsan-text mb-1 line-clamp-1">{exam.title}</h3>
-              <p className="text-sm font-semibold text-namsan-primary mb-3">Kelas: {exam.class.name}</p>
-              
-              <div className="grid grid-cols-2 gap-3 text-sm mt-auto">
-                <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded-lg">
-                  <Clock className="w-4 h-4 text-blue-500" />
-                  <span className="font-medium">{exam.time_limit ? `${exam.time_limit} Menit` : 'Tanpa Batas'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded-lg">
-                  <FileQuestion className="w-4 h-4 text-namsan-red" />
-                  <span className="font-medium">{exam._count.questions} Soal</span>
-                </div>
               </div>
             </div>
             
-            <div className="bg-gray-50 p-3 border-t border-gray-100 flex gap-2">
-              <Link href={`/admin/ujian/${exam.id}`} className="flex-1 flex justify-center items-center gap-2 bg-white border border-gray-200 hover:border-namsan-primary text-namsan-text font-bold py-2 rounded-xl transition-colors">
+            <h3 className="text-xl font-bold text-namsan-text mb-2 group-hover:text-namsan-primary transition-colors">{exam.title}</h3>
+            <p className="text-sm text-gray-500 mb-6 flex-1 line-clamp-2">
+              {exam.description || "Tidak ada deskripsi"}
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="flex flex-col">
+                <span className="text-xs text-namsan-text-muted font-bold tracking-wider">SOAL</span>
+                <div className="flex items-center gap-1.5 text-namsan-text font-bold">
+                  <FileQuestion className="w-4 h-4 text-blue-500" />
+                  {exam._count?.questions || 0} Soal
+                </div>
+              </div>
+              <div className="flex flex-col">
+                <span className="text-xs text-namsan-text-muted font-bold tracking-wider">WAKTU</span>
+                <div className="flex items-center gap-1.5 text-namsan-text font-bold">
+                  <Clock className="w-4 h-4 text-orange-500" />
+                  {exam.time_limit ? `${exam.time_limit} Menit` : 'Tanpa Batas'}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+              <button 
+                onClick={() => handleTogglePublish(exam.id, exam.is_published)}
+                className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                  exam.is_published ? "bg-green-100 text-green-700 hover:bg-green-200" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                }`}
+              >
+                {exam.is_published ? "🟢 PUBLISHED" : "⚫ DRAFT"}
+              </button>
+
+              <Link href={`/admin/ujian/${exam.id}`} className="text-sm font-bold text-namsan-primary hover:text-namsan-secondary flex items-center gap-1">
                 Kelola Soal <ArrowRight className="w-4 h-4" />
               </Link>
-              <button onClick={() => handleDelete(exam.id)} className="px-3 bg-white border border-gray-200 hover:border-red-200 hover:bg-red-50 text-red-500 rounded-xl transition-colors">
-                <Trash2 className="w-5 h-5" />
-              </button>
             </div>
           </div>
         ))}

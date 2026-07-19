@@ -44,41 +44,50 @@ export default function AdminKuisClient({ initialQuizzes, className, classId }: 
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {filteredQuizzes.map((quiz) => (
-          <div key={quiz.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden flex flex-col transition-all hover:shadow-md">
-            <div className="p-5 border-b border-gray-50 flex-1">
-              <div className="flex justify-between items-start mb-3">
-                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700">
-                  <BadgeInfo className="w-3 h-3" /> {quiz.class.name}
+          <div key={quiz.id} className="bg-white rounded-2xl p-6 shadow-sm border border-gray-100 flex flex-col hover:border-namsan-primary transition-colors group">
+            <div className="flex justify-between items-start mb-4">
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-gray-100 text-gray-600">
+                {quiz.class.name}
+              </span>
+              <div className="flex gap-2">
+                <span className="text-gray-500 text-xs flex items-center gap-1">
+                  <Users className="w-3 h-3" /> {quiz.class.teacher?.nama_lengkap || '-'}
                 </span>
-                <span className={`text-xs font-bold px-2 py-1 rounded-md ${quiz.is_published ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}`}>
-                  {quiz.is_published ? 'Dipublikasi' : 'Draft'}
-                </span>
-              </div>
-              <h3 className="text-lg font-bold text-namsan-text mb-2 line-clamp-2">{quiz.title}</h3>
-              <p className="text-sm text-gray-500 mb-4 line-clamp-3">
-                {quiz.description || "Tidak ada deskripsi"}
-              </p>
-              
-              <div className="grid grid-cols-2 gap-3 text-sm mt-auto">
-                <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded-lg">
-                  <Clock className="w-4 h-4 text-blue-500" />
-                  <span className="font-medium">{quiz.time_limit ? `${quiz.time_limit} Menit` : 'Tanpa Batas'}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600 bg-gray-50 p-2 rounded-lg">
-                  <FileQuestion className="w-4 h-4 text-purple-500" />
-                  <span className="font-medium">{quiz._count.questions} Soal</span>
-                </div>
               </div>
             </div>
             
-            <div className="bg-gray-50 p-3 border-t border-gray-100">
-              <div className="flex justify-between items-center text-sm mb-3 px-1">
-                <span className="text-gray-500 flex items-center gap-1">
-                  <Users className="w-4 h-4" /> Pengajar: <span className="font-bold text-gray-700">{quiz.class.teacher?.nama_lengkap || '-'}</span>
-                </span>
-                <span className="font-bold text-namsan-primary">{quiz._count.exam_attempts} Pengerjaan</span>
+            <h3 className="text-xl font-bold text-namsan-text mb-2 group-hover:text-namsan-primary transition-colors">{quiz.title}</h3>
+            <p className="text-sm text-gray-500 mb-6 flex-1 line-clamp-2">
+              {quiz.description || "Tidak ada deskripsi"}
+            </p>
+
+            <div className="grid grid-cols-2 gap-4 mb-6">
+              <div className="flex flex-col">
+                <span className="text-xs text-namsan-text-muted font-bold tracking-wider">SOAL</span>
+                <div className="flex items-center gap-1.5 text-namsan-text font-bold">
+                  <FileQuestion className="w-4 h-4 text-blue-500" />
+                  {quiz._count?.questions || 0} Soal
+                </div>
               </div>
-              <Link href={`/admin/kuis/${quiz.id}`} className="w-full flex justify-center items-center gap-2 bg-white border border-gray-200 hover:border-namsan-primary text-namsan-text font-bold py-2 rounded-xl transition-colors">
+              <div className="flex flex-col">
+                <span className="text-xs text-namsan-text-muted font-bold tracking-wider">WAKTU</span>
+                <div className="flex items-center gap-1.5 text-namsan-text font-bold">
+                  <Clock className="w-4 h-4 text-orange-500" />
+                  {quiz.time_limit ? `${quiz.time_limit} Menit` : 'Tanpa Batas'}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+              <div className="flex flex-col">
+                <span className={`text-xs font-bold px-3 py-1.5 rounded-lg transition-colors ${
+                  quiz.is_published ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600"
+                }`}>
+                  {quiz.is_published ? "🟢 PUBLISHED" : "⚫ DRAFT"}
+                </span>
+              </div>
+
+              <Link href={`/admin/kuis/${quiz.id}`} className="text-sm font-bold text-namsan-primary hover:text-namsan-secondary flex items-center gap-1">
                 Pantau Detail <ArrowRight className="w-4 h-4" />
               </Link>
             </div>
