@@ -304,7 +304,7 @@ export default function SiswaKuisAttemptClient({ exam }: { exam: any }) {
         {/* Media Attachments */}
         {currentQ.image_url && (
           <div className="mb-8 overflow-hidden rounded-2xl border border-gray-200 shadow-sm transition-transform hover:scale-[1.01] duration-300">
-            <img src={currentQ.image_url} alt="Ilustrasi Soal" className="w-full object-cover max-h-[400px]" />
+            <img src={currentQ.image_url} alt="Ilustrasi Soal" className="w-full object-contain max-h-[400px]" />
           </div>
         )}
 

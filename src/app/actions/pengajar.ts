@@ -556,19 +556,28 @@ export async function updateQuestion(formData: FormData) {
   };
 
   try {
+    const remove_audio = formData.get("remove_audio") === "true";
     const existing_audio = formData.get("existing_audio_reference") as string | null;
     const audio_file = formData.get("audio_reference") as File | null;
-    if (audio_file && audio_file.size > 0) {
+    if (remove_audio) {
+      updateData.audio_reference = null;
+    } else if (audio_file && audio_file.size > 0) {
       const url = await saveUploadedFile(audio_file, "kuis_audio");
       if (url) updateData.audio_reference = url;
     } else if (existing_audio) {
       updateData.audio_reference = existing_audio;
     }
     
+    const remove_image = formData.get("remove_image") === "true";
+    const existing_image = formData.get("existing_image_url") as string | null;
     const image_file = formData.get("image_url") as File | null;
-    if (image_file && image_file.size > 0) {
+    if (remove_image) {
+      updateData.image_url = null;
+    } else if (image_file && image_file.size > 0) {
       const url = await saveUploadedFile(image_file, "kuis_image");
       if (url) updateData.image_url = url;
+    } else if (existing_image) {
+      updateData.image_url = existing_image;
     }
 
     await prisma.question.update({

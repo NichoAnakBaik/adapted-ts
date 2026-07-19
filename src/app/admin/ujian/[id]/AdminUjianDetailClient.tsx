@@ -250,7 +250,15 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                       {imageUploadType === "NEW" ? (
                         <>
                           <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
-                          {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                          {editingQuestion?.image_url && (
+                            <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
+                              <p className="text-xs text-blue-700 font-medium">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>
+                              <label className="flex items-center gap-1.5 text-sm text-red-600 font-bold cursor-pointer">
+                                <input type="checkbox" name="remove_image" value="true" className="w-4 h-4 text-red-600 rounded" />
+                                Hapus Gambar
+                              </label>
+                            </div>
+                          )}
                         </>
                       ) : (
                         <div className="space-y-3">
@@ -286,7 +294,15 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                       {audioUploadType === "NEW" ? (
                         <>
                           <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
-                          {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                          {editingQuestion?.audio_reference && (
+                            <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
+                              <p className="text-xs text-blue-700 font-medium">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>
+                              <label className="flex items-center gap-1.5 text-sm text-red-600 font-bold cursor-pointer">
+                                <input type="checkbox" name="remove_audio" value="true" className="w-4 h-4 text-red-600 rounded" />
+                                Hapus Audio
+                              </label>
+                            </div>
+                          )}
                         </>
                       ) : (
                         <div className="space-y-3">
@@ -356,35 +372,19 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                       <input type="number" name="difficulty" defaultValue={editingQuestion?.difficulty || 1} min="1" max="5" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
 
-                    {activeTab === "LISTENING" && (
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">File Audio {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Wajib untuk Listening)"}</label>
-                        <input type="file" accept="audio/*" name="audio_reference" required={!editingQuestion} className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
-                        {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File saat ini sudah ada. Upload baru untuk mengganti.</p>}
-                      </div>
-                    )}
-                    {activeTab === "READING" && (
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">Gambar Pendukung (Opsional)</label>
-                        <input type="file" accept="image/*" name="image_url" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
-                        {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">Gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
-                      </div>
-                    )}
-                    {activeTab === "SPEAKING" && (
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-bold text-gray-700 mb-2">File Audio Panduan (Opsional)</label>
-                        <input type="file" accept="audio/*" name="audio_reference" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none bg-white" />
-                        {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File saat ini sudah ada. Upload baru untuk mengganti.</p>}
-                      </div>
-                    )}
                   </div>
 
                   <div className="mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
-                    <button type="button" onClick={closeForm} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors">
+                    <button type="button" onClick={closeForm} disabled={isSubmitting} className="px-5 py-2.5 text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-lg font-bold transition-colors disabled:opacity-50">
                       Batal
                     </button>
-                    <button type="submit" className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors">
-                      {editingQuestion ? "Simpan Perubahan" : `Simpan Soal ke ${tabs.find(t => t.id === activeTab)?.label}`}
+                    <button type="submit" disabled={isSubmitting} className="bg-namsan-text hover:bg-namsan-text/90 text-white font-bold py-2.5 px-6 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
+                      {isSubmitting ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          Menyimpan...
+                        </>
+                      ) : editingQuestion ? "Simpan Perubahan" : `Simpan Soal ke ${tabs.find(t => t.id === activeTab)?.label}`}
                     </button>
                   </div>
                 </form>

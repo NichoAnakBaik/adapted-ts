@@ -255,7 +255,15 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 {imageUploadType === "NEW" ? (
                   <>
                     <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
-                    {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                    {editingQuestion?.image_url && (
+                      <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
+                        <p className="text-xs text-blue-700 font-medium">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>
+                        <label className="flex items-center gap-1.5 text-sm text-red-600 font-bold cursor-pointer">
+                          <input type="checkbox" name="remove_image" value="true" className="w-4 h-4 text-red-600 rounded" />
+                          Hapus Gambar
+                        </label>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="space-y-3">
@@ -290,7 +298,15 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                 {audioUploadType === "NEW" ? (
                   <>
                     <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={questionType === "LISTENING" && !editingQuestion} />
-                    {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                    {editingQuestion?.audio_reference && (
+                      <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
+                        <p className="text-xs text-blue-700 font-medium">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>
+                        <label className="flex items-center gap-1.5 text-sm text-red-600 font-bold cursor-pointer">
+                          <input type="checkbox" name="remove_audio" value="true" className="w-4 h-4 text-red-600 rounded" />
+                          Hapus Audio
+                        </label>
+                      </div>
+                    )}
                   </>
                 ) : (
                   <div className="space-y-3">
