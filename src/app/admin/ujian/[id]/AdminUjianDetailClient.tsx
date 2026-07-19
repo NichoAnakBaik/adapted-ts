@@ -30,6 +30,12 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
   const [eligibleStudents, setEligibleStudents] = useState(initialEligibleStudents);
   const [assigningAll, setAssigningAll] = useState(false);
   const [imageUploadType, setImageUploadType] = useState<"NEW" | "EXISTING">("NEW");
+  const [audioUploadType, setAudioUploadType] = useState<"NEW" | "EXISTING">("NEW");
+
+  const existingAudios = React.useMemo(() => {
+    const urls = exam.questions.map((q: any) => q.audio_reference).filter(Boolean);
+    return Array.from(new Set(urls));
+  }, [exam.questions]);
 
   const existingImages = React.useMemo(() => {
     const urls = questions.map((q: any) => q.image_url).filter(Boolean);
@@ -259,8 +265,36 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">File Audio MP3 {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Opsional / Wajib untuk Listening)"}</label>
-                      <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
-                      {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                      
+                      {existingAudios.length > 0 && (
+                        <div className="flex gap-4 mb-3">
+                          <label className="flex items-center gap-2">
+                            <input type="radio" checked={audioUploadType === "NEW"} onChange={() => setAudioUploadType("NEW")} />
+                            <span className="text-sm">Upload Baru</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input type="radio" checked={audioUploadType === "EXISTING"} onChange={() => setAudioUploadType("EXISTING")} />
+                            <span className="text-sm">Pilih dari Soal Lain</span>
+                          </label>
+                        </div>
+                      )}
+
+                      {audioUploadType === "NEW" ? (
+                        <>
+                          <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
+                          {editingQuestion?.audio_reference && <p className="text-xs text-blue-600 mt-2">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                        </>
+                      ) : (
+                        <div className="space-y-3">
+                          <select name="existing_audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion}>
+                            <option value="">-- Pilih Audio --</option>
+                            {existingAudios.map((url: any, idx) => (
+                              <option key={idx} value={url}>Audio dari soal lain ({url.split('/').pop()})</option>
+                            ))}
+                          </select>
+                          <p className="text-xs text-gray-500">Pilih audio yang sudah pernah diupload di soal lain pada ujian ini.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                   

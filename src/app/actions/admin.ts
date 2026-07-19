@@ -511,9 +511,12 @@ export async function createAdminQuestion(formData: FormData) {
 
   try {
     let audio_reference = null;
+    const existing_audio = formData.get("existing_audio_reference") as string | null;
     const audio_file = formData.get("audio_reference") as File | null;
     if (audio_file && audio_file.size > 0) {
       audio_reference = await saveUploadedFile(audio_file, "ujian_audio");
+    } else if (existing_audio) {
+      audio_reference = existing_audio;
     }
 
     let image_url = null;
@@ -563,10 +566,13 @@ export async function updateAdminQuestion(formData: FormData) {
   };
 
   try {
+    const existing_audio = formData.get("existing_audio_reference") as string | null;
     const audio_file = formData.get("audio_reference") as File | null;
     if (audio_file && audio_file.size > 0) {
       const url = await saveUploadedFile(audio_file, "ujian_audio");
       updateData.audio_reference = url;
+    } else if (existing_audio) {
+      updateData.audio_reference = existing_audio;
     }
 
     const existing_image = formData.get("existing_image_url") as string | null;
