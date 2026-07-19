@@ -24,7 +24,7 @@ export interface ClassData {
   };
   teacher?: {
     nama_lengkap: string;
-  };
+  } | null;
 }
 
 interface ClassIndexClientProps {
