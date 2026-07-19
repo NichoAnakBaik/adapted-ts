@@ -615,16 +615,23 @@ async function processAudioTranscriptionBackground(
       const qa = createdQuestionAttempts.find(q => q.question_id === pending.question_id);
       if (!qa) continue;
 
-      // 2. Read audio file from URL (since it's in Supabase now)
-      const fullAudioUrl = pending.audio_url.startsWith('http') 
-        ? pending.audio_url 
-        : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000") + pending.audio_url;
-      
-      const audioRes = await fetch(fullAudioUrl);
-      if (!audioRes.ok) {
-        throw new Error(`Failed to fetch audio from Supabase URL: ${fullAudioUrl}`);
+      // 2. Read audio file from URL or local file system
+      let arrayBuffer: ArrayBuffer;
+      if (pending.audio_url.startsWith('/uploads/')) {
+        const localPath = path.join(process.cwd(), "public", pending.audio_url);
+        const fileBuffer = await fs.readFile(localPath);
+        arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
+      } else {
+        const fullAudioUrl = pending.audio_url.startsWith('http') 
+          ? pending.audio_url 
+          : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000") + pending.audio_url;
+        
+        const audioRes = await fetch(fullAudioUrl);
+        if (!audioRes.ok) {
+          throw new Error(`Failed to fetch audio from URL: ${fullAudioUrl}`);
+        }
+        arrayBuffer = await audioRes.arrayBuffer();
       }
-      const arrayBuffer = await audioRes.arrayBuffer();
       const base64Audio = Buffer.from(arrayBuffer).toString("base64");
 
       let transcriptText = "";
@@ -639,7 +646,7 @@ async function processAudioTranscriptionBackground(
         while (retries > 0 && !isSuccess) {
           try {
             const response = await fetch(
-              "https://router.huggingface.co/hf-inference/models/openai/whisper-large-v3",
+              "https://router.huggingface.co/hf-inference/models/openai/whisper-small",
               {
                 headers: {
                   Authorization: `Bearer ${hfApiKey}`,
@@ -654,9 +661,9 @@ async function processAudioTranscriptionBackground(
               const errorText = await response.text();
               console.warn(`HF API Attempt Failed (${response.status}):`, errorText);
               
-              if (response.status === 503) {
-                // Model is loading
-                console.log(`Model is loading. Retrying in ${waitTime/1000}s... (${retries} retries left)`);
+              if (response.status === 503 || response.status === 504 || errorText.includes("loading")) {
+                // Model is loading or timeout
+                console.log(`Model is loading/timeout. Retrying in ${waitTime/1000}s... (${retries} retries left)`);
                 await new Promise(res => setTimeout(res, waitTime));
                 waitTime += 5000; // Increase wait time for next retry
                 retries--;
@@ -676,6 +683,13 @@ async function processAudioTranscriptionBackground(
             }
           } catch (e) {
             console.error("Hugging Face Transcription Error:", e);
+            if (retries > 1) {
+              console.log(`Retrying on catch... in ${waitTime/1000}s... (${retries-1} retries left)`);
+              await new Promise(res => setTimeout(res, waitTime));
+              waitTime += 5000;
+              retries--;
+              continue;
+            }
             break;
           }
         }

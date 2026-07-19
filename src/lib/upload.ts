@@ -1,5 +1,7 @@
 import crypto from "crypto";
 import { createClient } from "@supabase/supabase-js";
+import fs from "fs/promises";
+import path from "path";
 
 function getSupabase() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -10,8 +12,18 @@ function getSupabase() {
   return createClient(supabaseUrl, supabaseKey);
 }
 
+async function saveToLocal(buffer: Buffer, filename: string, subfolder: string): Promise<string> {
+  const uploadDir = path.join(process.cwd(), "public", "uploads", subfolder);
+  await fs.mkdir(uploadDir, { recursive: true });
+  
+  const filePath = path.join(uploadDir, filename);
+  await fs.writeFile(filePath, buffer);
+  
+  return `/uploads/${subfolder ? subfolder + '/' : ''}${filename}`;
+}
+
 /**
- * Saves a File object to the Supabase uploads bucket.
+ * Saves a File object to the Supabase uploads bucket, with local fallback.
  * @param file The File object to save
  * @param subfolder Optional subfolder inside uploads (e.g., 'pdf', 'audio')
  * @returns The public URL path to access the file
@@ -29,29 +41,34 @@ export async function saveUploadedFile(file: File, subfolder: string = ""): Prom
     
     // Construct the path within the bucket
     const filePath = subfolder ? `${subfolder}/${uniqueFilename}` : uniqueFilename;
-    const supabase = getSupabase();
+    
+    try {
+      const supabase = getSupabase();
+      const { error } = await supabase.storage
+        .from("uploads")
+        .upload(filePath, buffer, {
+          contentType: file.type || "application/octet-stream",
+          upsert: false,
+        });
 
-    const { error } = await supabase.storage
-      .from("uploads")
-      .upload(filePath, buffer, {
-        contentType: file.type || "application/octet-stream",
-        upsert: false,
-      });
+      if (error) {
+        throw error;
+      }
 
-    if (error) {
-      throw error;
+      const { data } = supabase.storage.from("uploads").getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (supabaseError) {
+      console.warn("Supabase upload failed, falling back to local storage:", supabaseError);
+      return await saveToLocal(buffer, uniqueFilename, subfolder);
     }
-
-    const { data } = supabase.storage.from("uploads").getPublicUrl(filePath);
-    return data.publicUrl;
   } catch (error: any) {
-    console.error("Error saving file to Supabase:", error);
+    console.error("Error saving file:", error);
     throw new Error(`Upload failed: ${error.message}`);
   }
 }
 
 /**
- * Saves a Base64 string (Data URL) to the Supabase uploads bucket.
+ * Saves a Base64 string (Data URL) to local file system directly.
  * @param base64String The Data URL string (e.g. data:audio/webm;base64,...)
  * @param subfolder Optional subfolder inside uploads
  * @returns The public URL path to access the file
@@ -83,26 +100,11 @@ export async function saveBase64File(base64String: string, subfolder: string = "
 
     const buffer = Buffer.from(base64Data, "base64");
     const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
-    const filePath = subfolder ? `${subfolder}/${uniqueFilename}` : uniqueFilename;
 
-    const mimeType = mimePrefix.replace("data:", "") || "application/octet-stream";
-    const supabase = getSupabase();
-
-    const { error } = await supabase.storage
-      .from("uploads")
-      .upload(filePath, buffer, {
-        contentType: mimeType,
-        upsert: false,
-      });
-
-    if (error) {
-      throw error;
-    }
-
-    const { data } = supabase.storage.from("uploads").getPublicUrl(filePath);
-    return data.publicUrl;
+    // By-pass Supabase completely for Base64 (audio recordings) to avoid bucket visibility issues
+    return await saveToLocal(buffer, uniqueFilename, subfolder);
   } catch (error) {
-    console.error("Error saving base64 file to Supabase:", error);
+    console.error("Error saving base64 file locally:", error);
     return null;
   }
 }
