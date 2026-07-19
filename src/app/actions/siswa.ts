@@ -739,6 +739,19 @@ async function processAudioTranscriptionBackground(
       
     } catch (err) {
       console.error("Error processing transcription for question", pending.question_id, err);
+      // Ensure the DB is updated to prevent infinite "Sedang diproses" loop
+      try {
+        await prisma.questionAttempt.update({
+          where: { id: qa.id },
+          data: {
+            score: 0,
+            ai_feedback: "AI Error: Gagal memproses transkripsi suara (Sistem sibuk atau file tidak valid).",
+            transcript: "[Transkripsi gagal]"
+          }
+        });
+      } catch (dbErr) {
+        console.error("Failed to update DB with transcription error state:", dbErr);
+      }
     }
   }
 
