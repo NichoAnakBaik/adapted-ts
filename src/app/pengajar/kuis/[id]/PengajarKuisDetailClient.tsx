@@ -3,7 +3,8 @@
 import React, { useState } from "react";
 import { ArrowLeft, Plus, FileQuestion, Trash2, Pencil, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { createQuestion, updateQuestion, deleteQuestion } from "@/app/actions/pengajar";
+import { createPengajarQuestion as createQuestion, updatePengajarQuestion as updateQuestion, deletePengajarQuestion as deleteQuestion } from "@/app/actions/pengajar";
+import { useRouter } from "next/navigation";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
 
@@ -21,6 +22,13 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [questionType, setQuestionType] = useState("READING");
   const [questionFormat, setQuestionFormat] = useState("MULTIPLE_CHOICE");
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
+  const [questions, setQuestions] = useState(exam.questions);
+  const router = useRouter();
+  
+  React.useEffect(() => {
+    setQuestions(exam.questions);
+  }, [exam.questions]);
+
   const [error, setError] = useState("");
   const [activeTab, setActiveTab] = useState<"SOAL" | "HASIL" | "HASIL_DETAIL">("SOAL");
   const [selectedAttempt, setSelectedAttempt] = useState<any>(null);
@@ -29,14 +37,14 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [audioUploadType, setAudioUploadType] = useState<"NEW" | "EXISTING">("NEW");
 
   const existingAudios = React.useMemo(() => {
-    const urls = exam.questions.map((q: any) => q.audio_reference).filter(Boolean);
+    const urls = questions.map((q: any) => q.audio_reference).filter(Boolean);
     return Array.from(new Set(urls));
-  }, [exam.questions]);
+  }, [questions]);
 
   const existingImages = React.useMemo(() => {
-    const urls = exam.questions.map((q: any) => q.image_url).filter(Boolean);
+    const urls = questions.map((q: any) => q.image_url).filter(Boolean);
     return Array.from(new Set(urls));
-  }, [exam.questions]);
+  }, [questions]);
 
   const handleCreateQuestion = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -47,9 +55,6 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
     formData.append("exam_id", exam.id);
     
     try {
-      // Let Next.js handle the File uploads natively via multipart/form-data
-      // No need to convert to base64, which bloats the payload and crashes
-
       let res;
       if (editingQuestion) {
         formData.append("id", editingQuestion.id);
@@ -62,22 +67,13 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
         setError(res.error);
       } else {
         setShowForm(false);
-        window.location.reload();
+        router.refresh();
       }
     } catch (err: any) {
       setError(err.message || "Gagal menyimpan soal. Pastikan file tidak terlalu besar.");
     } finally {
       setIsSubmitting(false);
     }
-  };
-
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = error => reject(error);
-    });
   };
 
   const openEditForm = (q: any) => {
@@ -99,7 +95,8 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
     if (!confirm("Hapus soal ini?")) return;
     const res = await deleteQuestion(id);
     if (res.success) {
-      window.location.reload();
+      router.refresh();
+      closeForm();
     } else {
       alert("Gagal menghapus soal");
     }

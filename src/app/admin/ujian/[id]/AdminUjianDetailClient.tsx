@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createAdminQuestion, updateAdminQuestion, deleteAdminQuestion, assignExamToStudent, assignAllEligibleStudents } from "@/app/actions/admin";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
+import { useRouter } from "next/navigation";
 
 const fileToBase64 = (file: File): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -18,6 +19,12 @@ const fileToBase64 = (file: File): Promise<string> => {
 
 export default function AdminUjianDetailClient({ exam, initialEligibleStudents }: { exam: any, initialEligibleStudents: any[] }) {
   const [questions, setQuestions] = useState(exam.questions);
+  const router = useRouter();
+
+  React.useEffect(() => {
+    setQuestions(exam.questions);
+  }, [exam.questions]);
+
   const [activeTab, setActiveTab] = useState<"SPEAKING" | "LISTENING" | "READING" | "WRITING">("READING");
   const [showForm, setShowForm] = useState(false);
   const [editingQuestion, setEditingQuestion] = useState<any>(null);
@@ -73,7 +80,8 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
       }
       
       if (res.success) {
-        window.location.reload();
+        router.refresh();
+        closeForm();
       } else {
         setError(res.error || "Terjadi kesalahan");
       }

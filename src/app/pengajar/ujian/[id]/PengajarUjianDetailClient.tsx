@@ -68,6 +68,12 @@ export default function PengajarUjianDetailClient({ exam }: { exam: any }) {
                   </div>
                   <p className="text-namsan-text font-medium whitespace-pre-wrap">{q.question_text}</p>
                   
+                  {q.image_url && (
+                    <div className="mt-3 mb-2">
+                      <img src={q.image_url} alt="Gambar Soal" className="max-w-xs md:max-w-md rounded-xl border border-gray-200" />
+                    </div>
+                  )}
+
                   {(q.option_a || q.option_b || q.option_c || q.option_d) && (
                     <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <div><span className="font-bold">A.</span> {q.option_a}</div>
