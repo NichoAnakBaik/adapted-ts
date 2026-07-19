@@ -249,7 +249,10 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
 
                       {imageUploadType === "NEW" ? (
                         <>
-                          <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
+                          <div className="flex gap-2 items-center">
+                            <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
+                            <button type="button" onClick={(e) => { const input = e.currentTarget.previousElementSibling as HTMLInputElement; if (input) input.value = ''; }} className="px-3 py-2 text-sm text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg whitespace-nowrap" title="Batal Pilih">Batal</button>
+                          </div>
                           {editingQuestion?.image_url && (
                             <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
                               <p className="text-xs text-blue-700 font-medium">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>
@@ -305,7 +308,10 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
 
                       {audioUploadType === "NEW" ? (
                         <>
-                          <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
+                          <div className="flex gap-2 items-center">
+                            <input type="file" accept="audio/*" name="audio_reference" className="w-full p-2.5 border rounded-lg bg-white" required={activeTab === "LISTENING" && !editingQuestion} />
+                            <button type="button" onClick={(e) => { const input = e.currentTarget.previousElementSibling as HTMLInputElement; if (input) input.value = ''; }} className="px-3 py-2 text-sm text-red-500 border border-red-200 bg-red-50 hover:bg-red-100 rounded-lg whitespace-nowrap" title="Batal Pilih">Batal</button>
+                          </div>
                           {editingQuestion?.audio_reference && (
                             <div className="mt-2 flex items-center justify-between bg-blue-50 p-2 rounded-lg border border-blue-100">
                               <p className="text-xs text-blue-700 font-medium">File audio saat ini sudah ada. Upload baru untuk mengganti.</p>
@@ -341,45 +347,32 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
 
                     {questionFormat === "MULTIPLE_CHOICE" && (
                       <div className="md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 p-4 rounded-xl border border-gray-100">
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan A</label>
-                          <KoreanInput type="text" name="option_a" defaultValue={editingQuestion?.option_a || ""} required placeholder="Teks Pilihan A..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan B</label>
-                          <KoreanInput type="text" name="option_b" defaultValue={editingQuestion?.option_b || ""} required placeholder="Teks Pilihan B..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan C</label>
-                          <KoreanInput type="text" name="option_c" defaultValue={editingQuestion?.option_c || ""} required placeholder="Teks Pilihan C..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
-                        </div>
-                        <div>
-                          <label className="block text-sm font-bold text-gray-700 mb-1">Pilihan D</label>
-                          <KoreanInput type="text" name="option_d" defaultValue={editingQuestion?.option_d || ""} required placeholder="Teks Pilihan D..." className="w-full p-2.5 border border-gray-200 rounded-lg outline-none" />
-                        </div>
+                        {['a', 'b', 'c', 'd'].map((opt) => (
+                          <div key={opt} className="relative bg-white p-3 rounded-xl border border-gray-200 focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all shadow-sm">
+                            <div className="flex items-center justify-between mb-2 pb-2 border-b border-gray-100">
+                              <label className="text-sm font-bold text-gray-700">Pilihan {opt.toUpperCase()}</label>
+                              <label className="flex items-center gap-2 cursor-pointer bg-gray-50 hover:bg-gray-100 px-2 py-1 rounded-lg transition-colors border border-gray-200 has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50 has-[:checked]:text-blue-700">
+                                <input type="radio" name="answer_key" value={opt.toUpperCase()} defaultChecked={editingQuestion?.answer_key?.toUpperCase() === opt.toUpperCase()} required className="w-4 h-4 text-blue-600 focus:ring-blue-500 cursor-pointer" />
+                                <span className="text-xs font-bold text-gray-600">Jawaban Benar</span>
+                              </label>
+                            </div>
+                            <KoreanInput type="text" name={`option_${opt}`} defaultValue={editingQuestion ? (editingQuestion as any)[`option_${opt}`] : ""} required placeholder={`Teks Pilihan ${opt.toUpperCase()}...`} className="w-full p-2 border-none bg-transparent outline-none focus:ring-0" />
+                          </div>
+                        ))}
                       </div>
                     )}
 
-                    <div>
-                      <label className="block text-sm font-bold text-gray-700 mb-2">
-                        Kunci Jawaban 
-                        {activeTab === "SPEAKING" || activeTab === "WRITING" ? " (Opsional/Panduan)" : " (Wajib)"}
-                      </label>
-                      {questionFormat === "MULTIPLE_CHOICE" ? (
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                          {["A", "B", "C", "D"].map((opt) => (
-                            <label key={opt} className="flex items-center justify-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors">
-                              <input type="radio" name="answer_key" value={opt} defaultChecked={editingQuestion?.answer_key?.toUpperCase() === opt} required className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
-                              <span className="font-bold text-gray-700">Pilihan {opt}</span>
-                            </label>
-                          ))}
-                        </div>
-                      ) : (
+                    {questionFormat !== "MULTIPLE_CHOICE" && (
+                      <div className="md:col-span-2">
+                        <label className="block text-sm font-bold text-gray-700 mb-2">
+                          Kunci Jawaban 
+                          {activeTab === "SPEAKING" || activeTab === "WRITING" ? " (Opsional/Panduan)" : " (Wajib)"}
+                        </label>
                         <KoreanInput type="text" name="answer_key" defaultValue={editingQuestion?.answer_key || ""} required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Kunci Jawaban (teks)..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
-                      )}
-                    </div>
+                      </div>
+                    )}
                     
-                    <div>
+                    <div className="md:col-span-2">
                       <label className="block text-sm font-bold text-gray-700 mb-2">Tingkat Kesulitan (1-5)</label>
                       <input type="number" name="difficulty" defaultValue={editingQuestion?.difficulty || 1} min="1" max="5" className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
                     </div>
