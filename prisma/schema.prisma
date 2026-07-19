@@ -7,6 +7,248 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id                     String                  @id @default(uuid())
+  nama_lengkap           String
+  username               String                  @unique
+  password               String
+  role                   Role                    @default(SISWA)
+  created_at             DateTime                @default(now())
+  updated_at             DateTime                @updatedAt
+  attendances            Attendance[]
+  sertifikat_siswa       Certificate[]           @relation("SertifikatSiswa")
+  kelas_diajar           Class[]                 @relation("PengajarKelas")
+  enrollments            Enrollment[]
+  exam_assignments       ExamAssignment[]
+  exam_attempts          ExamAttempt[]
+  forum_messages         ForumMessage[]
+  learning_progresses    LearningProgress[]
+  notifications          Notification[]
+  recommendation_history RecommendationHistory[]
+  student_activity_logs  StudentActivityLog[]
+}
+
+model Notification {
+  id         String   @id @default(uuid())
+  user_id    String
+  title      String
+  message    String
+  link       String?
+  is_read    Boolean  @default(false)
+  created_at DateTime @default(now())
+  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model Class {
+  id                  String              @id @default(uuid())
+  name                String
+  type                ClassType           @default(ONLINE)
+  schedule            String?
+  teacher_id          String?
+  created_at          DateTime            @default(now())
+  updated_at          DateTime            @updatedAt
+  meeting_link        String?
+  level               Int                 @default(1)
+  module_link         String?
+  attendance_sessions AttendanceSession[]
+  certificates        Certificate[]
+  teacher             User?               @relation("PengajarKelas", fields: [teacher_id], references: [id])
+  enrollments         Enrollment[]
+  exams               Exam[]
+  forums              Forum[]
+  learning_progresses LearningProgress[]
+}
+
+model Enrollment {
+  id         String   @id @default(uuid())
+  student_id String
+  class_id   String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+  status     String   @default("APPROVED")
+  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student    User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([student_id, class_id])
+}
+
+model Exam {
+  id               String           @id @default(uuid())
+  class_id         String
+  title            String
+  description      String?
+  time_limit       Int?
+  is_published     Boolean          @default(false)
+  is_final         Boolean          @default(false)
+  created_at       DateTime         @default(now())
+  updated_at       DateTime         @updatedAt
+  class            Class            @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  exam_assignments ExamAssignment[]
+  exam_attempts    ExamAttempt[]
+  questions        Question[]
+}
+
+model Question {
+  id                String            @id @default(uuid())
+  exam_id           String
+  type              QuestionType
+  question_text     String
+  answer_key        String?
+  audio_reference   String?
+  difficulty        Int?              @default(1)
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  format            String            @default("ESSAY")
+  option_a          String?
+  option_b          String?
+  option_c          String?
+  option_d          String?
+  image_url         String?
+  exam              Exam              @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  question_attempts QuestionAttempt[]
+}
+
+model Certificate {
+  id           String            @id @default(uuid())
+  student_id   String
+  class_id     String
+  file_url     String?
+  status       CertificateStatus @default(PENDING)
+  created_at   DateTime          @default(now())
+  updated_at   DateTime          @updatedAt
+  available_at DateTime?
+  class        Class             @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student      User              @relation("SertifikatSiswa", fields: [student_id], references: [id], onDelete: Cascade)
+}
+
+model Forum {
+  id         String         @id @default(uuid())
+  class_id   String
+  title      String?
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  class      Class          @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  messages   ForumMessage[]
+}
+
+model ForumMessage {
+  id         String         @id @default(uuid())
+  forum_id   String
+  user_id    String
+  message    String
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+  parent_id  String?
+  reactions  String?
+  forum      Forum          @relation(fields: [forum_id], references: [id], onDelete: Cascade)
+  parent     ForumMessage?  @relation("ForumThread", fields: [parent_id], references: [id], onDelete: Cascade)
+  replies    ForumMessage[] @relation("ForumThread")
+  user       User           @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
+
+model StudentActivityLog {
+  id          String       @id @default(uuid())
+  student_id  String
+  action_type ActivityType
+  duration    Int?         @default(0)
+  metadata    String?
+  created_at  DateTime     @default(now())
+  student     User         @relation(fields: [student_id], references: [id], onDelete: Cascade)
+}
+
+model ExamAttempt {
+  id                String            @id @default(uuid())
+  exam_id           String
+  student_id        String
+  start_time        DateTime          @default(now())
+  end_time          DateTime?
+  total_score       Int?              @default(0)
+  created_at        DateTime          @default(now())
+  updated_at        DateTime          @updatedAt
+  exam              Exam              @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student           User              @relation(fields: [student_id], references: [id], onDelete: Cascade)
+  question_attempts QuestionAttempt[]
+}
+
+model QuestionAttempt {
+  id                 String      @id @default(uuid())
+  exam_attempt_id    String
+  question_id        String
+  student_answer     String?
+  audio_url          String?
+  transcript         String?
+  time_spent_seconds Int?        @default(0)
+  score              Int?        @default(0)
+  ai_feedback        String?
+  created_at         DateTime    @default(now())
+  updated_at         DateTime    @updatedAt
+  exam_attempt       ExamAttempt @relation(fields: [exam_attempt_id], references: [id], onDelete: Cascade)
+  question           Question    @relation(fields: [question_id], references: [id], onDelete: Cascade)
+}
+
+model ExamAssignment {
+  id          String   @id @default(uuid())
+  exam_id     String
+  student_id  String
+  assigned_by String?
+  created_at  DateTime @default(now())
+  exam        Exam     @relation(fields: [exam_id], references: [id], onDelete: Cascade)
+  student     User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([exam_id, student_id])
+}
+
+model LearningProgress {
+  id            String    @id @default(uuid())
+  student_id    String
+  is_completed  Boolean   @default(false)
+  last_accessed DateTime? @default(now())
+  created_at    DateTime  @default(now())
+  updated_at    DateTime  @updatedAt
+  class_id      String
+  class         Class     @relation(fields: [class_id], references: [id], onDelete: Cascade)
+  student       User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([student_id, class_id])
+}
+
+model RecommendationHistory {
+  id                  String   @id @default(uuid())
+  student_id          String
+  recommendation_text String
+  recommendation_type String
+  is_applied          Boolean  @default(false)
+  created_at          DateTime @default(now())
+  student             User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
+}
+
+model AttendanceSession {
+  id          String       @id @default(uuid())
+  class_id    String
+  title       String
+  description String?
+  date        DateTime?
+  created_at  DateTime     @default(now())
+  updated_at  DateTime     @updatedAt
+  attendances Attendance[]
+  class       Class        @relation(fields: [class_id], references: [id], onDelete: Cascade)
+}
+
+model Attendance {
+  id            String            @id @default(uuid())
+  student_id    String
+  session_id    String
+  status        AttendanceStatus  @default(PRESENT)
+  check_in_time DateTime?
+  notes         String?
+  created_at    DateTime          @default(now())
+  updated_at    DateTime          @updatedAt
+  session       AttendanceSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
+  student       User              @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  @@unique([student_id, session_id])
+}
+
 enum Role {
   ADMIN
   PENGAJAR
@@ -23,7 +265,7 @@ enum QuestionType {
   LISTENING
   WRITING
   READING
-  MULTIPLE_CHOICE // Adding standard multiple choice just in case
+  MULTIPLE_CHOICE
 }
 
 enum CertificateStatus {
@@ -46,262 +288,4 @@ enum ActivityType {
   QUIZ_ATTEMPT
   EXAM_ATTEMPT
   FORUM_PARTICIPATION
-}
-
-model User {
-  id           String   @id @default(uuid())
-  nama_lengkap String
-  username     String   @unique
-  password     String
-  role         Role     @default(SISWA)
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-
-  // Relationships
-  kelas_diajar           Class[]                 @relation("PengajarKelas")
-  enrollments            Enrollment[]
-  student_activity_logs  StudentActivityLog[]
-  exam_attempts          ExamAttempt[]
-  exam_assignments       ExamAssignment[]
-  learning_progresses    LearningProgress[]
-  recommendation_history RecommendationHistory[]
-  sertifikat_siswa       Certificate[]           @relation("SertifikatSiswa")
-  forum_messages         ForumMessage[]
-  attendances            Attendance[]
-  notifications          Notification[]
-}
-
-model Notification {
-  id         String   @id @default(uuid())
-  user_id    String
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  title      String
-  message    String
-  link       String?  // Optional link to redirect user when clicked
-  is_read    Boolean  @default(false)
-  created_at DateTime @default(now())
-}
-
-model Class {
-  id           String    @id @default(uuid())
-  name         String
-  level        Int       @default(1) // Level kelas (1-12)
-  type         ClassType @default(ONLINE)
-  schedule     String? // Could be a JSON string or simple text for now
-  meeting_link String? // Zoom/GMeet link for online classes
-  module_link  String? // GDrive link for module material
-  teacher_id   String?
-  teacher      User?     @relation("PengajarKelas", fields: [teacher_id], references: [id])
-  created_at   DateTime  @default(now())
-  updated_at   DateTime  @updatedAt
-
-  // Relationships
-  enrollments  Enrollment[]
-  exams        Exam[]
-  certificates Certificate[]
-  forums       Forum[]
-  learning_progresses LearningProgress[]
-  attendance_sessions AttendanceSession[]
-}
-
-model Enrollment {
-  id         String   @id @default(uuid())
-  student_id String
-  student    User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  class_id   String
-  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  status     String   @default("APPROVED") // "PENDING", "APPROVED", "REJECTED"
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  @@unique([student_id, class_id])
-}
-
-model Exam {
-  id           String   @id @default(uuid())
-  class_id     String
-  class        Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  title        String
-  description  String?
-  time_limit   Int? // in minutes
-  is_published Boolean  @default(false)
-  is_final     Boolean  @default(false) // Distinguish between Quiz and Final Exam
-  created_at   DateTime @default(now())
-  updated_at   DateTime @updatedAt
-
-  questions     Question[]
-  exam_attempts ExamAttempt[]
-  exam_assignments ExamAssignment[]
-}
-
-model Question {
-  id              String       @id @default(uuid())
-  exam_id         String
-  exam            Exam         @relation(fields: [exam_id], references: [id], onDelete: Cascade)
-  type            QuestionType
-  question_text   String
-  answer_key      String? // Optional for open-ended or subjective tests
-  audio_reference String? // URL to audio for listening questions
-  image_url       String? // URL to image for any questions
-  format          String   @default("ESSAY") // "MULTIPLE_CHOICE" or "ESSAY"
-  option_a        String?
-  option_b        String?
-  option_c        String?
-  option_d        String?
-  difficulty      Int?     @default(1) // 1-5 scale
-  created_at      DateTime     @default(now())
-  updated_at      DateTime     @updatedAt
-
-  question_attempts QuestionAttempt[]
-}
-
-model Certificate {
-  id         String            @id @default(uuid())
-  student_id String
-  student    User              @relation("SertifikatSiswa", fields: [student_id], references: [id], onDelete: Cascade)
-  class_id   String
-  class      Class             @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  file_url   String?
-  status     CertificateStatus @default(PENDING)
-  available_at DateTime?
-  created_at DateTime          @default(now())
-  updated_at DateTime          @updatedAt
-}
-
-model Forum {
-  id         String   @id @default(uuid())
-  class_id   String
-  class      Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  title      String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-
-  messages ForumMessage[]
-}
-
-model ForumMessage {
-  id         String   @id @default(uuid())
-  forum_id   String
-  forum      Forum    @relation(fields: [forum_id], references: [id], onDelete: Cascade)
-  user_id    String
-  user       User     @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  message    String
-  reactions  String?  @db.Text
-  parent_id  String?
-  parent     ForumMessage?  @relation("ForumThread", fields: [parent_id], references: [id], onDelete: Cascade)
-  replies    ForumMessage[] @relation("ForumThread")
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-}
-
-// ============================================
-// MACHINE LEARNING PREPARATION & TRACKING DATA
-// ============================================
-
-model StudentActivityLog {
-  id          String       @id @default(uuid())
-  student_id  String
-  student     User         @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  action_type ActivityType
-  duration    Int?         @default(0) // Duration in seconds (e.g. learning duration)
-  metadata    String? // JSON string for extra info (module_id, ip_address, etc.)
-  created_at  DateTime     @default(now())
-}
-
-model ExamAttempt {
-  id          String    @id @default(uuid())
-  exam_id     String
-  exam        Exam      @relation(fields: [exam_id], references: [id], onDelete: Cascade)
-  student_id  String
-  student     User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  start_time  DateTime  @default(now())
-  end_time    DateTime?
-  total_score Int?      @default(0)
-  created_at  DateTime  @default(now())
-  updated_at  DateTime  @updatedAt
-
-  question_attempts QuestionAttempt[]
-}
-
-model QuestionAttempt {
-  id              String      @id @default(uuid())
-  exam_attempt_id String
-  exam_attempt    ExamAttempt @relation(fields: [exam_attempt_id], references: [id], onDelete: Cascade)
-  question_id     String
-  question        Question    @relation(fields: [question_id], references: [id], onDelete: Cascade)
-
-  // ML Data Points
-  student_answer     String?
-  audio_url          String? // URL to recording if speaking test
-  transcript         String? // Speech-to-text transcript
-  time_spent_seconds Int?    @default(0)
-  score              Int?    @default(0)
-  ai_feedback        String?
-
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-}
-
-model ExamAssignment {
-  id         String   @id @default(uuid())
-  exam_id    String
-  exam       Exam     @relation(fields: [exam_id], references: [id], onDelete: Cascade)
-  student_id String
-  student    User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  assigned_by String?
-  created_at DateTime @default(now())
-
-  @@unique([exam_id, student_id])
-}
-
-model LearningProgress {
-  id            String    @id @default(uuid())
-  student_id    String
-  student       User      @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  class_id      String
-  class         Class     @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  is_completed  Boolean   @default(false)
-  last_accessed DateTime? @default(now())
-  created_at    DateTime  @default(now())
-  updated_at    DateTime  @updatedAt
-
-  @@unique([student_id, class_id])
-}
-
-model RecommendationHistory {
-  id                  String   @id @default(uuid())
-  student_id          String
-  student             User     @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  recommendation_text String
-  recommendation_type String // e.g., 'MODULE_SUGGESTION', 'PACE_WARNING', 'STYLE_ADAPTATION'
-  is_applied          Boolean  @default(false) // Did the student click/follow it?
-  created_at          DateTime @default(now())
-}
-
-model AttendanceSession {
-  id          String   @id @default(uuid())
-  class_id    String
-  class       Class    @relation(fields: [class_id], references: [id], onDelete: Cascade)
-  title       String
-  description String?
-  date        DateTime?
-  created_at  DateTime @default(now())
-  updated_at  DateTime @updatedAt
-
-  attendances Attendance[]
-}
-
-model Attendance {
-  id             String           @id @default(uuid())
-  student_id     String
-  student        User             @relation(fields: [student_id], references: [id], onDelete: Cascade)
-  session_id     String
-  session        AttendanceSession @relation(fields: [session_id], references: [id], onDelete: Cascade)
-  status         AttendanceStatus @default(PRESENT)
-  check_in_time  DateTime?
-  notes          String?
-  created_at     DateTime         @default(now())
-  updated_at     DateTime         @updatedAt
-
-  @@unique([student_id, session_id])
 }
