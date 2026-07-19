@@ -509,9 +509,12 @@ export async function createQuestion(formData: FormData) {
     }
     
     let image_url = null;
+    const existing_image = formData.get("existing_image_url") as string | null;
     const image_file = formData.get("image_url") as File | null;
     if (image_file && image_file.size > 0) {
       image_url = await saveUploadedFile(image_file, "kuis_image");
+    } else if (existing_image) {
+      image_url = existing_image;
     }
 
     await prisma.question.create({

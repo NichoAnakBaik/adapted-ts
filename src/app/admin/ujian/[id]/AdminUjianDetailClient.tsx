@@ -29,6 +29,12 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
   
   const [eligibleStudents, setEligibleStudents] = useState(initialEligibleStudents);
   const [assigningAll, setAssigningAll] = useState(false);
+  const [imageUploadType, setImageUploadType] = useState<"NEW" | "EXISTING">("NEW");
+
+  const existingImages = React.useMemo(() => {
+    const urls = questions.map((q: any) => q.image_url).filter(Boolean);
+    return Array.from(new Set(urls));
+  }, [questions]);
 
   const tabs = [
     { id: "READING", label: "Membaca (Reading)", icon: BookOpen, color: "text-blue-500", bg: "bg-blue-50" },
@@ -217,8 +223,36 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="md:col-span-2">
                       <label className="block text-sm font-medium text-gray-700 mb-1">Gambar Soal {editingQuestion ? "(Opsional jika tidak ingin diubah)" : "(Opsional)"}</label>
-                      <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
-                      {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                      
+                      {existingImages.length > 0 && (
+                        <div className="flex gap-4 mb-3">
+                          <label className="flex items-center gap-2">
+                            <input type="radio" checked={imageUploadType === "NEW"} onChange={() => setImageUploadType("NEW")} />
+                            <span className="text-sm">Upload Baru</span>
+                          </label>
+                          <label className="flex items-center gap-2">
+                            <input type="radio" checked={imageUploadType === "EXISTING"} onChange={() => setImageUploadType("EXISTING")} />
+                            <span className="text-sm">Pilih dari Soal Lain</span>
+                          </label>
+                        </div>
+                      )}
+
+                      {imageUploadType === "NEW" ? (
+                        <>
+                          <input type="file" accept="image/*" name="image_url" className="w-full p-2.5 border rounded-lg bg-white" />
+                          {editingQuestion?.image_url && <p className="text-xs text-blue-600 mt-2">File gambar saat ini sudah ada. Upload baru untuk mengganti.</p>}
+                        </>
+                      ) : (
+                        <div className="space-y-3">
+                          <select name="existing_image_url" className="w-full p-2.5 border rounded-lg bg-white">
+                            <option value="">-- Pilih Gambar --</option>
+                            {existingImages.map((url: any, idx) => (
+                              <option key={idx} value={url}>Gambar dari soal lain ({url.split('/').pop()})</option>
+                            ))}
+                          </select>
+                          <p className="text-xs text-gray-500">Pilih gambar yang sudah pernah diupload di soal lain pada ujian ini.</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 

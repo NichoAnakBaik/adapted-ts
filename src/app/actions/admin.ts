@@ -517,9 +517,12 @@ export async function createAdminQuestion(formData: FormData) {
     }
 
     let image_url = null;
+    const existing_image = formData.get("existing_image_url") as string | null;
     const image_file = formData.get("image_url") as File | null;
     if (image_file && image_file.size > 0) {
       image_url = await saveUploadedFile(image_file, "ujian_image");
+    } else if (existing_image) {
+      image_url = existing_image;
     }
 
     await prisma.question.create({
@@ -566,10 +569,13 @@ export async function updateAdminQuestion(formData: FormData) {
       updateData.audio_reference = url;
     }
 
+    const existing_image = formData.get("existing_image_url") as string | null;
     const image_file = formData.get("image_url") as File | null;
     if (image_file && image_file.size > 0) {
       const url = await saveUploadedFile(image_file, "ujian_image");
       updateData.image_url = url;
+    } else if (existing_image) {
+      updateData.image_url = existing_image;
     }
 
     await prisma.question.update({
