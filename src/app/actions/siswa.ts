@@ -610,10 +610,11 @@ async function processAudioTranscriptionBackground(
   createdQuestionAttempts: any[]
 ) {
   for (const pending of pendingTranscriptions) {
+    // 1. Find the question attempt id
+    const qa = createdQuestionAttempts.find(q => q.question_id === pending.question_id);
+    if (!qa) continue;
+
     try {
-      // 1. Find the question attempt id
-      const qa = createdQuestionAttempts.find(q => q.question_id === pending.question_id);
-      if (!qa) continue;
 
       // 2. Read audio file from URL or local file system
       let arrayBuffer: ArrayBuffer;
