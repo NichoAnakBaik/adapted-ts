@@ -150,7 +150,7 @@ export async function getDashboardStats() {
     if (geminiApiKey) {
       try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
         const prompt = `
           Kamu adalah teman belajar dan asisten AI bahasa Korea untuk siswa bernama ${session.user.username}.
           Berikut adalah performa terkininya:
@@ -646,7 +646,7 @@ async function processAudioTranscriptionBackground(
         while (retries > 0 && !isSuccess) {
           try {
             const response = await fetch(
-              "https://router.huggingface.co/hf-inference/models/openai/whisper-small",
+              "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
               {
                 headers: {
                   Authorization: `Bearer ${hfApiKey}`,

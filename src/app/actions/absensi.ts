@@ -174,7 +174,7 @@ export async function updateAttendanceSession(sessionId: string, formData: FormD
     if (!existingExam) {
       try {
         const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+        const model = genAI.getGenerativeModel({ model: "gemini-pro" });
         
         const prompt = `Anda adalah guru bahasa Korea ahli. Berdasarkan deskripsi materi pertemuan berikut ini: "${description}"\n\nBuatkan 5 soal latihan tingkat dasar yang relevan dengan materi tersebut untuk menguji pemahaman siswa.\n\nSyarat penting:\n1. Variasikan tipe soal (field "type") sesuai kecocokan materi, gunakan salah satu dari: "READING", "WRITING", "SPEAKING", "LISTENING", atau "MULTIPLE_CHOICE".\n2. Walaupun tipe soal bervariasi, pastikan format menjawabnya tetap berupa pilihan ganda (A, B, C, D).\n3. Anda WAJIB merespons HANYA dengan JSON murni (array of objects), tanpa markdown, tanpa penjelasan lain.\n\nFormat output harus sama persis seperti ini:\n[\n  {\n    "type": "READING",\n    "question_text": "Apa arti kata X?",\n    "option_a": "A",\n    "option_b": "B",\n    "option_c": "C",\n    "option_d": "D",\n    "answer_key": "A"\n  }\n]`;
 
