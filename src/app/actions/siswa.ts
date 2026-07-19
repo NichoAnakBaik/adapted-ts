@@ -309,7 +309,7 @@ export async function submitExam(formData: FormData) {
 
   let totalScore = 0;
   let autoGradedQuestions = 0;
-  const pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string }[] = [];
+  const pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string, audioB64?: string }[] = [];
 
   const questionAttemptData = await Promise.all(questions.map(async (q) => {
     const data = answersData[q.id] || { student_answer: "", time_spent_seconds: 0, has_audio: false };
