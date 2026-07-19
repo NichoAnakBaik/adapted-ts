@@ -264,7 +264,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                   />
                   {/* Mention Dropdown for Reply */}
                   {mentionState?.active && mentionState.type === 'reply' && mentionState.parentId === msg.id && filteredMembers.length > 0 && (
-                    <div className="absolute bottom-full left-0 mb-1 w-64 bg-white border border-gray-100 shadow-lg rounded-xl overflow-y-auto max-h-48 z-30 animate-in fade-in zoom-in-95">
+                    <div className="absolute top-full left-0 mt-1 w-64 bg-white border border-gray-100 shadow-lg rounded-xl overflow-y-auto max-h-48 z-30 animate-in fade-in zoom-in-95">
                       {filteredMembers.map((member: any) => (
                         <button
                           key={member.id}
@@ -285,8 +285,8 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                   )}
                 </div>
                 <div className="flex justify-between items-center px-2 pb-2">
-                  <div className="text-[10px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 ml-1">
-                    Gunakan @ untuk _mention_ teman
+                  <div className="text-[11px] text-gray-500 ml-1">
+                    Gunakan @ untuk mention teman
                   </div>
                   <button 
                     type="submit"
@@ -354,7 +354,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                 />
                 {/* Mention Dropdown for Main Compose */}
                 {mentionState?.active && mentionState.type === 'main' && filteredMembers.length > 0 && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-100 shadow-xl rounded-xl overflow-y-auto max-h-48 z-30 animate-in fade-in zoom-in-95">
+                  <div className="absolute top-full left-0 mt-2 w-64 bg-white border border-gray-100 shadow-xl rounded-xl overflow-y-auto max-h-48 z-30 animate-in fade-in zoom-in-95">
                     {filteredMembers.map((member: any) => (
                       <button
                         key={member.id}
@@ -375,8 +375,8 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                 )}
               </div>
               <div className="border-t border-gray-200/50 pt-2 flex justify-between items-center mt-1">
-                <div className="text-[10px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">
-                  Gunakan @ untuk _mention_
+                <div className="text-[11px] text-gray-500">
+                  Gunakan @ untuk mention
                 </div>
                 <button 
                   type="submit"
