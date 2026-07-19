@@ -599,6 +599,8 @@ export async function getStudentAnalytics() {
 }
 
 // Background Task for Audio Transcription
+
+
 async function processAudioTranscriptionBackground(
   attemptId: string, 
   pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string, audioB64?: string | null }[],
@@ -687,23 +689,21 @@ async function processAudioTranscriptionBackground(
           score = 0;
           ai_feedback = "AI Speech Analysis: Suara terdeteksi bukan bahasa Korea atau tidak jelas. Harap gunakan bahasa Korea.";
           transcriptText = "[Bukan bahasa Korea]";
-        } else if (pending.answer_key) {
-          const similarity = stringSimilarity.compareTwoStrings(
-            transcriptText.trim().toLowerCase(),
-            pending.answer_key.trim().toLowerCase()
-          );
-          
-          if (similarity >= 0.8) score = 10;
-          else if (similarity >= 0.5) score = 7;
-          else score = 4;
-
-          const percentage = Math.round(similarity * 100);
-          ai_feedback = `AI Speech Analysis: Pelafalan Anda mendapat skor ${percentage}%. Transkrip suara berhasil dibandingkan dengan kunci jawaban secara otomatis.`;
-          transcriptText = `[AI Transcript] ${transcriptText}`;
         } else {
-          // No answer key, just give an average score
-          score = 8;
-          ai_feedback = "AI Speech Analysis: Transkripsi berhasil. Terdapat sedikit logat lokal namun secara keseluruhan intonasi terdengar natural.";
+          // Fetch question data to pass to dynamic evaluator
+          const questionData = await prisma.question.findUnique({ where: { id: pending.question_id } });
+          
+          if (questionData) {
+            const ai = new AdaptEdAI(process.env.GEMINI_API_KEY || "");
+            const evalResult = await ai.evaluateQuestionDynamic(questionData, transcriptText);
+            
+            score = evalResult.skor;
+            ai_feedback = evalResult.feedback;
+          } else {
+            // Fallback if question not found
+            score = 8;
+            ai_feedback = "AI Speech Analysis: Transkripsi berhasil, namun data soal tidak ditemukan untuk dievaluasi lebih lanjut.";
+          }
           transcriptText = `[AI Transcript] ${transcriptText}`;
         }
       } else {
