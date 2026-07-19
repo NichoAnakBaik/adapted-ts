@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-import { setSession, clearSession } from "@/lib/auth";
+import { setSession, clearSession, getSession } from "@/lib/auth";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 
