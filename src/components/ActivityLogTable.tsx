@@ -55,244 +55,122 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
     return acc;
   }, {} as Record<string, any[]>);
 
-  // === RENDER SISWA (Learning Journey Timeline) ===
-  if (role === "SISWA") {
-    return (
-      <div className="space-y-8 max-w-3xl">
-        {Object.entries(groupedLogs).map(([date, dayLogs], index) => (
-          <div key={date} className="relative">
-            <div className="sticky top-0 z-10 py-2 bg-white/80 backdrop-blur-md mb-4 flex items-center gap-3">
-              <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm">
-                {date}
-              </div>
-              <div className="h-px bg-gray-100 flex-1"></div>
+  const timelineContent = (
+    <div className="relative max-w-4xl mx-auto w-full">
+      {/* Main vertical line */}
+      <div className="absolute top-0 bottom-0 left-[23px] w-[2px] bg-gradient-to-b from-blue-100 via-gray-100 to-transparent"></div>
+      
+      {Object.entries(groupedLogs).map(([date, dayLogs], index) => (
+        <div key={date} className="relative mb-10">
+          
+          {/* Date Header */}
+          <div className="sticky top-0 z-10 py-2 bg-white/80 backdrop-blur-md mb-6 flex items-center gap-3 ml-[45px]">
+            <div className="bg-gradient-to-r from-blue-500 to-blue-600 text-white text-xs font-bold px-4 py-1.5 rounded-full shadow-sm">
+              {date}
             </div>
+            <div className="h-px bg-gray-200 flex-1"></div>
+          </div>
 
-            <div className="relative pl-6 space-y-6">
-              <div className="absolute top-0 bottom-0 left-[11px] w-[2px] bg-gradient-to-b from-blue-100 via-gray-100 to-transparent"></div>
-              
-              {(dayLogs as any[]).map((log: any) => {
-                let meta: any = {};
-                try { meta = log.metadata ? JSON.parse(log.metadata) : {}; } catch (e) {}
-                const actionInfo = getActionInfo(log.action_type);
-                const Icon = actionInfo.icon;
-                const dur = formatDuration(log.duration);
+          <div className="space-y-6">
+            {(dayLogs as any[]).map((log: any) => {
+              let meta: any = {};
+              try { meta = log.metadata ? JSON.parse(log.metadata) : {}; } catch (e) {}
+              const actionInfo = getActionInfo(log.action_type);
+              const Icon = actionInfo.icon;
+              const dur = formatDuration(log.duration);
 
-                return (
-                  <div key={log.id} className="relative group">
-                    <div className={`absolute -left-[30px] top-1 w-6 h-6 rounded-full border-4 border-white ${actionInfo.bg} shadow-sm z-10 transition-transform group-hover:scale-110`}></div>
+              return (
+                <div key={log.id} className="relative ml-[60px] group">
+                  {/* The dot */}
+                  <div className={`absolute -left-[48px] top-4 w-6 h-6 rounded-full border-4 border-white ${actionInfo.bg} shadow-sm z-10 transition-transform group-hover:scale-110`}></div>
+                  
+                  {/* The Card */}
+                  <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
                     
-                    <div className="bg-white rounded-2xl p-5 shadow-[0_2px_10px_rgb(0,0,0,0.02)] border border-gray-100 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300">
-                      <div className="flex items-start justify-between gap-4 mb-2">
-                        <div className="flex items-center gap-2">
+                    <div className="flex flex-col md:flex-row md:items-start justify-between gap-4 mb-3">
+                      <div>
+                        <div className="flex items-center gap-2 mb-2">
                           <span className={`text-xs font-black tracking-widest uppercase ${actionInfo.color} flex items-center gap-1.5`}>
                             <Icon className="w-3.5 h-3.5" />
                             {actionInfo.label}
                           </span>
                         </div>
-                        <div className="text-xs font-semibold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-md">
-                          {new Date(log.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}
+                        <div className="text-[15px] md:text-base font-bold text-gray-900 leading-snug">
+                          {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "Aktivitas Sistem Umum"}
                         </div>
                       </div>
 
-                      <div className="text-[15px] font-bold text-gray-900 mb-1 leading-snug">
-                        {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "Aktivitas Umum"}
-                      </div>
-                      
-                      <div className="flex flex-wrap items-center gap-3 mt-3">
-                        {meta.className && (
-                          <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
-                            <BookOpen className="w-3.5 h-3.5" /> Kelas: {meta.className}
-                          </div>
-                        )}
-                        {dur && (
-                          <div className="flex items-center gap-1.5 text-xs text-orange-600 bg-orange-50 font-bold px-2 py-0.5 rounded-md">
-                            <Clock className="w-3.5 h-3.5" /> {dur}
+                      <div className="flex flex-col items-end gap-2 shrink-0">
+                        <div className="text-xs font-semibold text-gray-400 bg-gray-50 px-2.5 py-1 rounded-md border border-gray-100">
+                          {new Date(log.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}
+                        </div>
+                        
+                        {/* Show student info for ADMIN and PENGAJAR */}
+                        {(role === "ADMIN" || role === "PENGAJAR") && (
+                          <div className="flex items-center gap-2 mt-1 bg-gray-50/50 p-1.5 pr-3 rounded-full border border-gray-100">
+                            <div className="w-7 h-7 rounded-full bg-gradient-to-tr from-blue-500 to-indigo-600 text-white flex items-center justify-center font-bold text-xs shadow-sm">
+                              {log.student?.nama_lengkap?.charAt(0).toUpperCase() || "?"}
+                            </div>
+                            <div className="text-right hidden sm:block">
+                              <div className="text-xs font-bold text-gray-800 leading-none">{log.student?.nama_lengkap || "Unknown User"}</div>
+                            </div>
                           </div>
                         )}
                       </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        ))}
-      </div>
-    );
-  }
 
-  // === RENDER ADMIN (Super Admin Table) ===
-  if (role === "ADMIN") {
-    return (
-      <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/40 border border-gray-100 overflow-hidden">
-        <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
-              <Activity className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 text-xl tracking-tight">Log Sistem Terpadu</h3>
-              <p className="text-sm text-gray-500 font-medium">Rekaman seluruh aktivitas platform secara real-time</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span className="text-gray-700 font-bold text-sm">{logs.length} Total Aktivitas</span>
-          </div>
-        </div>
-        
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50/80 border-b border-gray-100 text-gray-500 text-xs font-black uppercase tracking-wider">
-              <tr>
-                <th className="px-8 py-5">Waktu & Tanggal</th>
-                <th className="px-8 py-5">Pengguna / Siswa</th>
-                <th className="px-8 py-5">Tindakan</th>
-                <th className="px-8 py-5">Target Informasi</th>
-                <th className="px-8 py-5 text-right">Durasi</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {logs.map((log) => {
-                let meta: any = {};
-                try { meta = log.metadata ? JSON.parse(log.metadata) : {}; } catch (e) {}
-                const actionInfo = getActionInfo(log.action_type);
-                const Icon = actionInfo.icon;
-                const dur = formatDuration(log.duration);
-                return (
-                  <tr key={log.id} className="hover:bg-blue-50/30 transition-colors group">
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <div className="text-gray-900 font-bold mb-1">
-                        {new Date(log.created_at).toLocaleDateString("id-ID", { day: '2-digit', month: 'long', year: 'numeric' })}
-                      </div>
-                      <div className="inline-flex items-center gap-1.5 bg-gray-100 px-2 py-0.5 rounded text-gray-500 text-xs font-semibold">
-                        <Clock className="w-3 h-3" />
-                        {new Date(log.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                      </div>
-                    </td>
-                    
-                    <td className="px-8 py-5">
-                      <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-namsan-primary to-orange-400 text-white flex items-center justify-center font-bold shadow-sm">
-                          {log.student?.nama_lengkap?.charAt(0).toUpperCase() || "?"}
-                        </div>
-                        <div>
-                          <div className="font-bold text-gray-900 text-base">{log.student?.nama_lengkap || "Unknown User"}</div>
-                          <div className="text-gray-400 text-xs font-medium">@{log.student?.username || "unknown"}</div>
-                        </div>
-                      </div>
-                    </td>
-                    
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${actionInfo.lightBg} ${actionInfo.border} shadow-sm group-hover:scale-105 transition-transform`}>
-                        <Icon className={`w-4 h-4 ${actionInfo.color}`} />
-                        <span className={`text-xs font-black uppercase tracking-wide ${actionInfo.color}`}>
-                          {actionInfo.label}
-                        </span>
-                      </div>
-                    </td>
-                    
-                    <td className="px-8 py-5 min-w-[250px]">
-                      <div className="font-bold text-gray-800 text-sm md:text-base leading-snug">
-                        {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "Interaksi sistem umum"}
-                      </div>
+                    <div className="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-gray-50">
                       {meta.className && (
-                        <div className="flex items-center gap-1.5 mt-2">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kelas</span>
-                          <span className="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">{meta.className}</span>
+                        <div className="flex items-center gap-1.5 text-xs text-gray-500 font-medium">
+                          <BookOpen className="w-3.5 h-3.5" /> Kelas: <span className="font-bold text-gray-700">{meta.className}</span>
                         </div>
                       )}
-                    </td>
-                    
-                    <td className="px-8 py-5 whitespace-nowrap text-right">
-                      {dur ? (
-                        <div className="inline-flex items-center gap-1.5 text-orange-600 font-bold bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">
-                          <Clock className="w-3.5 h-3.5" />
-                          {dur}
+                      {dur && (
+                        <div className="flex items-center gap-1.5 text-xs text-orange-600 bg-orange-50 font-bold px-2 py-0.5 rounded-md border border-orange-100">
+                          <Clock className="w-3.5 h-3.5" /> {dur}
                         </div>
-                      ) : (
-                        <span className="text-gray-300 font-medium">-</span>
                       )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
-      </div>
-    );
+      ))}
+    </div>
+  );
+
+  if (role === "SISWA") {
+    return timelineContent;
   }
 
-  // === RENDER PENGAJAR (Social / Monitoring Feed) ===
   return (
-    <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-      <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
-        <h3 className="font-bold text-gray-800 text-lg">Feed Aktivitas Terkini</h3>
-        <span className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">{logs.length} Data</span>
+    <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/40 border border-gray-100 overflow-hidden">
+      {/* Header */}
+      <div className="px-6 md:px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="flex items-center gap-3">
+          <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+            <Activity className="w-5 h-5" />
+          </div>
+          <div>
+            <h3 className="font-bold text-gray-900 text-lg md:text-xl tracking-tight">
+              {role === "ADMIN" ? "Log Sistem Terpadu" : "Feed Aktivitas Terkini"}
+            </h3>
+            <p className="text-sm text-gray-500 font-medium">
+              {role === "ADMIN" ? "Rekaman seluruh aktivitas platform secara real-time" : "Pantau riwayat belajar siswa di kelas Anda"}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+          <span className="text-gray-700 font-bold text-sm">{logs.length} Total Data</span>
+        </div>
       </div>
-
-      <div className="divide-y divide-gray-50">
-        {logs.map((log) => {
-          let meta: any = {};
-          try { meta = log.metadata ? JSON.parse(log.metadata) : {}; } catch (e) {}
-          const actionInfo = getActionInfo(log.action_type);
-          const Icon = actionInfo.icon;
-          const dur = formatDuration(log.duration);
-
-          return (
-            <div key={log.id} className="p-4 md:p-6 hover:bg-gray-50/80 transition-colors flex gap-4 md:gap-6 group">
-              {/* Avatar Column */}
-              <div className="flex flex-col items-center gap-2 shrink-0">
-                <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white font-bold text-lg shadow-md group-hover:scale-105 transition-transform">
-                  {log.student?.nama_lengkap?.charAt(0).toUpperCase()}
-                </div>
-                <div className={`w-1 flex-1 ${actionInfo.bg} opacity-20 rounded-full my-1 min-h-[20px]`}></div>
-              </div>
-
-              {/* Content Column */}
-              <div className="flex-1 min-w-0 pb-2">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-2 mb-2">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-gray-900 text-base">{log.student?.nama_lengkap}</span>
-                    <span className="text-gray-400 text-sm">@{log.student?.username}</span>
-                  </div>
-                  <div className="text-xs font-medium text-gray-400 flex items-center gap-1.5 bg-white border border-gray-100 px-2.5 py-1 rounded-full shadow-sm w-fit">
-                    <Calendar className="w-3.5 h-3.5" />
-                    {new Date(log.created_at).toLocaleDateString("id-ID", { day: '2-digit', month: 'short' })}, {new Date(log.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}
-                  </div>
-                </div>
-
-                <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-lg border ${actionInfo.lightBg} ${actionInfo.border} mb-3`}>
-                  <Icon className={`w-4 h-4 ${actionInfo.color}`} />
-                  <span className={`text-xs font-bold uppercase tracking-wide ${actionInfo.color}`}>
-                    {actionInfo.label}
-                  </span>
-                </div>
-
-                <div className="bg-white border border-gray-100 p-4 rounded-2xl shadow-sm group-hover:shadow-md transition-shadow">
-                  <div className="font-semibold text-gray-800 text-sm md:text-base leading-snug mb-2">
-                    {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "Melakukan aktivitas sistem"}
-                  </div>
-                  
-                  <div className="flex flex-wrap items-center gap-4 text-xs font-medium">
-                    {meta.className && (
-                      <div className="flex items-center gap-1.5 text-gray-500">
-                        <BookOpen className="w-3.5 h-3.5 text-gray-400" /> Kelas: <span className="text-gray-700">{meta.className}</span>
-                      </div>
-                    )}
-                    {dur && (
-                      <div className="flex items-center gap-1.5 text-orange-600">
-                        <Clock className="w-3.5 h-3.5" /> Durasi: {dur}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          );
-        })}
+      
+      {/* Body with subtle padding */}
+      <div className="p-4 md:p-8 bg-gray-50/30">
+        {timelineContent}
       </div>
     </div>
   );
