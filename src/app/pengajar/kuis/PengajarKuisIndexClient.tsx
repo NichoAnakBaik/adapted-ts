@@ -9,10 +9,10 @@ export default function PengajarKuisIndexClient({ classes }: { classes: ClassDat
     <ClassIndexClient 
       title="Pilih Kelas untuk Kuis"
       subtitle="Pilih kelas di bawah ini untuk melihat dan membuat kuis."
-      headerIcon={ClipboardList}
-      cardIcon={LayoutDashboard}
+      headerIcon="ClipboardList"
+      cardIcon="LayoutDashboard"
       countLabel="Kuis"
-      countIcon={ClipboardList}
+      countIcon="ClipboardList"
       actionLabel="Kelola Kuis"
       basePath="/pengajar/kuis/kelas"
       classes={classes}

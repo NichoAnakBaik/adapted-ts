@@ -22,10 +22,10 @@ export default async function AdminKuisIndexPage() {
     <ClassIndexClient 
       title="Pilih Kelas untuk Kuis"
       subtitle="Pilih kelas di bawah ini untuk melihat kuis yang tersedia pada kelas tersebut."
-      headerIcon={ClipboardList}
-      cardIcon={LayoutDashboard}
+      headerIcon="ClipboardList"
+      cardIcon="LayoutDashboard"
       countLabel="Kuis"
-      countIcon={ClipboardList}
+      countIcon="ClipboardList"
       actionLabel="Pantau Kuis"
       basePath="/admin/kuis/kelas"
       classes={classes}

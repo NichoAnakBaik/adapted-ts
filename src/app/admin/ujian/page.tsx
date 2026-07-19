@@ -22,10 +22,10 @@ export default async function AdminUjianIndexPage() {
     <ClassIndexClient 
       title="Pilih Kelas untuk Ujian"
       subtitle="Pilih kelas di bawah ini untuk melihat ujian akhir yang tersedia pada kelas tersebut."
-      headerIcon={GraduationCap}
-      cardIcon={LayoutDashboard}
+      headerIcon="GraduationCap"
+      cardIcon="LayoutDashboard"
       countLabel="Ujian"
-      countIcon={ClipboardList}
+      countIcon="ClipboardList"
       actionLabel="Pantau Ujian"
       basePath="/admin/ujian/kelas"
       classes={classes}

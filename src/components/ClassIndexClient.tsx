@@ -1,8 +1,18 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, ArrowRight } from "lucide-react";
+import { Users, ArrowRight, ClipboardList, LayoutDashboard, BookOpen, Award, GraduationCap } from "lucide-react";
 import Link from "next/link";
+
+const iconMap = {
+  ClipboardList,
+  LayoutDashboard,
+  BookOpen,
+  Award,
+  GraduationCap
+};
+
+export type IconName = keyof typeof iconMap;
 
 export interface ClassData {
   id: string;
@@ -17,10 +27,10 @@ export interface ClassData {
 interface ClassIndexClientProps {
   title: string;
   subtitle: string;
-  headerIcon: React.ElementType;
-  cardIcon: React.ElementType;
+  headerIcon: IconName;
+  cardIcon: IconName;
   countLabel: string;
-  countIcon: React.ElementType;
+  countIcon: IconName;
   actionLabel: string;
   basePath: string;
   classes: ClassData[];
@@ -31,10 +41,10 @@ interface ClassIndexClientProps {
 export default function ClassIndexClient({
   title,
   subtitle,
-  headerIcon: HeaderIcon,
-  cardIcon: CardIcon,
+  headerIcon: HeaderIconName,
+  cardIcon: CardIconName,
   countLabel,
-  countIcon: CountIcon,
+  countIcon: CountIconName,
   actionLabel,
   basePath,
   classes,
@@ -46,6 +56,10 @@ export default function ClassIndexClient({
   const filteredClasses = classes.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const HeaderIcon = iconMap[HeaderIconName];
+  const CardIcon = iconMap[CardIconName];
+  const CountIcon = iconMap[CountIconName];
 
   // Theme mapping
   const themes = {

@@ -9,10 +9,10 @@ export default function PengajarUjianIndexClient({ classes }: { classes: ClassDa
     <ClassIndexClient 
       title="Pilih Kelas untuk Ujian"
       subtitle="Pilih kelas di bawah ini untuk melihat dan membuat ujian akhir."
-      headerIcon={GraduationCap}
-      cardIcon={LayoutDashboard}
+      headerIcon="GraduationCap"
+      cardIcon="LayoutDashboard"
       countLabel="Ujian"
-      countIcon={ClipboardList}
+      countIcon="ClipboardList"
       actionLabel="Kelola Ujian"
       basePath="/pengajar/ujian/kelas"
       classes={classes}

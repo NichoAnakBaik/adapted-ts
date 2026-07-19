@@ -28,10 +28,10 @@ export default async function SiswaUjianIndexPage() {
     <ClassIndexClient 
       title="Pilih Kelas untuk Ujian"
       subtitle="Pilih kelas di bawah ini untuk melihat daftar ujian yang tersedia."
-      headerIcon={GraduationCap}
-      cardIcon={LayoutDashboard}
+      headerIcon="GraduationCap"
+      cardIcon="LayoutDashboard"
       countLabel="Ujian"
-      countIcon={ClipboardList}
+      countIcon="ClipboardList"
       actionLabel="Lihat Ujian"
       basePath="/siswa/ujian/kelas"
       classes={classes}
