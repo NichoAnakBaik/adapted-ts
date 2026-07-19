@@ -164,7 +164,7 @@ export async function getClassDetails(id: string) {
         },
         orderBy: { created_at: 'desc' }
       },
-      _count: { select: { exams: true } }
+      _count: { select: { exams: { where: { is_final: false } } } }
     }
   });
 
@@ -581,3 +581,30 @@ export async function updateQuestion(formData: FormData) {
 
   return { success: true };
 }
+
+
+export async function deleteQuestion(questionId: string) {
+  try {
+    const session = await checkPengajarAuth();
+    
+    // Verify the question belongs to an exam owned by the teacher
+    const question = await prisma.question.findUnique({
+      where: { id: questionId },
+      include: { exam: { include: { class: true } } }
+    });
+
+    if (!question || question.exam.class.teacher_id !== session.user.id) {
+      return { error: "Unauthorized or Question not found" };
+    }
+
+    await prisma.question.delete({
+      where: { id: questionId }
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    console.error("deleteQuestion error:", error);
+    return { error: error.message };
+  }
+}
+

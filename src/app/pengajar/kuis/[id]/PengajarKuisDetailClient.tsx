@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { ArrowLeft, Plus, FileQuestion, Trash2, Pencil, Clock, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
-import { createQuestion, updateQuestion } from "@/app/actions/pengajar";
+import { createQuestion, updateQuestion, deleteQuestion } from "@/app/actions/pengajar";
 import { KoreanInput, KoreanTextarea } from "@/components/KoreanInput";
 import SiswaHasilClient from "@/app/siswa/kuis/[id]/hasil/SiswaHasilClient";
 

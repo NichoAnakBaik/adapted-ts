@@ -119,7 +119,34 @@ export async function getDashboardStats() {
 
   let mlRecommendation = `Sistem AI belum dapat mendeteksi pola belajar kamu karena data kuis masih kosong. Ayo kerjakan kuis pertamamu!`;
   if (totalAttempts > 0 || totalAttendances > 0) {
-    const geminiApiKey = process.env.GEMINI_API_KEY;
+    
+    // Fetch recent mistaken multiple choice questions to give AI context
+    const recentMistakes = await prisma.questionAttempt.findMany({
+      where: {
+        exam_attempt: { student_id: session.user.id },
+        score: 0,
+        question: { type: "MULTIPLE_CHOICE" }
+      },
+      include: {
+        question: true
+      },
+      orderBy: { id: 'desc' },
+      take: 3
+    });
+
+    let mistakesContext = "";
+    if (recentMistakes.length > 0) {
+      mistakesContext = "\n- Analisis Kesalahan Terbaru (Pilihan Ganda):\n";
+      recentMistakes.forEach((m, idx) => {
+        const q = m.question;
+        mistakesContext += `  ${idx+1}. Soal: ${q.question_text}\n`;
+        mistakesContext += `     Pilihan: A. ${q.option_a}, B. ${q.option_b}, C. ${q.option_c}, D. ${q.option_d}\n`;
+        mistakesContext += `     Jawaban Benar: ${q.answer_key}\n`;
+        mistakesContext += `     Jawaban Siswa (Salah): ${m.student_answer || "Tidak menjawab"}\n`;
+      });
+    }
+
+      const geminiApiKey = process.env.GEMINI_API_KEY;
     if (geminiApiKey) {
       try {
         const genAI = new GoogleGenerativeAI(geminiApiKey);
@@ -130,12 +157,12 @@ export async function getDashboardStats() {
           - Nilai Rata-rata Kuis: ${masteryPercentage}%
           - Kehadiran (Absensi): ${attendanceRate}% (dari ${totalAttendances} sesi)
           - Kelemahan Utama: ${weakPointName}
-          - Total Kuis Selesai: ${totalAttempts}
+          - Total Kuis Selesai: ${totalAttempts}${mistakesContext}
           
-          Buatlah 2-3 kalimat rekomendasi belajar yang SANGAT KASUAL, gaul, asyik, dan suportif (layaknya teman atau mentor gaul). 
+          Buatlah 3-4 kalimat rekomendasi belajar yang SANGAT KASUAL, gaul, asyik, dan suportif (layaknya teman atau mentor gaul). 
           Instruksi Khusus:
           1. Evaluasi kerajinan siswa dari Absensi dan Total Kuis secara natural (jangan kaku). Kalau rajin puji dengan antusias, kalau jarang absen/kuis berikan semangat yang relate.
-          2. Selipkan tips singkat dan fleksibel untuk mengatasi kelemahannya di ${weakPointName}.
+          2. Selipkan tips singkat dan fleksibel untuk mengatasi kelemahannya di ${weakPointName}. Jika ada Analisis Kesalahan Terbaru, berikan feedback spesifik kenapa jawaban siswa salah dan apa konteks materi yang benar dari soal tersebut.
           3. Gunakan bahasa Indonesia santai (aku/kamu, boleh pakai singkatan wajar) dan sertakan 1-2 emoji biar hidup! Jangan terlihat seperti robot.
         `;
         const result = await model.generateContent(prompt);

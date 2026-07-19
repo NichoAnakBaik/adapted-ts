@@ -122,7 +122,74 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
     );
   }
 
-  // === RENDER ADMIN & PENGAJAR (Social / Monitoring Feed) ===
+  // === RENDER ADMIN (Super Admin Table) ===
+  if (role === "ADMIN") {
+    return (
+      <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+        <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <h3 className="font-bold text-gray-800 text-lg">Log Sistem</h3>
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">{logs.length} Data Total</div>
+          </div>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-sm">
+            <thead className="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
+              <tr>
+                <th className="px-6 py-4">Waktu</th>
+                <th className="px-6 py-4">Siswa</th>
+                <th className="px-6 py-4">Aksi</th>
+                <th className="px-6 py-4">Detail Target</th>
+                <th className="px-6 py-4 text-right">Durasi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-100">
+              {logs.map((log) => {
+                let meta: any = {};
+                try { meta = log.metadata ? JSON.parse(log.metadata) : {}; } catch (e) {}
+                const actionInfo = getActionInfo(log.action_type);
+                const Icon = actionInfo.icon;
+                const dur = formatDuration(log.duration);
+                return (
+                  <tr key={log.id} className="hover:bg-gray-50 transition-colors group">
+                    <td className="px-6 py-4 whitespace-nowrap text-gray-500 font-medium">
+                      {new Date(log.created_at).toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' })} <br/>
+                      <span className="text-gray-400 text-xs">{new Date(log.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-gray-900">{log.student?.nama_lengkap}</div>
+                      <div className="text-gray-400 text-xs">@{log.student?.username}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${actionInfo.lightBg} ${actionInfo.border}`}>
+                        <Icon className={`w-3.5 h-3.5 ${actionInfo.color}`} />
+                        <span className={`text-[10px] font-bold uppercase tracking-wide ${actionInfo.color}`}>
+                          {actionInfo.label}
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 min-w-[250px]">
+                      <div className="font-semibold text-gray-800 text-sm truncate">
+                        {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "-"}
+                      </div>
+                      {meta.className && (
+                        <div className="text-xs text-gray-500 mt-1">Kelas: {meta.className}</div>
+                      )}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-gray-600 font-medium">
+                      {dur || "-"}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    );
+  }
+
+  // === RENDER PENGAJAR (Social / Monitoring Feed) ===
   return (
     <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
       <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex items-center justify-between">
