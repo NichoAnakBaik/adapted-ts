@@ -630,35 +630,54 @@ async function processAudioTranscriptionBackground(
       let transcriptText = "";
       let isSuccess = false;
 
-      // 3. Call Hugging Face API for Transcription (Using Whisper Large v3 for best Korean accuracy)
+      // 3. Call Hugging Face API for Transcription with Retry Logic (Cold Start Handling)
       const hfApiKey = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
       if (hfApiKey) {
-        try {
-          const response = await fetch(
-            "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
-            {
-              headers: {
-                Authorization: `Bearer ${hfApiKey}`,
-                "Content-Type": "application/octet-stream",
-              },
-              method: "POST",
-              body: Buffer.from(arrayBuffer),
+        let retries = 5;
+        let waitTime = 5000; // start with 5 seconds wait
+
+        while (retries > 0 && !isSuccess) {
+          try {
+            const response = await fetch(
+              "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
+              {
+                headers: {
+                  Authorization: `Bearer ${hfApiKey}`,
+                  "Content-Type": "application/octet-stream",
+                },
+                method: "POST",
+                body: Buffer.from(arrayBuffer),
+              }
+            );
+            
+            if (!response.ok) {
+              const errorText = await response.text();
+              console.warn(`HF API Attempt Failed (${response.status}):`, errorText);
+              
+              if (response.status === 503) {
+                // Model is loading
+                console.log(`Model is loading. Retrying in ${waitTime/1000}s... (${retries} retries left)`);
+                await new Promise(res => setTimeout(res, waitTime));
+                waitTime += 5000; // Increase wait time for next retry
+                retries--;
+                continue;
+              }
+              
+              throw new Error(`HF API Error: ${response.status} ${errorText}`);
             }
-          );
-          
-          if (!response.ok) {
-            throw new Error(`HF API Error: ${response.status} ${await response.text()}`);
+            
+            const result = await response.json();
+            if (result && result.text) {
+              transcriptText = result.text.trim();
+              isSuccess = true;
+            } else {
+              console.error("Unexpected HF API response:", result);
+              break;
+            }
+          } catch (e) {
+            console.error("Hugging Face Transcription Error:", e);
+            break;
           }
-          
-          const result = await response.json();
-          if (result && result.text) {
-            transcriptText = result.text.trim();
-            isSuccess = true;
-          } else {
-            console.error("Unexpected HF API response:", result);
-          }
-        } catch (e) {
-          console.error("Hugging Face Transcription Error:", e);
         }
       } else {
         console.warn("HUGGINGFACE_API_KEY or HF_TOKEN is missing in environment variables.");
