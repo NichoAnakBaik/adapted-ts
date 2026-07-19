@@ -652,7 +652,7 @@ async function processAudioTranscriptionBackground(
                 mimeType: "audio/webm" 
               }
             },
-            { text: "Tolong transkripsi audio ini secara akurat. Hanya berikan teks hasil transkripsinya saja, tanpa tambahan kata-kata lain, tanpa menerjemahkan, pastikan bahasanya sesuai dengan apa yang diucapkan dalam audio (misal jika bahasa Korea, tulis dalam tulisan Hangeul)." }
+            { text: "Tolong transkripsi audio ini secara akurat. Jika audio TIDAK mengandung bahasa Korea atau bukan bahasa Korea sama sekali, kembalikan HANYA teks: '[BUKAN_KOREA]'. Jika bahasa Korea, hanya berikan teks hasil transkripsinya saja dalam Hangeul, tanpa tambahan kata-kata lain dan tanpa menerjemahkan." }
           ]);
           
           const text = result.response.text();
@@ -672,7 +672,11 @@ async function processAudioTranscriptionBackground(
       let ai_feedback = "";
       
       if (isSuccess && transcriptText) {
-        if (pending.answer_key) {
+        if (transcriptText.includes("[BUKAN_KOREA]")) {
+          score = 0;
+          ai_feedback = "AI Speech Analysis: Suara terdeteksi bukan bahasa Korea atau tidak jelas. Harap gunakan bahasa Korea.";
+          transcriptText = "[Bukan bahasa Korea]";
+        } else if (pending.answer_key) {
           const similarity = stringSimilarity.compareTwoStrings(
             transcriptText.trim().toLowerCase(),
             pending.answer_key.trim().toLowerCase()
@@ -684,12 +688,13 @@ async function processAudioTranscriptionBackground(
 
           const percentage = Math.round(similarity * 100);
           ai_feedback = `AI Speech Analysis: Pelafalan Anda mendapat skor ${percentage}%. Transkrip suara berhasil dibandingkan dengan kunci jawaban secara otomatis.`;
+          transcriptText = `[AI Transcript] ${transcriptText}`;
         } else {
           // No answer key, just give an average score
           score = 8;
           ai_feedback = "AI Speech Analysis: Transkripsi berhasil. Terdapat sedikit logat lokal namun secara keseluruhan intonasi terdengar natural.";
+          transcriptText = `[AI Transcript] ${transcriptText}`;
         }
-        transcriptText = `[AI Transcript] ${transcriptText}`;
       } else {
         // Fallback if API fails
         score = 0;
