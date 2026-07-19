@@ -46,7 +46,7 @@ export class AdaptEdAI {
       2. Jika tipe soal adalah Pilihan Ganda (MULTIPLE_CHOICE):
          - Jika jawaban SALAH (SKOR 0), jelaskan secara detail mengapa pilihan tersebut salah dan apa alasan dari jawaban yang benar.
          - Jika jawaban BENAR (SKOR 10), jangan hanya bilang "akurat". Jelaskan secara edukatif MENGAPA jawaban itu benar untuk menguatkan pemahaman.
-      3. Jika tipe soal SPEAKING/LISTENING (dari transkripsi teks), nilai berdasarkan kemiripan arti/struktur dengan kunci jawaban.
+      4. Jika ada file audio yang terlampir pada konteks ini (sebagai audio reference soal), DENGARKAN secara cermat dan evaluasi apakah jawaban/transkripsi siswa memiliki kemiripan arti, struktur, dan konteks dengan apa yang diucapkan dalam audio tersebut. Jika jawaban siswa melenceng jauh dari audio soal, jelaskan kesalahannya berdasarkan apa yang sebenarnya diucapkan dalam audio.
       
       GAYA BAHASA & STRUKTUR:
       - Gunakan bahasa yang santai, ramah, dan tidak kaku (seperti tutor asyik yang sedang ngobrol dengan muridnya, gunakan sapaan santai).
@@ -69,6 +69,16 @@ export class AdaptEdAI {
           inlineData: {
             data: questionData.image_base64,
             mimeType: "image/jpeg" // Asumsikan jpeg/png bisa diparsing otomatis
+          }
+        });
+      }
+      
+      // Jika ada referensi audio soal (berupa base64 string)
+      if (questionData.audio_reference_base64) {
+        contentParts.push({
+          inlineData: {
+            data: questionData.audio_reference_base64,
+            mimeType: "audio/webm" // Format audio default web
           }
         });
       }

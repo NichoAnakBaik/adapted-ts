@@ -350,13 +350,34 @@ export async function submitExam(formData: FormData) {
       }
     }
 
+    let audio_reference_base64 = undefined;
+    if (q.audio_reference) {
+      try {
+        let arrayBuffer: ArrayBuffer;
+        if (q.audio_reference.startsWith('/uploads/')) {
+          const localPath = path.join(process.cwd(), "public", q.audio_reference);
+          const fileBuffer = await fs.readFile(localPath);
+          arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
+        } else {
+          const fullAudioUrl = q.audio_reference.startsWith('http') 
+            ? q.audio_reference 
+            : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000") + q.audio_reference;
+          const response = await fetch(fullAudioUrl);
+          arrayBuffer = await response.arrayBuffer();
+        }
+        audio_reference_base64 = Buffer.from(arrayBuffer).toString('base64');
+      } catch (e) {
+        console.error("Gagal mendownload audio soal untuk evaluasi AI:", e);
+      }
+    }
+
     if (q.type === "MULTIPLE_CHOICE" || q.format === "MULTIPLE_CHOICE") {
       // Tentukan benar/salah secara statis terlebih dahulu
       const isCorrect = q.answer_key && studentAnswer.trim().toLowerCase() === q.answer_key.trim().toLowerCase();
       score = isCorrect ? 10 : 0;
       
       // Panggil AI untuk memberikan penjelasan edukatif dan rekomendasi
-      const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64 }, studentAnswer);
+      const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64, audio_reference_base64 }, studentAnswer);
       ai_feedback = evalResult.feedback;
     } else if (q.type === "SPEAKING") {
       if (audioB64 || data.has_audio) {
@@ -369,7 +390,7 @@ export async function submitExam(formData: FormData) {
       }
     } else {
       // ESSAY, WRITING, LISTENING, READING yang berupa teks
-      const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64 }, studentAnswer);
+      const evalResult = await ai.evaluateQuestionDynamic({ ...q, image_base64, audio_reference_base64 }, studentAnswer);
       score = evalResult.skor;
       ai_feedback = evalResult.feedback;
     }
