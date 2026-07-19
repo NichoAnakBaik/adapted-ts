@@ -1,6 +1,6 @@
 import React from "react";
 export const dynamic = 'force-dynamic';
-import { Users, BookOpen, ShieldAlert, Award, Database, Settings, ShieldCheck, BarChart4 } from "lucide-react";
+import { Users, BookOpen, ShieldAlert, Award, Settings, ShieldCheck, ArrowRight, LayoutDashboard, Database } from "lucide-react";
 import { getDashboardStats } from "@/app/actions/admin";
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
@@ -15,112 +15,154 @@ export default async function AdminDashboardPage() {
   });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-4 md:space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-12">
       
       {/* Welcome Banner */}
-      <div className="bg-namsan-primary rounded-2xl p-6 md:p-8 flex flex-col sm:flex-row items-center gap-4 sm:gap-6 shadow-sm text-center sm:text-left">
-        <div className="p-3 md:p-4 bg-white/20 rounded-xl shrink-0">
-          <ShieldCheck className="w-10 h-10 md:w-12 md:h-12 text-namsan-dark" strokeWidth={1.5} />
+      <div className="relative bg-gradient-to-r from-namsan-dark via-namsan-dark to-namsan-dark/90 rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-6 overflow-hidden shadow-xl border border-namsan-dark/20">
+        {/* Decorative Background Elements */}
+        <div className="absolute top-0 right-0 w-64 h-64 bg-namsan-primary rounded-full mix-blend-screen filter blur-[80px] opacity-20 animate-pulse"></div>
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full mix-blend-overlay filter blur-[60px] opacity-10"></div>
+        
+        <div className="relative p-5 bg-white/10 backdrop-blur-md rounded-2xl shrink-0 border border-white/10 shadow-inner">
+          <ShieldCheck className="w-12 h-12 md:w-16 md:h-16 text-namsan-primary drop-shadow-md" strokeWidth={1.5} />
         </div>
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-namsan-text mb-1">Selamat Datang, Administrator!</h1>
-          <p className="text-namsan-text/80 text-sm md:text-base font-medium">
-            Pusat Kontrol Utama AdapteEd. Kelola pengguna, kelas, dan pantau aktivitas sistem.
+        <div className="relative text-center md:text-left">
+          <h1 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Selamat Datang, <span className="text-namsan-primary">Administrator</span></h1>
+          <p className="text-gray-300 text-sm md:text-base font-medium max-w-xl leading-relaxed">
+            Pusat Kontrol Utama Namsan Korean Course. Kelola seluruh ekosistem pengguna, kelas, dan pantau aktivitas sistem secara real-time.
           </p>
         </div>
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
-        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-yellow-50 rounded-full flex items-center justify-center mb-2 md:mb-3">
-            <Users className="w-5 h-5 md:w-6 md:h-6 text-namsan-primary" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex items-center gap-6 transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center shrink-0 border border-yellow-100/50">
+            <Users className="w-7 h-7 text-namsan-primary" />
           </div>
-          <p className="text-xs md:text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Total Siswa Aktif</p>
-          <p className="text-2xl md:text-3xl font-bold text-namsan-text">{totalSiswa}</p>
+          <div>
+            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Total Siswa</p>
+            <p className="text-3xl font-black text-gray-800">{totalSiswa}</p>
+          </div>
         </div>
         
-        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-blue-50 rounded-full flex items-center justify-center mb-2 md:mb-3">
-            <Users className="w-5 h-5 md:w-6 md:h-6 text-namsan-blue" />
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex items-center gap-6 transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100/50">
+            <Users className="w-7 h-7 text-namsan-blue" />
           </div>
-          <p className="text-xs md:text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Total Pengajar</p>
-          <p className="text-2xl md:text-3xl font-bold text-namsan-text">{totalPengajar}</p>
+          <div>
+            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Total Pengajar</p>
+            <p className="text-3xl font-black text-gray-800">{totalPengajar}</p>
+          </div>
         </div>
 
-        <div className="bg-white rounded-2xl p-4 md:p-6 shadow-sm border border-gray-100 flex flex-col items-center justify-center text-center">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-green-50 rounded-full flex items-center justify-center mb-2 md:mb-3">
-            <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-green-600" />
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex items-center gap-6 transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center shrink-0 border border-green-100/50">
+            <BookOpen className="w-7 h-7 text-green-600" />
           </div>
-          <p className="text-xs md:text-sm font-bold text-namsan-text-muted mb-1 tracking-wider uppercase">Total Kelas Tersedia</p>
-          <p className="text-2xl md:text-3xl font-bold text-namsan-text">{totalKelas}</p>
+          <div>
+            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Kelas Aktif</p>
+            <p className="text-3xl font-black text-gray-800">{totalKelas}</p>
+          </div>
         </div>
       </div>
 
       {/* Lower Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
         
         {/* Menu Cepat */}
-        <div className="lg:col-span-2">
-          <h2 className="text-lg md:text-xl font-bold text-namsan-text mb-3 md:mb-4">Akses Cepat</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
-            
-            <Link href="/admin/users" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <Users className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="text-sm md:text-base font-bold text-namsan-text">Manajemen Pengguna</span>
+        <div className="xl:col-span-2 space-y-4">
+          <div className="flex items-center gap-3 px-1">
+            <div className="p-2 bg-namsan-primary/20 rounded-lg">
+              <LayoutDashboard className="w-5 h-5 text-namsan-dark" />
+            </div>
+            <h2 className="text-xl font-bold text-gray-800 tracking-tight">Akses Cepat</h2>
+          </div>
+          
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <Link href="/admin/users" className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-namsan-primary/50 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-namsan-primary/10 to-transparent rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+              <div className="w-12 h-12 bg-gray-50 group-hover:bg-namsan-primary/10 rounded-2xl flex items-center justify-center mb-4 transition-colors border border-gray-100 group-hover:border-namsan-primary/20">
+                <Users className="w-6 h-6 text-gray-600 group-hover:text-namsan-dark transition-colors" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">Manajemen Pengguna</h3>
+              <p className="text-sm text-gray-500 font-medium">Kelola akses siswa dan pengajar</p>
+              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-namsan-primary absolute bottom-6 right-6 transition-transform group-hover:translate-x-1" />
             </Link>
             
-            <Link href="/admin/kelas" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <BookOpen className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="text-sm md:text-base font-bold text-namsan-text">Manajemen Kelas</span>
+            <Link href="/admin/kelas" className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-namsan-primary/50 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-namsan-primary/10 to-transparent rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+              <div className="w-12 h-12 bg-gray-50 group-hover:bg-namsan-primary/10 rounded-2xl flex items-center justify-center mb-4 transition-colors border border-gray-100 group-hover:border-namsan-primary/20">
+                <BookOpen className="w-6 h-6 text-gray-600 group-hover:text-namsan-dark transition-colors" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">Manajemen Kelas</h3>
+              <p className="text-sm text-gray-500 font-medium">Kelola modul dan jadwal</p>
+              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-namsan-primary absolute bottom-6 right-6 transition-transform group-hover:translate-x-1" />
             </Link>
             
-            <Link href="/admin/sertifikat" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <Award className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="text-sm md:text-base font-bold text-namsan-text">Sertifikasi & Leveling</span>
+            <Link href="/admin/sertifikat" className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-namsan-primary/50 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-namsan-primary/10 to-transparent rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+              <div className="w-12 h-12 bg-gray-50 group-hover:bg-namsan-primary/10 rounded-2xl flex items-center justify-center mb-4 transition-colors border border-gray-100 group-hover:border-namsan-primary/20">
+                <Award className="w-6 h-6 text-gray-600 group-hover:text-namsan-dark transition-colors" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">Sertifikasi & Level</h3>
+              <p className="text-sm text-gray-500 font-medium">Penerbitan sertifikat kelulusan</p>
+              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-namsan-primary absolute bottom-6 right-6 transition-transform group-hover:translate-x-1" />
             </Link>
             
-            <Link href="/admin/logs" className="bg-white rounded-xl p-4 md:p-5 border border-namsan-primary/30 flex items-center justify-start sm:justify-center gap-3 hover:border-namsan-primary hover:shadow-md transition-all group">
-              <Settings className="w-5 h-5 md:w-6 md:h-6 text-namsan-text group-hover:text-namsan-primary transition-colors" />
-              <span className="text-sm md:text-base font-bold text-namsan-text">Pengaturan Sistem</span>
+            <Link href="/admin/logs" className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-namsan-primary/50 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-namsan-primary/10 to-transparent rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
+              <div className="w-12 h-12 bg-gray-50 group-hover:bg-namsan-primary/10 rounded-2xl flex items-center justify-center mb-4 transition-colors border border-gray-100 group-hover:border-namsan-primary/20">
+                <Settings className="w-6 h-6 text-gray-600 group-hover:text-namsan-dark transition-colors" />
+              </div>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">Pengaturan Sistem</h3>
+              <p className="text-sm text-gray-500 font-medium">Konfigurasi dan pantauan sistem</p>
+              <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-namsan-primary absolute bottom-6 right-6 transition-transform group-hover:translate-x-1" />
             </Link>
-
           </div>
         </div>
 
         {/* System Logs */}
-        <div className="bg-namsan-dark rounded-2xl p-5 md:p-6 flex flex-col shadow-lg mt-4 lg:mt-0">
-          <div className="flex items-center justify-center lg:justify-start gap-3 mb-4 md:mb-6">
-            <ShieldAlert className="w-6 h-6 md:w-8 md:h-8 text-namsan-primary" />
-            <h2 className="text-lg md:text-xl font-bold text-namsan-primary">Aktivitas Terbaru</h2>
+        <div className="bg-gray-900 rounded-3xl p-6 md:p-8 flex flex-col shadow-xl border border-gray-800 relative overflow-hidden">
+          <div className="absolute top-0 right-0 w-32 h-32 bg-namsan-primary/10 rounded-bl-full -z-10 blur-xl"></div>
+          
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-namsan-primary/20 rounded-xl">
+              <ShieldAlert className="w-5 h-5 text-namsan-primary" />
+            </div>
+            <h2 className="text-xl font-bold text-white tracking-tight">Aktivitas Terbaru</h2>
           </div>
           
-          <div className="space-y-3 md:space-y-4 flex-1 overflow-hidden">
-            {recentLogs.map((log) => {
+          <div className="space-y-4 flex-1">
+            {recentLogs.map((log, i) => {
               const meta = log.metadata ? JSON.parse(log.metadata) : {};
               return (
-                <div key={log.id} className="flex flex-col border-b border-white/10 pb-3 last:border-0 last:pb-0">
-                  <div className="flex justify-between items-start mb-1">
-                    <span className="text-white text-xs font-bold truncate pr-2">
+                <div key={log.id} className="relative pl-5 before:content-[''] before:absolute before:left-0 before:top-2 before:w-2 before:h-2 before:bg-namsan-primary before:rounded-full before:shadow-[0_0_8px_rgba(251,191,36,0.8)]">
+                  <div className="flex justify-between items-baseline mb-0.5">
+                    <span className="text-gray-100 text-sm font-bold truncate pr-2">
                       {log.student?.nama_lengkap || "Siswa"}
                     </span>
-                    <span className="text-gray-400 text-[10px] shrink-0">
+                    <span className="text-gray-500 text-xs shrink-0 font-medium">
                       {new Date(log.created_at).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                   </div>
-                  <span className="text-gray-300 text-xs line-clamp-2">
-                    <span className="text-namsan-primary">{log.action_type}</span>: {meta.targetName || log.action_type}
-                  </span>
+                  <p className="text-gray-400 text-xs leading-relaxed line-clamp-2">
+                    <span className="text-namsan-primary font-medium">{log.action_type}</span>: {meta.targetName || log.action_type}
+                  </p>
+                  {i !== recentLogs.length - 1 && (
+                    <div className="absolute left-1 top-5 bottom-[-16px] w-[2px] bg-gray-800 -z-10"></div>
+                  )}
                 </div>
               );
             })}
             {recentLogs.length === 0 && (
-              <div className="text-center text-gray-500 text-xs py-4">Tidak ada aktivitas.</div>
+              <div className="text-center text-gray-500 text-sm py-8 font-medium">Belum ada aktivitas tercatat.</div>
             )}
           </div>
 
-          <Link href="/admin/logs" className="mt-6 w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 md:py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors text-sm md:text-base">
+          <Link href="/admin/logs" className="mt-8 w-full bg-white/5 hover:bg-white/10 text-white border border-white/10 font-bold py-3.5 px-4 rounded-xl flex items-center justify-center gap-2 transition-all text-sm group">
             Lihat Semua Log
+            <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white transition-colors" />
           </Link>
         </div>
 
