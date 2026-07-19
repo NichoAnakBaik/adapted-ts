@@ -337,7 +337,18 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                         Kunci Jawaban 
                         {activeTab === "SPEAKING" || activeTab === "WRITING" ? " (Opsional/Panduan)" : " (Wajib)"}
                       </label>
-                      <KoreanInput type="text" name="answer_key" defaultValue={editingQuestion?.answer_key || ""} required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Jawaban (atau 1 huruf A/B/C/D jika pilihan ganda)..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      {questionFormat === "MULTIPLE_CHOICE" ? (
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                          {["A", "B", "C", "D"].map((opt) => (
+                            <label key={opt} className="flex items-center justify-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors">
+                              <input type="radio" name="answer_key" value={opt} defaultChecked={editingQuestion?.answer_key?.toUpperCase() === opt} required className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                              <span className="font-bold text-gray-700">Pilihan {opt}</span>
+                            </label>
+                          ))}
+                        </div>
+                      ) : (
+                        <KoreanInput type="text" name="answer_key" defaultValue={editingQuestion?.answer_key || ""} required={activeTab === "READING" || activeTab === "LISTENING"} placeholder="Kunci Jawaban (teks)..." className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none" />
+                      )}
                     </div>
                     
                     <div>

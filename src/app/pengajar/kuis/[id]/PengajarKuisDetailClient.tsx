@@ -318,13 +318,24 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
 
               <div className="md:col-span-2">
                 <label className="block text-sm font-bold text-gray-700 mb-2">Kunci Jawaban</label>
-                <KoreanInput 
-                  type="text" 
-                  name="answer_key" 
-                  defaultValue={editingQuestion?.answer_key || ""}
-                  placeholder="Kunci Jawaban (contoh: A, atau teks isian)" 
-                  className="w-full p-2.5 border rounded-lg" 
-                />
+                {questionFormat === "MULTIPLE_CHOICE" ? (
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {["A", "B", "C", "D"].map((opt) => (
+                      <label key={opt} className="flex items-center justify-center gap-2 cursor-pointer p-3 border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition-colors">
+                        <input type="radio" name="answer_key" value={opt} defaultChecked={editingQuestion?.answer_key?.toUpperCase() === opt} required className="w-4 h-4 text-blue-600 focus:ring-blue-500" />
+                        <span className="font-bold text-gray-700">Pilihan {opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <KoreanInput 
+                    type="text" 
+                    name="answer_key" 
+                    defaultValue={editingQuestion?.answer_key || ""}
+                    placeholder="Kunci Jawaban (contoh: A, atau teks isian)" 
+                    className="w-full p-2.5 border rounded-lg" 
+                  />
+                )}
               </div>
 
               <div className="md:col-span-2 mt-4 flex justify-end gap-3 pt-4 border-t border-gray-100">
