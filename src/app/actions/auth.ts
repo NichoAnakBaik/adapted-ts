@@ -32,6 +32,17 @@ export async function loginAction(formData: FormData) {
   // Set session
   await setSession({ id: user.id, role: user.role, username: user.username });
 
+  // Add Log for Siswa
+  if (user.role === "SISWA") {
+    await prisma.studentActivityLog.create({
+      data: {
+        student_id: user.id,
+        action_type: "LOGIN",
+        metadata: JSON.stringify({ targetName: "Sistem AdaptEd" })
+      }
+    });
+  }
+
   // Return redirect url
   if (user.role === "ADMIN") return { redirectUrl: "/admin/dashboard" };
   if (user.role === "PENGAJAR") return { redirectUrl: "/pengajar/dashboard" };
@@ -39,6 +50,17 @@ export async function loginAction(formData: FormData) {
 }
 
 export async function logoutAction() {
+  const session = await getSession();
+  if (session && session.user.role === "SISWA") {
+    await prisma.studentActivityLog.create({
+      data: {
+        student_id: session.user.id,
+        action_type: "LOGOUT",
+        metadata: JSON.stringify({ targetName: "Sistem AdaptEd" })
+      }
+    });
+  }
+
   await clearSession();
   redirect("/?login=true");
 }

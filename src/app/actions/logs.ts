@@ -53,11 +53,8 @@ export async function getActivityLogs(targetRole: "ADMIN" | "PENGAJAR" | "SISWA"
 
       // Filter: Hanya tampilkan log yang classId-nya milik pengajar ini, 
       // atau log global (tanpa classId) dari siswa yang diajarnya.
-      const importantActions = ["QUIZ_ATTEMPT", "EXAM_ATTEMPT", "FORUM_PARTICIPATION", "MODULE_ACCESS", "ATTENDANCE_MARKED"];
+      const importantActions = ["LOGIN", "LOGOUT", "QUIZ_ATTEMPT", "EXAM_ATTEMPT", "FORUM_PARTICIPATION", "MODULE_ACCESS", "ATTENDANCE_MARKED"];
       const filteredLogs = allLogs.filter(log => {
-        // Jangan tampilkan log umum (LOGIN/LOGOUT) untuk pengajar, karena kurang relevan
-        if (log.action_type === "LOGIN" || log.action_type === "LOGOUT") return false;
-
         try {
           const meta = log.metadata ? JSON.parse(log.metadata) : {};
           if (meta.classId) {

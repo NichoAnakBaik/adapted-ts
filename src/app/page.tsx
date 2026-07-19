@@ -235,7 +235,8 @@ export default function Home() {
                 </button>
                 
                 <p className="text-xs text-center text-gray-400 mt-6 leading-relaxed">
-                  Tip Dev: Login dengan username awalan <b className="text-gray-600">admin</b>, <b className="text-gray-600">pengajar</b>, atau <b className="text-gray-600">siswa</b>.
+                  Tip Dev: Login dengan username <b className="text-gray-600">admin</b>, <b className="text-gray-600">pengajar_dummy</b>, atau <b className="text-gray-600">siswa_dummy_1</b><br/>
+                  Password untuk semua akun: <b className="text-gray-600">password123</b>
                 </p>
               </form>
             </div>

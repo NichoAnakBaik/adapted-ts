@@ -21,6 +21,21 @@ async function main() {
     console.log('Created dummy teacher:', teacher.nama_lengkap);
   }
 
+  // 1.5 Create or ensure we have Admin
+  let admin = await prisma.user.findFirst({ where: { role: 'ADMIN' } });
+  if (!admin) {
+    const password = await bcrypt.hash('password123', 10);
+    admin = await prisma.user.create({
+      data: {
+        username: 'admin',
+        nama_lengkap: 'Administrator',
+        password,
+        role: 'ADMIN'
+      }
+    });
+    console.log('Created dummy admin:', admin.nama_lengkap);
+  }
+
   // 2. Create or ensure we have some Siswa
   const students = [];
   for (let i = 1; i <= 3; i++) {

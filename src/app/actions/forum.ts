@@ -68,6 +68,20 @@ export async function postMessage(forumId: string, message: string, parentId?: s
     }
   });
 
+  if (session.user.role === "SISWA") {
+    await prisma.studentActivityLog.create({
+      data: {
+        student_id: session.user.id,
+        action_type: "FORUM_PARTICIPATION",
+        metadata: JSON.stringify({
+          classId: newMessage.forum.class_id,
+          className: newMessage.forum.class?.name,
+          targetName: newMessage.forum.title || newMessage.forum.class?.name
+        })
+      }
+    });
+  }
+
   const { createNotificationsForUsers } = await import("./notification");
   
   // Base recipients: everyone in class except sender
