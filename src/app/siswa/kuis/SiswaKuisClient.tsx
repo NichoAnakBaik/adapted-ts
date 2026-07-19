@@ -1,11 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
-import { ArrowLeft, ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2 } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { ArrowLeft, ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 export default function SiswaKuisClient({ exams, className }: { exams: any[], className?: string }) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [clickedId, setClickedId] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => setClickedId(null);
+  }, []);
 
   const filteredExams = exams.filter(ex => 
     ex.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -85,17 +90,27 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
                     </div>
                     <Link 
                       href={`/siswa/kuis/${ex.id}/hasil`}
+                      onClick={() => setClickedId(`hasil-${ex.id}`)}
                       className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2.5 rounded-lg transition-colors"
                     >
-                      Lihat Hasil <ArrowRight className="w-4 h-4" />
+                      {clickedId === `hasil-${ex.id}` ? (
+                        <><Loader2 className="w-4 h-4 animate-spin" /> Memuat...</>
+                      ) : (
+                        <>Lihat Hasil <ArrowRight className="w-4 h-4" /></>
+                      )}
                     </Link>
                   </div>
                 ) : (
                   <Link 
                     href={`/siswa/kuis/${ex.id}`} 
+                    onClick={() => setClickedId(ex.id)}
                     className="w-full bg-namsan-primary hover:bg-namsan-secondary text-namsan-dark font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors text-sm"
                   >
-                    Kerjakan Sekarang <ArrowRight className="w-4 h-4" />
+                    {clickedId === ex.id ? (
+                      <><Loader2 className="w-4 h-4 animate-spin" /> Memuat...</>
+                    ) : (
+                      <>Kerjakan Sekarang <ArrowRight className="w-4 h-4" /></>
+                    )}
                   </Link>
                 )}
               </div>

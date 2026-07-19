@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Users, ArrowRight, ClipboardList, LayoutDashboard, BookOpen, Award, GraduationCap, User } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Users, ArrowRight, ClipboardList, LayoutDashboard, BookOpen, Award, GraduationCap, User, Loader2 } from "lucide-react";
 import Link from "next/link";
 
 const iconMap = {
@@ -57,6 +57,12 @@ export default function ClassIndexClient({
   role
 }: ClassIndexClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
+  const [clickedId, setClickedId] = useState<string | null>(null);
+
+  // Reset clicked state when component unmounts or path changes (meaning navigation finished)
+  useEffect(() => {
+    return () => setClickedId(null);
+  }, []);
 
   const filteredClasses = classes.filter(c => 
     c.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -184,8 +190,20 @@ export default function ClassIndexClient({
               )}
             </div>
 
-            <Link href={`${basePath}/${c.id}`} className={`mt-auto w-full ${theme.btnBg} ${theme.btnHover} ${theme.btnText} ${theme.btnTextHover} font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors`}>
-              {actionLabel} <ArrowRight className="w-4 h-4" />
+            <Link 
+              href={`${basePath}/${c.id}`} 
+              onClick={() => setClickedId(c.id)}
+              className={`mt-auto w-full ${theme.btnBg} ${theme.btnHover} ${theme.btnText} ${theme.btnTextHover} font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors`}
+            >
+              {clickedId === c.id ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" /> Memuat...
+                </>
+              ) : (
+                <>
+                  {actionLabel} <ArrowRight className="w-4 h-4" />
+                </>
+              )}
             </Link>
           </div>
         ))}
