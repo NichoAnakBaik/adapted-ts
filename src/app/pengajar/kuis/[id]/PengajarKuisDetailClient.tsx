@@ -267,13 +267,25 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
                   </>
                 ) : (
                   <div className="space-y-3">
-                    <select name="existing_image_url" className="w-full p-2.5 border rounded-lg bg-white">
-                      <option value="">-- Pilih Gambar --</option>
+                    <p className="text-xs text-gray-500 mb-2">Pilih gambar yang sudah pernah diupload di soal lain pada kuis ini.</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto p-2 border border-gray-100 rounded-xl bg-gray-50">
+                      <label className="relative cursor-pointer group flex items-center justify-center border-2 border-gray-200 rounded-xl transition-all aspect-square bg-white hover:border-blue-300 has-[:checked]:border-blue-500 has-[:checked]:ring-2 has-[:checked]:ring-blue-500">
+                        <input type="radio" name="existing_image_url" value="" className="peer sr-only" defaultChecked />
+                        <span className="text-xs text-gray-500 font-bold text-center p-2">Tidak Memilih / Batal</span>
+                      </label>
                       {existingImages.map((url: any, idx) => (
-                        <option key={idx} value={url}>Gambar dari soal lain ({url.split('/').pop()})</option>
+                        <label key={idx} className="relative cursor-pointer group flex">
+                          <input type="radio" name="existing_image_url" value={url} className="peer sr-only" />
+                          <div className="border-2 border-gray-200 rounded-xl overflow-hidden peer-checked:border-blue-500 peer-checked:ring-2 peer-checked:ring-blue-500 transition-all aspect-square relative w-full bg-white">
+                            <img src={url} alt={`Preview ${idx + 1}`} className="w-full h-full object-contain p-1 group-hover:scale-105 transition-transform" />
+                            <div className="absolute inset-0 bg-blue-500/10 opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                          </div>
+                        </label>
                       ))}
-                    </select>
-                    <p className="text-xs text-gray-500">Pilih gambar yang sudah pernah diupload di soal lain pada kuis ini.</p>
+                    </div>
+                    {existingImages.length === 0 && (
+                      <p className="text-sm text-red-500">Belum ada gambar yang terupload di kuis ini.</p>
+                    )}
                   </div>
                 )}
               </div>
