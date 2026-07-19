@@ -18,17 +18,17 @@ export default async function AdminDashboardPage() {
     <div className="max-w-6xl mx-auto space-y-6 md:space-y-8 pb-12">
       
       {/* Welcome Banner */}
-      <div className="relative bg-gradient-to-r from-namsan-dark via-namsan-dark to-namsan-dark/90 rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-6 overflow-hidden shadow-xl border border-namsan-dark/20">
+      <div className="relative bg-namsan-primary rounded-3xl p-8 md:p-10 flex flex-col md:flex-row items-center gap-6 overflow-hidden shadow-xl border border-namsan-primary/20">
         {/* Decorative Background Elements */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-namsan-primary rounded-full mix-blend-screen filter blur-[80px] opacity-20 animate-pulse"></div>
-        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full mix-blend-overlay filter blur-[60px] opacity-10"></div>
+        <div className="absolute top-0 right-0 w-64 h-64 bg-white rounded-full mix-blend-overlay filter blur-[80px] opacity-30 animate-pulse"></div>
+        <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-white rounded-full mix-blend-overlay filter blur-[60px] opacity-20"></div>
         
-        <div className="relative p-5 bg-white/10 backdrop-blur-md rounded-2xl shrink-0 border border-white/10 shadow-inner">
-          <ShieldCheck className="w-12 h-12 md:w-16 md:h-16 text-namsan-primary drop-shadow-md" strokeWidth={1.5} />
+        <div className="relative p-5 bg-white/30 backdrop-blur-md rounded-2xl shrink-0 border border-white/20 shadow-inner">
+          <ShieldCheck className="w-12 h-12 md:w-16 md:h-16 text-namsan-dark drop-shadow-md" strokeWidth={1.5} />
         </div>
         <div className="relative text-center md:text-left">
-          <h1 className="text-3xl md:text-4xl font-black text-white mb-2 tracking-tight">Selamat Datang, <span className="text-namsan-primary">Administrator</span></h1>
-          <p className="text-gray-300 text-sm md:text-base font-medium max-w-xl leading-relaxed">
+          <h1 className="text-3xl md:text-4xl font-black text-namsan-dark mb-2 tracking-tight">Selamat Datang, Administrator</h1>
+          <p className="text-namsan-dark/80 text-sm md:text-base font-bold max-w-xl leading-relaxed">
             Pusat Kontrol Utama Namsan Korean Course. Kelola seluruh ekosistem pengguna, kelas, dan pantau aktivitas sistem secara real-time.
           </p>
         </div>
