@@ -56,7 +56,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
   const filteredMembers = (forumData.members || []).filter((m: any) => 
     m.username.toLowerCase().includes(mentionState?.query.toLowerCase() || '') ||
     m.nama_lengkap.toLowerCase().includes(mentionState?.query.toLowerCase() || '')
-  ).slice(0, 5); // Max 5 suggestions
+  );
 
 
   const handleSend = async (e: React.FormEvent, parentId: string | null = null) => {
@@ -253,7 +253,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
               <div className="w-6 h-6 md:w-8 md:h-8 rounded-full bg-gray-200 flex items-center justify-center text-gray-500 flex-shrink-0">
                 <User className="w-3 h-3 md:w-4 md:h-4" />
               </div>
-              <div className="flex-1 bg-white border border-gray-200 rounded-lg overflow-hidden focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all shadow-sm">
+              <div className="flex-1 bg-white border border-gray-200 rounded-lg focus-within:border-blue-500 focus-within:ring-1 focus-within:ring-blue-500 transition-all shadow-sm">
                 <div className="relative">
                   <textarea 
                     value={replyText}
@@ -264,7 +264,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                   />
                   {/* Mention Dropdown for Reply */}
                   {mentionState?.active && mentionState.type === 'reply' && mentionState.parentId === msg.id && filteredMembers.length > 0 && (
-                    <div className="absolute bottom-full left-0 mb-1 w-64 bg-white border border-gray-100 shadow-lg rounded-xl overflow-hidden z-30 animate-in fade-in zoom-in-95">
+                    <div className="absolute bottom-full left-0 mb-1 w-64 bg-white border border-gray-100 shadow-lg rounded-xl overflow-y-auto max-h-48 z-30 animate-in fade-in zoom-in-95">
                       {filteredMembers.map((member: any) => (
                         <button
                           key={member.id}
@@ -285,7 +285,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                   )}
                 </div>
                 <div className="flex justify-between items-center px-2 pb-2">
-                  <div className="text-[10px] md:text-xs text-blue-500 px-1 cursor-pointer font-medium hover:underline">
+                  <div className="text-[10px] text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100 ml-1">
                     Gunakan @ untuk _mention_ teman
                   </div>
                   <button 
@@ -354,7 +354,7 @@ export default function ForumChatClient({ forumData, currentUserId, readOnly = f
                 />
                 {/* Mention Dropdown for Main Compose */}
                 {mentionState?.active && mentionState.type === 'main' && filteredMembers.length > 0 && (
-                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden z-30 animate-in fade-in zoom-in-95">
+                  <div className="absolute bottom-full left-0 mb-2 w-64 bg-white border border-gray-100 shadow-xl rounded-xl overflow-y-auto max-h-48 z-30 animate-in fade-in zoom-in-95">
                     {filteredMembers.map((member: any) => (
                       <button
                         key={member.id}
