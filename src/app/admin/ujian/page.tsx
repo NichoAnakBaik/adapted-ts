@@ -30,7 +30,7 @@ export default async function AdminUjianIndexPage() {
       basePath="/admin/ujian/kelas"
       classes={classes}
       emptyMessage="Belum ada kelas yang terdaftar."
-      themeColor="yellow"
+      themeColor="orange"
     />
   );
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { ArrowLeft, PenTool, Plus, Trash2, ArrowRight, Clock, FileQuestion } from "lucide-react";
+import { ArrowLeft, PenTool, Plus, Trash2, ArrowRight, Clock, FileQuestion, ClipboardList } from "lucide-react";
 import Link from "next/link";
 import { createAdminExam, deleteAdminExam, toggleAdminExamPublish } from "@/app/actions/admin";
 
@@ -51,7 +51,7 @@ export default function AdminUjianClient({ initialExams, classes, className, cla
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-red-50 rounded-xl">
-            <PenTool className="w-8 h-8 text-namsan-red" />
+            <ClipboardList className="w-8 h-8 text-namsan-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-namsan-text">Manajemen Ujian Bahasa {className ? `- Kelas ${className}` : ''}</h1>

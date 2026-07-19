@@ -39,7 +39,7 @@ export default async function SiswaKuisIndexPage() {
       basePath="/siswa/kuis/kelas"
       classes={classes}
       emptyMessage="Anda belum terdaftar di kelas manapun."
-      themeColor="yellow"
+      themeColor="orange"
       role="SISWA"
     />
   );

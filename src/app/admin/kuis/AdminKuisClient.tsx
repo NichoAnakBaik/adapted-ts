@@ -15,8 +15,8 @@ export default function AdminKuisClient({ initialQuizzes, className, classId }: 
     <div className="max-w-6xl mx-auto space-y-6">
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
-          <div className="p-3 bg-indigo-50 rounded-xl">
-            <ClipboardList className="w-8 h-8 text-indigo-600" />
+          <div className="p-3 bg-red-50 rounded-xl">
+            <ClipboardList className="w-8 h-8 text-namsan-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-namsan-text">Pantau Kuis {className ? `- Kelas ${className}` : ''}</h1>

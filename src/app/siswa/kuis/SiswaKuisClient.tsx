@@ -21,7 +21,7 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
         <div className="flex items-center gap-4">
           <div className="p-3 bg-red-50 rounded-xl">
-            <ClipboardList className="w-8 h-8 text-red-500" />
+            <ClipboardList className="w-8 h-8 text-namsan-primary" />
           </div>
           <div>
             <h1 className="text-2xl font-bold text-namsan-text">Kuis {className ? `- Kelas ${className}` : ''}</h1>

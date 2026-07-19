@@ -30,7 +30,7 @@ export default async function AdminKuisIndexPage() {
       basePath="/admin/kuis/kelas"
       classes={classes}
       emptyMessage="Belum ada kelas yang terdaftar."
-      themeColor="indigo"
+      themeColor="orange"
     />
   );
 }

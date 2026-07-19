@@ -30,7 +30,7 @@ export default function AdminKuisDetailClient({ exam }: { exam: any }) {
 
       <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 flex justify-between items-start">
         <div>
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-indigo-50 text-indigo-700 mb-3">
+          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-yellow-50 text-namsan-primary mb-3">
             Kelas: {exam.class.name}
           </span>
           <h1 className="text-2xl font-bold text-gray-900 mb-2">{exam.title}</h1>
