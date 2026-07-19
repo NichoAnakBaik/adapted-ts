@@ -638,7 +638,8 @@ async function processAudioTranscriptionBackground(
       let transcriptText = "";
       let isSuccess = false;
 
-      // 3. Call Hugging Face API for Transcription with Retry Logic (Cold Start Handling)
+      // 3. Call Hugging Face API for Transcription (Reverted to Whisper as requested)
+      // Menggunakan whisper-small agar proses loading model (Cold Start) jauh lebih cepat dan jarang timeout.
       const hfApiKey = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
       if (hfApiKey) {
         let retries = 5;
@@ -647,7 +648,7 @@ async function processAudioTranscriptionBackground(
         while (retries > 0 && !isSuccess) {
           try {
             const response = await fetch(
-              "https://api-inference.huggingface.co/models/openai/whisper-large-v3",
+              "https://api-inference.huggingface.co/models/openai/whisper-small",
               {
                 headers: {
                   Authorization: `Bearer ${hfApiKey}`,

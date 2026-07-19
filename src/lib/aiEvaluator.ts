@@ -71,11 +71,17 @@ export class AdaptEdAI {
       const response = await result.response;
       let text = response.text().trim();
       
-      // Bersihkan jika model mengembalikan ```json
-      if (text.startsWith("\`\`\`json")) text = text.replace("\`\`\`json", "");
-      if (text.endsWith("\`\`\`")) text = text.substring(0, text.length - 3);
-      
-      const parsed = JSON.parse(text.trim());
+      let parsed;
+      try {
+        const match = text.match(/\{[\s\S]*\}/);
+        if (match) {
+          parsed = JSON.parse(match[0]);
+        } else {
+          parsed = JSON.parse(text);
+        }
+      } catch (parseErr) {
+        throw new Error("Format balasan AI tidak valid JSON.");
+      }
       
       // Normalisasi skor (0-10) -> diubah ke basis pengali sesuai kebutuhan backend
       // Di backend biasanya per soal = 10 poin maksimum.
