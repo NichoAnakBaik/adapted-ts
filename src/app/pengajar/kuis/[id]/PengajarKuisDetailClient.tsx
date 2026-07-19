@@ -17,6 +17,15 @@ const fileToBase64 = (file: File): Promise<string> => {
   });
 };
 
+const fileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = error => reject(error);
+  });
+};
+
 export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
   const [showForm, setShowForm] = useState(false);
   const [questionType, setQuestionType] = useState("READING");
@@ -51,8 +60,19 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
     setError("");
     setIsSubmitting(true);
     const form = e.currentTarget;
-    const formData = new FormData(form);
+    const formData = new FormData(e.currentTarget);
     formData.append("exam_id", exam.id);
+    
+    // Convert audio to base64 to avoid Next.js Server Action file parsing bugs
+    const audioFile = formData.get("audio_reference") as File | null;
+    if (audioFile && audioFile.size > 0) {
+      try {
+        const b64 = await fileToBase64(audioFile);
+        formData.set("audio_b64", b64);
+      } catch (err) {
+        console.error("Gagal membaca file audio", err);
+      }
+    }
     
     try {
       let res;

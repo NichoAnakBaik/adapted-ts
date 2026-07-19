@@ -63,9 +63,21 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
     e.preventDefault();
     setError("");
     setIsSubmitting(true);
-    const formData = new FormData(e.currentTarget);
+    const form = e.currentTarget;
+    const formData = new FormData(form);
     formData.append("exam_id", exam.id);
     formData.append("type", activeTab);
+    
+    // Convert audio to base64 to avoid Next.js Server Action file parsing bugs
+    const audioFile = formData.get("audio_reference") as File | null;
+    if (audioFile && audioFile.size > 0) {
+      try {
+        const b64 = await fileToBase64(audioFile);
+        formData.set("audio_b64", b64);
+      } catch (err) {
+        console.error("Gagal membaca file audio", err);
+      }
+    }
 
     try {
       // Let Next.js handle the File uploads natively via multipart/form-data
