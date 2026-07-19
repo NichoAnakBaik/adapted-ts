@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Users, ArrowRight, ClipboardList, LayoutDashboard, BookOpen, Award, GraduationCap } from "lucide-react";
+import { Users, ArrowRight, ClipboardList, LayoutDashboard, BookOpen, Award, GraduationCap, User } from "lucide-react";
 import Link from "next/link";
 
 const iconMap = {
@@ -22,6 +22,9 @@ export interface ClassData {
     exams: number;
     enrollments: number;
   };
+  teacher?: {
+    nama_lengkap: string;
+  };
 }
 
 interface ClassIndexClientProps {
@@ -36,6 +39,7 @@ interface ClassIndexClientProps {
   classes: ClassData[];
   emptyMessage: string;
   themeColor?: "orange" | "indigo" | "yellow" | "blue" | "purple";
+  role?: "ADMIN" | "PENGAJAR" | "SISWA";
 }
 
 export default function ClassIndexClient({
@@ -49,7 +53,8 @@ export default function ClassIndexClient({
   basePath,
   classes,
   emptyMessage,
-  themeColor = "orange"
+  themeColor = "orange",
+  role
 }: ClassIndexClientProps) {
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -166,10 +171,17 @@ export default function ClassIndexClient({
                 <CountIcon className="w-4 h-4 text-gray-400" />
                 {c._count?.exams || 0} {countLabel}
               </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
-                <Users className="w-4 h-4 text-gray-400" />
-                {c._count?.enrollments || 0} Siswa
-              </div>
+              {role === "SISWA" && c.teacher ? (
+                <div className="flex items-center gap-2 text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100 truncate">
+                  <User className="w-4 h-4 text-gray-400" />
+                  <span className="truncate max-w-[120px]">{c.teacher.nama_lengkap}</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 text-sm text-gray-600 font-medium bg-gray-50 px-3 py-1.5 rounded-lg border border-gray-100">
+                  <Users className="w-4 h-4 text-gray-400" />
+                  {c._count?.enrollments || 0} Siswa
+                </div>
+              )}
             </div>
 
             <Link href={`${basePath}/${c.id}`} className={`mt-auto w-full ${theme.btnBg} ${theme.btnHover} ${theme.btnText} ${theme.btnTextHover} font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors`}>

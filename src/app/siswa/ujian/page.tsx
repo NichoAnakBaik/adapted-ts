@@ -16,6 +16,9 @@ export default async function SiswaUjianIndexPage() {
         include: {
           _count: {
             select: { exams: true, enrollments: true }
+          },
+          teacher: {
+            select: { nama_lengkap: true }
           }
         }
       }
@@ -36,7 +39,8 @@ export default async function SiswaUjianIndexPage() {
       basePath="/siswa/ujian/kelas"
       classes={classes}
       emptyMessage="Anda belum terdaftar di kelas manapun."
-      themeColor="purple"
+      themeColor="yellow"
+      role="SISWA"
     />
   );
 }

@@ -16,6 +16,9 @@ export default async function SiswaKuisIndexPage() {
         include: {
           _count: {
             select: { exams: true, enrollments: true }
+          },
+          teacher: {
+            select: { nama_lengkap: true }
           }
         }
       }
@@ -36,7 +39,8 @@ export default async function SiswaKuisIndexPage() {
       basePath="/siswa/kuis/kelas"
       classes={classes}
       emptyMessage="Anda belum terdaftar di kelas manapun."
-      themeColor="blue"
+      themeColor="yellow"
+      role="SISWA"
     />
   );
 }
