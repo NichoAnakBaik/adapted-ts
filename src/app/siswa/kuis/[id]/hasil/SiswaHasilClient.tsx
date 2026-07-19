@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import { ArrowLeft, CheckCircle2, XCircle, BrainCircuit, MessageSquareText, PlayCircle } from "lucide-react";
 import Link from "next/link";
 import { AudioPlayer } from "@/components/AudioPlayer";
@@ -10,6 +10,17 @@ import { useRouter } from "next/navigation";
 export default function SiswaHasilClient({ attempt, allAttempts, hideBackLink }: { attempt: any, allAttempts?: any[], hideBackLink?: boolean }) {
   const { exam, question_attempts } = attempt;
   const router = useRouter();
+
+  const isProcessing = question_attempts.some((qa: any) => qa.transcript === "[Sedang diproses oleh AI...]");
+
+  useEffect(() => {
+    if (isProcessing) {
+      const interval = setInterval(() => {
+        router.refresh();
+      }, 3000);
+      return () => clearInterval(interval);
+    }
+  }, [isProcessing, router]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-6">
@@ -48,9 +59,9 @@ export default function SiswaHasilClient({ attempt, allAttempts, hideBackLink }:
           </div>
           
           <div className="text-center p-4 bg-gray-50 rounded-xl border border-gray-100 min-w-[120px]">
-            <span className="block text-xs font-bold text-gray-500 mb-1">SKOR AKHIR</span>
-            <span className={`text-4xl font-black ${attempt.total_score >= 70 ? 'text-green-500' : 'text-orange-500'}`}>
-              {attempt.total_score}
+            <span className={`block text-xs font-bold ${isProcessing ? 'text-blue-500' : 'text-gray-500'} mb-1`}>SKOR AKHIR</span>
+            <span className={`text-4xl font-black ${isProcessing ? 'text-blue-500 text-2xl' : (attempt.total_score >= 70 ? 'text-green-500' : 'text-orange-500')}`}>
+              {isProcessing ? 'Diproses...' : attempt.total_score}
             </span>
           </div>
         </div>
@@ -143,12 +154,10 @@ export default function SiswaHasilClient({ attempt, allAttempts, hideBackLink }:
                     </div>
                   )}
 
-                  {isCorrect !== null && q.type === 'MULTIPLE_CHOICE' && (
-                    <div className={`mt-2 flex items-center gap-2 font-bold text-sm ${isCorrect ? 'text-green-600' : 'text-red-500'}`}>
-                      {isCorrect ? <CheckCircle2 className="w-5 h-5" /> : <XCircle className="w-5 h-5" />}
-                      {isCorrect ? 'Benar (+10)' : 'Salah (0)'}
-                    </div>
-                  )}
+                  <div className={`mt-3 flex items-center gap-2 font-bold text-sm ${qa?.score === 10 ? 'text-green-600' : (qa?.score > 0 ? 'text-orange-500' : (qa?.transcript === '[Sedang diproses oleh AI...]' ? 'text-blue-500' : 'text-red-500'))}`}>
+                    {qa?.score === 10 ? <CheckCircle2 className="w-5 h-5" /> : (qa?.score > 0 ? <CheckCircle2 className="w-5 h-5" /> : (qa?.transcript === '[Sedang diproses oleh AI...]' ? <BrainCircuit className="w-5 h-5 animate-pulse" /> : <XCircle className="w-5 h-5" />))}
+                    {qa?.transcript === '[Sedang diproses oleh AI...]' ? 'Menunggu Penilaian' : `Skor: ${qa?.score || 0}/10`}
+                  </div>
 
                   {/* AI Recommendations / Insights */}
                   <div className="mt-6 p-5 bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl border border-indigo-100 flex gap-4 items-start relative overflow-hidden shadow-sm">
