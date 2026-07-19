@@ -309,7 +309,10 @@ export async function submitExam(formData: FormData) {
     where: { exam_id: examId }
   });
 
-  const exam = await prisma.exam.findUnique({ where: { id: examId } });
+  const exam = await prisma.exam.findUnique({ 
+    where: { id: examId },
+    include: { class: true }
+  });
 
   let totalScore = 0;
   let autoGradedQuestions = 0;
