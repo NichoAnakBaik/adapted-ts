@@ -100,11 +100,37 @@ export async function saveBase64File(base64String: string, subfolder: string = "
 
     const buffer = Buffer.from(base64Data, "base64");
     const uniqueFilename = `${crypto.randomUUID()}.${ext}`;
+    const filePath = subfolder ? `${subfolder}/${uniqueFilename}` : uniqueFilename;
 
-    // By-pass Supabase completely for Base64 (audio recordings) to avoid bucket visibility issues
-    return await saveToLocal(buffer, uniqueFilename, subfolder);
+    try {
+      const supabase = getSupabase();
+      let contentType = "application/octet-stream";
+      if (ext === "webm") contentType = "audio/webm";
+      else if (ext === "wav") contentType = "audio/wav";
+      else if (ext === "mp3") contentType = "audio/mpeg";
+      else if (ext === "mp4") contentType = "video/mp4";
+      else if (ext === "png") contentType = "image/png";
+      else if (ext === "jpg") contentType = "image/jpeg";
+      
+      const { error } = await supabase.storage
+        .from("uploads")
+        .upload(filePath, buffer, {
+          contentType,
+          upsert: false,
+        });
+
+      if (error) {
+        throw error;
+      }
+
+      const { data } = supabase.storage.from("uploads").getPublicUrl(filePath);
+      return data.publicUrl;
+    } catch (supabaseError) {
+      console.warn("Supabase upload failed, falling back to local storage:", supabaseError);
+      return await saveToLocal(buffer, uniqueFilename, subfolder);
+    }
   } catch (error) {
-    console.error("Error saving base64 file locally:", error);
+    console.error("Error saving base64 file:", error);
     return null;
   }
 }

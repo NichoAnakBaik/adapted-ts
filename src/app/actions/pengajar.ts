@@ -95,8 +95,8 @@ export async function getTeacherDashboardStats() {
     const geminiApiKey = process.env.GEMINI_API_KEY;
     if (geminiApiKey) {
       try {
-        const genAI = new GoogleGenerativeAI(geminiApiKey);
-        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+        const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
         const prompt = `
           Kamu adalah asisten AI penasihat akademik (mentor pengajar) untuk Pengajar bahasa Korea bernama ${session.user.username}.
           Berikut adalah performa murid-murid di seluruh kelasnya:

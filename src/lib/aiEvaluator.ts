@@ -9,8 +9,8 @@ export class AdaptEdAI {
     if (geminiApiKey) {
       const genAI = new GoogleGenerativeAI(geminiApiKey);
       // Menggunakan 1.5-flash karena lebih cepat dan mensupport multimodal (teks+gambar)
-      this.llmModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-      this.visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+      this.llmModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
+      this.visionModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" });
     }
   }
 
