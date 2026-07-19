@@ -638,65 +638,35 @@ async function processAudioTranscriptionBackground(
       let transcriptText = "";
       let isSuccess = false;
 
-      // 3. Call Hugging Face API for Transcription (Reverted to Whisper as requested)
-      // Menggunakan whisper-small agar proses loading model (Cold Start) jauh lebih cepat dan jarang timeout.
-      const hfApiKey = process.env.HUGGINGFACE_API_KEY || process.env.HF_TOKEN;
-      if (hfApiKey) {
-        let retries = 5;
-        let waitTime = 5000; // start with 5 seconds wait
-
-        while (retries > 0 && !isSuccess) {
-          try {
-            const response = await fetch(
-              "https://api-inference.huggingface.co/models/openai/whisper-small",
-              {
-                headers: {
-                  Authorization: `Bearer ${hfApiKey}`,
-                  "Content-Type": "application/octet-stream",
-                },
-                method: "POST",
-                body: Buffer.from(arrayBuffer),
+      // 3. Call Gemini API for Transcription
+      // HuggingFace (Whisper) api-inference.huggingface.co diblokir/tidak bisa diakses dari server ini (ENOTFOUND).
+      // Oleh karena itu kita menggunakan Gemini Flash Latest yang sudah mendukung audio secara native.
+      const geminiApiKey = process.env.GEMINI_API_KEY;
+      if (geminiApiKey) {
+        try {
+          const genAI = new GoogleGenerativeAI(geminiApiKey);
+          const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
+          
+          const result = await model.generateContent([
+            {
+              inlineData: {
+                data: base64Audio,
+                mimeType: "audio/webm" 
               }
-            );
-            
-            if (!response.ok) {
-              const errorText = await response.text();
-              console.warn(`HF API Attempt Failed (${response.status}):`, errorText);
-              
-              if (response.status === 503 || response.status === 504 || errorText.includes("loading")) {
-                // Model is loading or timeout
-                console.log(`Model is loading/timeout. Retrying in ${waitTime/1000}s... (${retries} retries left)`);
-                await new Promise(res => setTimeout(res, waitTime));
-                waitTime += 5000; // Increase wait time for next retry
-                retries--;
-                continue;
-              }
-              
-              throw new Error(`HF API Error: ${response.status} ${errorText}`);
-            }
-            
-            const result = await response.json();
-            if (result && result.text) {
-              transcriptText = result.text.trim();
-              isSuccess = true;
-            } else {
-              console.error("Unexpected HF API response:", result);
-              break;
-            }
-          } catch (e) {
-            console.error("Hugging Face Transcription Error:", e);
-            if (retries > 1) {
-              console.log(`Retrying on catch... in ${waitTime/1000}s... (${retries-1} retries left)`);
-              await new Promise(res => setTimeout(res, waitTime));
-              waitTime += 5000;
-              retries--;
-              continue;
-            }
-            break;
+            },
+            { text: "Tolong transkripsi audio ini secara akurat. Hanya berikan teks hasil transkripsinya saja, tanpa tambahan kata-kata lain, tanpa menerjemahkan, pastikan bahasanya sesuai dengan apa yang diucapkan dalam audio (misal jika bahasa Korea, tulis dalam tulisan Hangeul)." }
+          ]);
+          
+          const text = result.response.text();
+          if (text) {
+            transcriptText = text.trim();
+            isSuccess = true;
           }
+        } catch (e) {
+          console.error("Gemini Audio Transcription Error:", e);
         }
       } else {
-        console.warn("HUGGINGFACE_API_KEY or HF_TOKEN is missing in environment variables.");
+        console.warn("GEMINI_API_KEY is missing in environment variables.");
       }
 
       // 4. Grade the transcription
