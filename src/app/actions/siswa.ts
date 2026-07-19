@@ -384,7 +384,7 @@ export async function submitExam(formData: FormData) {
        ai_feedback = "AI Error: Gagal menyimpan rekaman suara ke server.";
        score = 0;
     } else if (q.type === "SPEAKING" && audio_url) {
-       pendingTranscriptions.push({ question_id: q.id, answer_key: q.answer_key, audio_url });
+       pendingTranscriptions.push({ question_id: q.id, answer_key: q.answer_key, audio_url, audioB64 });
     }
 
     return {
@@ -604,7 +604,7 @@ export async function getStudentAnalytics() {
 // Background Task for Audio Transcription
 async function processAudioTranscriptionBackground(
   attemptId: string, 
-  pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string }[],
+  pendingTranscriptions: { question_id: string, answer_key: string | null, audio_url: string, audioB64?: string }[],
   createdQuestionAttempts: any[]
 ) {
   for (const pending of pendingTranscriptions) {
@@ -612,26 +612,40 @@ async function processAudioTranscriptionBackground(
     const qa = createdQuestionAttempts.find(q => q.question_id === pending.question_id);
     if (!qa) continue;
 
-    try {
+    // Tambahkan delay kecil (2 detik) antar request untuk mencegah rate-limit Gemini API jika ada multiple file
+    await new Promise(resolve => setTimeout(resolve, 2000));
 
-      // 2. Read audio file from URL or local file system
-      let arrayBuffer: ArrayBuffer;
-      if (pending.audio_url.startsWith('/uploads/')) {
-        const localPath = path.join(process.cwd(), "public", pending.audio_url);
-        const fileBuffer = await fs.readFile(localPath);
-        arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
-      } else {
-        const fullAudioUrl = pending.audio_url.startsWith('http') 
-          ? pending.audio_url 
-          : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000") + pending.audio_url;
-        
-        const audioRes = await fetch(fullAudioUrl);
-        if (!audioRes.ok) {
-          throw new Error(`Failed to fetch audio from URL: ${fullAudioUrl}`);
+    try {
+      let base64Audio = "";
+
+      if (pending.audioB64) {
+        // Extract raw base64 if it has data URI prefix
+        const b64Index = pending.audioB64.indexOf(";base64,");
+        if (b64Index !== -1) {
+          base64Audio = pending.audioB64.substring(b64Index + 8);
+        } else {
+          base64Audio = pending.audioB64;
         }
-        arrayBuffer = await audioRes.arrayBuffer();
+      } else {
+        // Fallback: Read audio file from URL or local file system if base64 is not provided
+        let arrayBuffer: ArrayBuffer;
+        if (pending.audio_url.startsWith('/uploads/')) {
+          const localPath = path.join(process.cwd(), "public", pending.audio_url);
+          const fileBuffer = await fs.readFile(localPath);
+          arrayBuffer = fileBuffer.buffer.slice(fileBuffer.byteOffset, fileBuffer.byteOffset + fileBuffer.byteLength);
+        } else {
+          const fullAudioUrl = pending.audio_url.startsWith('http') 
+            ? pending.audio_url 
+            : (process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000") + pending.audio_url;
+          
+          const audioRes = await fetch(fullAudioUrl);
+          if (!audioRes.ok) {
+            throw new Error(`Failed to fetch audio from URL: ${fullAudioUrl}`);
+          }
+          arrayBuffer = await audioRes.arrayBuffer();
+        }
+        base64Audio = Buffer.from(arrayBuffer).toString("base64");
       }
-      const base64Audio = Buffer.from(arrayBuffer).toString("base64");
 
       let transcriptText = "";
       let isSuccess = false;
