@@ -3,7 +3,7 @@ import SiswaKuisAttemptClient from "./SiswaKuisAttemptClient";
 import { getExamToTake } from "@/app/actions/siswa";
 import { notFound } from "next/navigation";
 
-export const maxDuration = 60; // Allow maximum execution time on Vercel Hobby tier for Hugging Face cold starts
+
 
 export default async function SiswaKuisAttemptPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
