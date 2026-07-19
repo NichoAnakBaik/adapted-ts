@@ -13,7 +13,10 @@ export default async function AdminKuisIndexPage() {
     orderBy: { created_at: 'desc' },
     include: {
       _count: {
-        select: { exams: true, enrollments: true }
+        select: { 
+          exams: { where: { is_final: false } }, 
+          enrollments: true 
+        }
       }
     }
   });

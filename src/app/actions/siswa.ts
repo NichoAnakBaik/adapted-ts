@@ -286,6 +286,24 @@ export async function getExamToTake(id: string) {
   return exam;
 }
 
+export async function retakeKuis(examId: string) {
+  const session = await checkSiswaAuth();
+  if (!session) return { error: "Unauthorized" };
+
+  try {
+    await prisma.examAttempt.deleteMany({
+      where: {
+        exam_id: examId,
+        student_id: session.user.id
+      }
+    });
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to retake quiz:", error);
+    return { error: "Gagal memproses pengerjaan ulang." };
+  }
+}
+
 export async function submitExam(formData: FormData) {
   const session = await checkSiswaAuth();
   

@@ -15,7 +15,10 @@ export default async function SiswaKuisIndexPage() {
       class: {
         include: {
           _count: {
-            select: { exams: true, enrollments: true }
+            select: { 
+              exams: { where: { is_final: false } }, 
+              enrollments: true 
+            }
           },
           teacher: {
             select: { nama_lengkap: true }

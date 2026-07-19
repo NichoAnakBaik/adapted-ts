@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { ArrowLeft, ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2, Loader2 } from "lucide-react";
+import { ArrowLeft, ClipboardList, Clock, FileQuestion, ArrowRight, CheckCircle2, Loader2, RefreshCcw } from "lucide-react";
 import Link from "next/link";
+import { retakeKuis } from "@/app/actions/siswa";
 
 export default function SiswaKuisClient({ exams, className }: { exams: any[], className?: string }) {
   const [searchQuery, setSearchQuery] = useState("");
@@ -11,6 +12,23 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
   useEffect(() => {
     return () => setClickedId(null);
   }, []);
+
+  const handleRetake = async (examId: string) => {
+    setClickedId(`retake-${examId}`);
+    try {
+      const res = await retakeKuis(examId);
+      if (res && res.success) {
+        window.location.href = `/siswa/kuis/${examId}`;
+      } else {
+        alert(res?.error || "Gagal mengulang kuis.");
+        setClickedId(null);
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Terjadi kesalahan.");
+      setClickedId(null);
+    }
+  };
 
   const filteredExams = exams.filter(ex => 
     ex.title.toLowerCase().includes(searchQuery.toLowerCase()) || 
@@ -88,17 +106,31 @@ export default function SiswaKuisClient({ exams, className }: { exams: any[], cl
                       <span className="text-xs text-gray-500 font-bold">NILAI KAMU</span>
                       <span className="text-lg font-bold text-green-600">{attempt.total_score}</span>
                     </div>
-                    <Link 
-                      href={`/siswa/kuis/${ex.id}/hasil`}
-                      onClick={() => setClickedId(`hasil-${ex.id}`)}
-                      className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2.5 rounded-lg transition-colors"
-                    >
-                      {clickedId === `hasil-${ex.id}` ? (
-                        <><Loader2 className="w-4 h-4 animate-spin" /> Memuat...</>
-                      ) : (
-                        <>Lihat Hasil <ArrowRight className="w-4 h-4" /></>
-                      )}
-                    </Link>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleRetake(ex.id)}
+                        disabled={clickedId !== null}
+                        title="Kerjakan Ulang"
+                        className="flex items-center justify-center w-10 h-10 bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg transition-colors"
+                      >
+                        {clickedId === `retake-${ex.id}` ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <RefreshCcw className="w-4 h-4" />
+                        )}
+                      </button>
+                      <Link 
+                        href={`/siswa/kuis/${ex.id}/hasil`}
+                        onClick={() => setClickedId(`hasil-${ex.id}`)}
+                        className="flex items-center gap-2 text-sm font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-4 py-2 rounded-lg transition-colors"
+                      >
+                        {clickedId === `hasil-${ex.id}` ? (
+                          <><Loader2 className="w-4 h-4 animate-spin" /> Memuat...</>
+                        ) : (
+                          <>Lihat Hasil <ArrowRight className="w-4 h-4" /></>
+                        )}
+                      </Link>
+                    </div>
                   </div>
                 ) : (
                   <Link 
