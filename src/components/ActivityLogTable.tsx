@@ -125,22 +125,32 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
   // === RENDER ADMIN (Super Admin Table) ===
   if (role === "ADMIN") {
     return (
-      <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
-        <div className="px-6 py-5 border-b border-gray-100 bg-gray-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <h3 className="font-bold text-gray-800 text-lg">Log Sistem</h3>
-          <div className="flex items-center gap-2">
-            <div className="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">{logs.length} Data Total</div>
+      <div className="bg-white rounded-3xl shadow-xl shadow-gray-200/40 border border-gray-100 overflow-hidden">
+        <div className="px-8 py-6 border-b border-gray-100 bg-gradient-to-r from-gray-50 to-white flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 bg-blue-50 text-blue-600 rounded-xl">
+              <Activity className="w-5 h-5" />
+            </div>
+            <div>
+              <h3 className="font-bold text-gray-900 text-xl tracking-tight">Log Sistem Terpadu</h3>
+              <p className="text-sm text-gray-500 font-medium">Rekaman seluruh aktivitas platform secara real-time</p>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-2xl shadow-sm border border-gray-100">
+            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span className="text-gray-700 font-bold text-sm">{logs.length} Total Aktivitas</span>
           </div>
         </div>
+        
         <div className="overflow-x-auto">
           <table className="w-full text-left text-sm">
-            <thead className="bg-gray-50 text-gray-500 uppercase text-xs font-bold">
+            <thead className="bg-gray-50/80 border-b border-gray-100 text-gray-500 text-xs font-black uppercase tracking-wider">
               <tr>
-                <th className="px-6 py-4">Waktu</th>
-                <th className="px-6 py-4">Siswa</th>
-                <th className="px-6 py-4">Aksi</th>
-                <th className="px-6 py-4">Detail Target</th>
-                <th className="px-6 py-4 text-right">Durasi</th>
+                <th className="px-8 py-5">Waktu & Tanggal</th>
+                <th className="px-8 py-5">Pengguna / Siswa</th>
+                <th className="px-8 py-5">Tindakan</th>
+                <th className="px-8 py-5">Target Informasi</th>
+                <th className="px-8 py-5 text-right">Durasi</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
@@ -151,33 +161,59 @@ export default function ActivityLogTable({ logs, role }: { logs: any[], role: "A
                 const Icon = actionInfo.icon;
                 const dur = formatDuration(log.duration);
                 return (
-                  <tr key={log.id} className="hover:bg-gray-50 transition-colors group">
-                    <td className="px-6 py-4 whitespace-nowrap text-gray-500 font-medium">
-                      {new Date(log.created_at).toLocaleDateString("id-ID", { day: '2-digit', month: 'short', year: 'numeric' })} <br/>
-                      <span className="text-gray-400 text-xs">{new Date(log.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit' })}</span>
+                  <tr key={log.id} className="hover:bg-blue-50/30 transition-colors group">
+                    <td className="px-8 py-5 whitespace-nowrap">
+                      <div className="text-gray-900 font-bold mb-1">
+                        {new Date(log.created_at).toLocaleDateString("id-ID", { day: '2-digit', month: 'long', year: 'numeric' })}
+                      </div>
+                      <div className="inline-flex items-center gap-1.5 bg-gray-100 px-2 py-0.5 rounded text-gray-500 text-xs font-semibold">
+                        <Clock className="w-3 h-3" />
+                        {new Date(log.created_at).toLocaleTimeString("id-ID", { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                      </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-gray-900">{log.student?.nama_lengkap}</div>
-                      <div className="text-gray-400 text-xs">@{log.student?.username}</div>
+                    
+                    <td className="px-8 py-5">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-namsan-primary to-orange-400 text-white flex items-center justify-center font-bold shadow-sm">
+                          {log.student?.nama_lengkap?.charAt(0).toUpperCase() || "?"}
+                        </div>
+                        <div>
+                          <div className="font-bold text-gray-900 text-base">{log.student?.nama_lengkap || "Unknown User"}</div>
+                          <div className="text-gray-400 text-xs font-medium">@{log.student?.username || "unknown"}</div>
+                        </div>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md border ${actionInfo.lightBg} ${actionInfo.border}`}>
-                        <Icon className={`w-3.5 h-3.5 ${actionInfo.color}`} />
-                        <span className={`text-[10px] font-bold uppercase tracking-wide ${actionInfo.color}`}>
+                    
+                    <td className="px-8 py-5 whitespace-nowrap">
+                      <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${actionInfo.lightBg} ${actionInfo.border} shadow-sm group-hover:scale-105 transition-transform`}>
+                        <Icon className={`w-4 h-4 ${actionInfo.color}`} />
+                        <span className={`text-xs font-black uppercase tracking-wide ${actionInfo.color}`}>
                           {actionInfo.label}
                         </span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 min-w-[250px]">
-                      <div className="font-semibold text-gray-800 text-sm truncate">
-                        {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "-"}
+                    
+                    <td className="px-8 py-5 min-w-[250px]">
+                      <div className="font-bold text-gray-800 text-sm md:text-base leading-snug">
+                        {meta.targetName || meta.title || meta.examTitle || meta.quizTitle || meta.moduleName || "Interaksi sistem umum"}
                       </div>
                       {meta.className && (
-                        <div className="text-xs text-gray-500 mt-1">Kelas: {meta.className}</div>
+                        <div className="flex items-center gap-1.5 mt-2">
+                          <span className="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Kelas</span>
+                          <span className="text-xs font-bold text-gray-600 bg-gray-100 px-2 py-0.5 rounded-full">{meta.className}</span>
+                        </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-gray-600 font-medium">
-                      {dur || "-"}
+                    
+                    <td className="px-8 py-5 whitespace-nowrap text-right">
+                      {dur ? (
+                        <div className="inline-flex items-center gap-1.5 text-orange-600 font-bold bg-orange-50 px-3 py-1.5 rounded-lg border border-orange-100">
+                          <Clock className="w-3.5 h-3.5" />
+                          {dur}
+                        </div>
+                      ) : (
+                        <span className="text-gray-300 font-medium">-</span>
+                      )}
                     </td>
                   </tr>
                 );

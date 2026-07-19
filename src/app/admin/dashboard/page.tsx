@@ -110,13 +110,13 @@ export default async function AdminDashboardPage() {
               <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-namsan-primary absolute bottom-6 right-6 transition-transform group-hover:translate-x-1" />
             </Link>
             
-            <Link href="/admin/logs" className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-namsan-primary/50 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
+            <Link href="/admin/ujian" className="group bg-white rounded-3xl p-6 border border-gray-100 hover:border-namsan-primary/50 shadow-sm hover:shadow-md transition-all duration-300 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-namsan-primary/10 to-transparent rounded-bl-full -z-10 transition-transform group-hover:scale-110"></div>
               <div className="w-12 h-12 bg-gray-50 group-hover:bg-namsan-primary/10 rounded-2xl flex items-center justify-center mb-4 transition-colors border border-gray-100 group-hover:border-namsan-primary/20">
                 <Settings className="w-6 h-6 text-gray-600 group-hover:text-namsan-dark transition-colors" />
               </div>
-              <h3 className="text-lg font-bold text-gray-800 mb-1">Pengaturan Sistem</h3>
-              <p className="text-sm text-gray-500 font-medium">Konfigurasi dan pantauan sistem</p>
+              <h3 className="text-lg font-bold text-gray-800 mb-1">Ujian Bahasa</h3>
+              <p className="text-sm text-gray-500 font-medium">Kelola dan pantau seluruh ujian</p>
               <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-namsan-primary absolute bottom-6 right-6 transition-transform group-hover:translate-x-1" />
             </Link>
           </div>
