@@ -452,12 +452,13 @@ export async function submitExam(formData: FormData) {
     }
   });
 
-  // Launch background task if there are pending transcriptions
+  // Launch transcription sequentially to prevent Next.js from dropping un-awaited promises
   if (pendingTranscriptions.length > 0) {
-    // Fire and forget
-    processAudioTranscriptionBackground(createdAttempt.id, pendingTranscriptions, createdAttempt.question_attempts).catch(err => {
-      console.error("Background transcription failed:", err);
-    });
+    try {
+      await processAudioTranscriptionBackground(createdAttempt.id, pendingTranscriptions, createdAttempt.question_attempts);
+    } catch (err) {
+      console.error("Transcription failed:", err);
+    }
   }
 
   // Record Activity Log
