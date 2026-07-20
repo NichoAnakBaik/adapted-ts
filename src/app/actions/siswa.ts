@@ -790,8 +790,14 @@ async function processAudioTranscriptionBackground(
             transcriptText = text.trim();
             isSuccess = true;
           }
-        } catch (e) {
+        } catch (e: any) {
           console.error("Gemini Audio Transcription Error:", e);
+          const errMsg = e.message || "";
+          if (errMsg.includes("429") || errMsg.includes("Too Many Requests") || errMsg.includes("quota")) {
+             ai_feedback = "Mohon maaf, sistem AI sedang penuh/sibuk (Limit Akses Tercapai). Harap tunggu sekitar 15-30 detik sebelum mencoba soal berikutnya.";
+             transcriptText = "[Gagal: Limit AI Tercapai]";
+             isSuccess = false;
+          }
         }
       } else {
         console.warn("GEMINI_API_KEY is missing in environment variables.");
@@ -826,8 +832,12 @@ async function processAudioTranscriptionBackground(
       } else {
         // Fallback if API fails
         score = 0;
-        ai_feedback = "AI Error: Gagal memproses transkripsi suara (API Error/Timeout).";
-        transcriptText = "[Transkripsi gagal]";
+        if (!ai_feedback) {
+           ai_feedback = "AI Error: Gagal memproses transkripsi suara (Sistem sibuk atau kendala jaringan).";
+        }
+        if (!transcriptText || transcriptText === "") {
+           transcriptText = "[Transkripsi gagal]";
+        }
       }
 
       // 5. Update QuestionAttempt in DB

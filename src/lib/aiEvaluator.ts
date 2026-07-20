@@ -107,9 +107,21 @@ export class AdaptEdAI {
       if (finalSkor < 0) finalSkor = 0;
 
       return { skor: finalSkor, feedback: parsed.feedback || "Evaluasi selesai." };
-    } catch (e: any) {
-      console.error("AI Dynamic Evaluation Error:", e);
-      return { skor: 0, feedback: `Gagal terhubung ke model analisis AI: ${e.message}` };
+    } catch (error: any) {
+      console.error("AI Evaluation Error:", error);
+      
+      const errMsg = error.message || "";
+      if (errMsg.includes("429") || errMsg.includes("Too Many Requests") || errMsg.includes("quota")) {
+        return {
+          skor: 0,
+          feedback: "Mohon maaf, sistem AI sedang penuh/sibuk (Limit Akses Tercapai). Harap tunggu sekitar 15-30 detik sebelum mencoba soal berikutnya.",
+        };
+      }
+
+      return {
+        skor: 0,
+        feedback: "Gagal terhubung ke model analisis AI. Sistem sedang mengalami kendala jaringan.",
+      };
     }
   }
 
