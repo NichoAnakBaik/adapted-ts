@@ -765,6 +765,8 @@ async function processAudioTranscriptionBackground(
 
       let transcriptText = "";
       let isSuccess = false;
+      let score = 0;
+      let ai_feedback = "";
 
       // 3. Call Gemini API for Transcription
       // HuggingFace (Whisper) api-inference.huggingface.co diblokir/tidak bisa diakses dari server ini (ENOTFOUND).
@@ -804,9 +806,6 @@ async function processAudioTranscriptionBackground(
       }
 
       // 4. Grade the transcription
-      let score = 0;
-      let ai_feedback = "";
-      
       if (isSuccess && transcriptText) {
         if (transcriptText.includes("[BUKAN_KOREA]")) {
           score = 0;
