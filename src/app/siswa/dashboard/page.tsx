@@ -27,14 +27,7 @@ export default async function SiswaDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
-          <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center mb-3 border border-yellow-100/50">
-            <CheckCircle2 className="w-7 h-7 text-namsan-primary" />
-          </div>
-          <p className="text-xs font-bold text-gray-400 mb-1 tracking-widest uppercase">Modul Lulus</p>
-          <p className="text-3xl font-black text-gray-800">{stats.completedModules}</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         
         <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
           <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-3 border border-green-100/50">
@@ -44,7 +37,7 @@ export default async function SiswaDashboardPage() {
           <p className="text-3xl font-black text-gray-800">{stats.durationMinutes} <span className="text-lg font-bold text-gray-400">Min</span></p>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center sm:col-span-2 md:col-span-1 transition-all hover:-translate-y-1 duration-300">
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
           <div className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 border ${stats.activeClass?.type === 'ONLINE' ? 'bg-purple-50 border-purple-100/50' : 'bg-blue-50 border-blue-100/50'}`}>
             {stats.activeClass?.type === 'ONLINE' ? (
               <Video className="w-7 h-7 text-purple-600" />
@@ -75,8 +68,64 @@ export default async function SiswaDashboardPage() {
         </div>
       </div>
 
+      {/* Language Mastery Bars */}
+      <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-100 mt-6">
+        <div className="flex items-center gap-3 mb-6">
+          <div className="p-2.5 bg-namsan-primary/20 rounded-xl">
+            <Award className="w-5 h-5 text-namsan-primary" />
+          </div>
+          <h2 className="text-xl font-bold text-gray-800 tracking-tight">Tingkat Pemahaman Siswa (Mastery)</h2>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Speaking */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-end">
+              <span className="text-sm font-bold text-gray-700">Berbicara (Speaking)</span>
+              <span className="text-sm font-black text-namsan-primary">{stats.masteryLevels?.SPEAKING || 0}%</span>
+            </div>
+            <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-namsan-primary transition-all duration-1000 ease-out rounded-full" style={{ width: `${stats.masteryLevels?.SPEAKING || 0}%` }}></div>
+            </div>
+          </div>
+
+          {/* Listening */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-end">
+              <span className="text-sm font-bold text-gray-700">Mendengar (Listening)</span>
+              <span className="text-sm font-black text-namsan-blue">{stats.masteryLevels?.LISTENING || 0}%</span>
+            </div>
+            <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-namsan-blue transition-all duration-1000 ease-out rounded-full" style={{ width: `${stats.masteryLevels?.LISTENING || 0}%` }}></div>
+            </div>
+          </div>
+
+          {/* Reading */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-end">
+              <span className="text-sm font-bold text-gray-700">Membaca (Reading)</span>
+              <span className="text-sm font-black text-green-500">{stats.masteryLevels?.READING || 0}%</span>
+            </div>
+            <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-green-500 transition-all duration-1000 ease-out rounded-full" style={{ width: `${stats.masteryLevels?.READING || 0}%` }}></div>
+            </div>
+          </div>
+
+          {/* Writing */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-end">
+              <span className="text-sm font-bold text-gray-700">Menulis (Writing)</span>
+              <span className="text-sm font-black text-purple-500">{stats.masteryLevels?.WRITING || 0}%</span>
+            </div>
+            <div className="h-3 w-full bg-gray-100 rounded-full overflow-hidden">
+              <div className="h-full bg-purple-500 transition-all duration-1000 ease-out rounded-full" style={{ width: `${stats.masteryLevels?.WRITING || 0}%` }}></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Lower Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8">
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 md:gap-8 mt-6">
         
         {/* Menu Pembelajaran */}
         <div className="xl:col-span-2 space-y-4">

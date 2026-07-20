@@ -6,7 +6,7 @@ import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboardPage() {
-  const { totalSiswa, totalPengajar, totalKelas } = await getDashboardStats();
+  const { totalSiswa, totalPengajar, totalKelas, totalUjian, totalUjianSelesai } = await getDashboardStats();
 
   const recentLogs = await prisma.studentActivityLog.findMany({
     include: { student: { select: { nama_lengkap: true } } },
@@ -35,35 +35,45 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex items-center gap-6 transition-all hover:-translate-y-1 duration-300">
-          <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center shrink-0 border border-yellow-100/50">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center mb-3 border border-yellow-100/50">
             <Users className="w-7 h-7 text-namsan-primary" />
           </div>
-          <div>
-            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Total Siswa</p>
-            <p className="text-3xl font-black text-gray-800">{totalSiswa}</p>
-          </div>
+          <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Total Siswa</p>
+          <p className="text-3xl font-black text-gray-800">{totalSiswa}</p>
         </div>
         
-        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex items-center gap-6 transition-all hover:-translate-y-1 duration-300">
-          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center shrink-0 border border-blue-100/50">
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-blue-50 rounded-2xl flex items-center justify-center mb-3 border border-blue-100/50">
             <Users className="w-7 h-7 text-namsan-blue" />
           </div>
-          <div>
-            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Total Pengajar</p>
-            <p className="text-3xl font-black text-gray-800">{totalPengajar}</p>
-          </div>
+          <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Total Pengajar</p>
+          <p className="text-3xl font-black text-gray-800">{totalPengajar}</p>
         </div>
 
-        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex items-center gap-6 transition-all hover:-translate-y-1 duration-300">
-          <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center shrink-0 border border-green-100/50">
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-green-50 rounded-2xl flex items-center justify-center mb-3 border border-green-100/50">
             <BookOpen className="w-7 h-7 text-green-600" />
           </div>
-          <div>
-            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Kelas Aktif</p>
-            <p className="text-3xl font-black text-gray-800">{totalKelas}</p>
+          <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Kelas Aktif</p>
+          <p className="text-3xl font-black text-gray-800">{totalKelas}</p>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center mb-3 border border-purple-100/50">
+            <Settings className="w-7 h-7 text-purple-600" />
           </div>
+          <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Modul Ujian</p>
+          <p className="text-3xl font-black text-gray-800">{totalUjian}</p>
+        </div>
+
+        <div className="bg-white rounded-3xl p-6 shadow-sm hover:shadow-md border border-gray-100 flex flex-col items-center justify-center text-center transition-all hover:-translate-y-1 duration-300">
+          <div className="w-14 h-14 bg-orange-50 rounded-2xl flex items-center justify-center mb-3 border border-orange-100/50">
+            <Award className="w-7 h-7 text-orange-600" />
+          </div>
+          <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Ujian Selesai</p>
+          <p className="text-3xl font-black text-gray-800">{totalUjianSelesai}</p>
         </div>
       </div>
 

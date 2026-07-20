@@ -99,8 +99,23 @@ export async function getDashboardStats() {
 
   let weakType = "SPEAKING"; // fallback
   let lowestAvg = Infinity;
+  
+  const masteryLevels = {
+    SPEAKING: 0,
+    LISTENING: 0,
+    READING: 0,
+    WRITING: 0
+  };
+
   for (const [t, data] of Object.entries(scoresByType)) {
-    const avg = data.totalScore / data.count;
+    const avg = Math.round((data.totalScore / data.count) * 10); // scale to 100% since max score is 10
+    
+    // WRITING includes ESSAY
+    if (t === "SPEAKING") masteryLevels.SPEAKING = avg;
+    if (t === "LISTENING") masteryLevels.LISTENING = avg;
+    if (t === "READING" || t === "MULTIPLE_CHOICE") masteryLevels.READING = avg; // Approximation
+    if (t === "ESSAY") masteryLevels.WRITING = avg;
+
     if (avg < lowestAvg) {
       lowestAvg = avg;
       weakType = t;
@@ -178,12 +193,14 @@ export async function getDashboardStats() {
   }
 
   return {
-    nama_lengkap: session.user.username, // Using username as fallback if nama_lengkap is not in session
+    nama_lengkap: session.user.nama_lengkap,
     completedModules,
     durationMinutes,
-    activeClass: activeEnrollment?.class || null,
+    activeClass: activeEnrollment?.class,
     masteryPercentage,
-    mlRecommendation
+    weakPointName,
+    mlRecommendation,
+    masteryLevels
   };
 }
 

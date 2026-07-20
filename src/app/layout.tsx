@@ -18,6 +18,7 @@ export const metadata: Metadata = {
 };
 
 import NextTopLoader from 'nextjs-toploader';
+import { GlobalLoadingProvider } from "@/components/GlobalLoading";
 
 export default function RootLayout({
   children,
@@ -43,7 +44,9 @@ export default function RootLayout({
           zIndex={1600}
           showAtBottom={false}
         />
-        {children}
+        <GlobalLoadingProvider>
+          {children}
+        </GlobalLoadingProvider>
       </body>
     </html>
   );

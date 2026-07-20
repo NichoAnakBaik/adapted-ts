@@ -22,13 +22,15 @@ async function checkAdminAuth() {
 export async function getDashboardStats() {
   await checkAdminAuth();
   
-  const [totalSiswa, totalPengajar, totalKelas] = await Promise.all([
+  const [totalSiswa, totalPengajar, totalKelas, totalUjian, totalUjianSelesai] = await Promise.all([
     prisma.user.count({ where: { role: "SISWA" } }),
     prisma.user.count({ where: { role: "PENGAJAR" } }),
     prisma.class.count(),
+    prisma.exam.count(),
+    prisma.examAttempt.count()
   ]);
 
-  return { totalSiswa, totalPengajar, totalKelas };
+  return { totalSiswa, totalPengajar, totalKelas, totalUjian, totalUjianSelesai };
 }
 
 // --- USER MANAGEMENT ---

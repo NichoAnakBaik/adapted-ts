@@ -54,7 +54,7 @@ export default async function PengajarDashboardPage() {
             <BookOpen className="w-7 h-7 text-namsan-blue" />
           </div>
           <div>
-            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Kuis & Ujian</p>
+            <p className="text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Total Kuis Kelas</p>
             <p className="text-3xl font-black text-gray-800">{stats.examsCount}</p>
           </div>
         </div>
