@@ -458,11 +458,6 @@ export default function AdminUjianDetailClient({ exam, initialEligibleStudents }
                         <span className="font-bold mr-1">Kunci:</span> {q.answer_key}
                       </div>
                     )}
-                    {q.audio_reference && (
-                      <div className="w-full">
-                        <AudioPlayer src={q.audio_reference} className="max-w-xs" />
-                      </div>
-                    )}
                     <div className="flex items-center gap-1 text-gray-500">
                       Kesulitan: <span className="font-bold text-gray-700">Level {q.difficulty}</span>
                     </div>

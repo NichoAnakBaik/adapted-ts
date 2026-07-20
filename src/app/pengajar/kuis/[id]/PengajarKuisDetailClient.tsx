@@ -403,15 +403,6 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               </div>
               <p className="text-namsan-text font-medium whitespace-pre-wrap">{q.question_text}</p>
               
-              {(q.format === 'MULTIPLE_CHOICE' || q.type === 'MULTIPLE_CHOICE') && (q.option_a || q.option_b || q.option_c || q.option_d) && (
-                <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
-                  <div><span className="font-bold">A.</span> {q.option_a}</div>
-                  <div><span className="font-bold">B.</span> {q.option_b}</div>
-                  <div><span className="font-bold">C.</span> {q.option_c}</div>
-                  <div><span className="font-bold">D.</span> {q.option_d}</div>
-                </div>
-              )}
-
               {q.image_url && (
                 <div className="mt-3">
                   <span className="text-sm text-gray-500 block mb-1">Gambar:</span>
@@ -422,6 +413,15 @@ export default function PengajarKuisDetailClient({ exam }: { exam: any }) {
               {q.audio_reference && (
                 <div className="mt-2 mb-3">
                   <AudioPlayer src={q.audio_reference} className="max-w-md" />
+                </div>
+              )}
+
+              {(q.format === 'MULTIPLE_CHOICE' || q.type === 'MULTIPLE_CHOICE') && (q.option_a || q.option_b || q.option_c || q.option_d) && (
+                <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
+                  <div><span className="font-bold">A.</span> {q.option_a}</div>
+                  <div><span className="font-bold">B.</span> {q.option_b}</div>
+                  <div><span className="font-bold">C.</span> {q.option_c}</div>
+                  <div><span className="font-bold">D.</span> {q.option_d}</div>
                 </div>
               )}
 

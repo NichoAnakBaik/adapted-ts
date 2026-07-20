@@ -75,18 +75,18 @@ export default function PengajarUjianDetailClient({ exam }: { exam: any }) {
                     </div>
                   )}
 
+                  {q.audio_reference && (
+                    <div className="mt-3 mb-2">
+                      <AudioPlayer src={q.audio_reference} className="max-w-md" />
+                    </div>
+                  )}
+
                   {(q.option_a || q.option_b || q.option_c || q.option_d) && (
                     <div className="grid grid-cols-2 gap-2 mt-3 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <div><span className="font-bold">A.</span> {q.option_a}</div>
                       <div><span className="font-bold">B.</span> {q.option_b}</div>
                       <div><span className="font-bold">C.</span> {q.option_c}</div>
                       <div><span className="font-bold">D.</span> {q.option_d}</div>
-                    </div>
-                  )}
-
-                  {q.audio_reference && (
-                    <div className="mt-3">
-                      <AudioPlayer src={q.audio_reference} className="max-w-md" />
                     </div>
                   )}
 

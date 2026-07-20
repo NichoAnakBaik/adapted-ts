@@ -109,6 +109,12 @@ export default function AdminKuisDetailClient({ exam }: { exam: any }) {
                       </div>
                     )}
 
+                    {q.audio_reference && (
+                      <div className="mt-3 mb-4">
+                        <AudioPlayer src={q.audio_reference} className="max-w-md" />
+                      </div>
+                    )}
+
                     {(q.option_a || q.option_b || q.option_c || q.option_d) && (
                       <div className="grid grid-cols-2 gap-2 mb-4 text-sm text-gray-700 bg-gray-50 p-3 rounded-xl border border-gray-100">
                         <div><span className="font-bold">A.</span> {q.option_a}</div>
@@ -122,11 +128,6 @@ export default function AdminKuisDetailClient({ exam }: { exam: any }) {
                       {q.answer_key && (
                         <div className="bg-green-50 text-green-700 px-3 py-1.5 rounded-lg border border-green-100">
                           <span className="font-bold mr-1">Kunci:</span> {q.answer_key}
-                        </div>
-                      )}
-                      {q.audio_reference && (
-                        <div className="w-full mt-2">
-                          <AudioPlayer src={q.audio_reference} className="max-w-xs" />
                         </div>
                       )}
                       <div className="flex items-center gap-1 text-gray-500">
