@@ -633,6 +633,50 @@ export async function getStudentAnalytics() {
     timePreference
   };
 
+  // --- USER-BASED COLLABORATIVE FILTERING ---
+  // Find similar students to recommend modules they succeeded in
+  let recommendedModule = "Lanjutkan modul reguler Anda";
+  if (attempts.length > 0) {
+    const studentAvgScore = attempts.reduce((acc, curr) => acc + (curr.total_score || 0), 0) / attempts.length;
+    
+    // Find all other students' attempts
+    const allOtherAttempts = await prisma.examAttempt.findMany({
+      where: { student_id: { not: session.user.id } },
+      include: { exam: { select: { title: true } } }
+    });
+
+    // Group by student to find their average
+    const otherStudentStats: Record<string, { totalScore: number, count: number, exams: Set<string> }> = {};
+    allOtherAttempts.forEach(a => {
+      if (!otherStudentStats[a.student_id]) otherStudentStats[a.student_id] = { totalScore: 0, count: 0, exams: new Set() };
+      otherStudentStats[a.student_id].totalScore += (a.total_score || 0);
+      otherStudentStats[a.student_id].count += 1;
+      otherStudentStats[a.student_id].exams.add(a.exam.title);
+    });
+
+    // Find the most similar student (Euclidean distance on average score)
+    let mostSimilarStudentId = null;
+    let minDiff = Infinity;
+    for (const [sid, stat] of Object.entries(otherStudentStats)) {
+      const avg = stat.totalScore / stat.count;
+      const diff = Math.abs(avg - studentAvgScore);
+      if (diff < minDiff) {
+        minDiff = diff;
+        mostSimilarStudentId = sid;
+      }
+    }
+
+    // Recommend an exam taken by the similar student that the current student hasn't taken
+    if (mostSimilarStudentId) {
+      const similarStudentExams = Array.from(otherStudentStats[mostSimilarStudentId].exams);
+      const myExams = new Set(attempts.map(a => a.exam.title));
+      const newExams = similarStudentExams.filter(e => !myExams.has(e));
+      if (newExams.length > 0) {
+        recommendedModule = newExams[0]; // Recommend the first one found
+      }
+    }
+  }
+
   let aiReport = "";
   if (attempts.length > 0) {
     const geminiApiKey = process.env.GEMINI_API_KEY;
@@ -649,11 +693,12 @@ export async function getStudentAnalytics() {
           - Tingkat Kehadiran: ${attendanceRate}%
           - Total Waktu Belajar: ${totalDurationHours} Jam
           - Waktu Belajar Favorit: ${timePreference}
+          - Rekomendasi Collaborative Filtering: "${recommendedModule}"
 
           Buatlah laporan komprehensif dengan struktur berikut:
           1. **Ringkasan Performa**: Paragraf pembuka yang hangat dan memotivasi.
           2. **Analisis Pola Belajar**: Evaluasi dedikasi belajar mereka berdasarkan kehadiran dan durasi.
-          3. **Peta Jalan Belajar (Roadmap)**: Berikan 3 langkah konkret (bullet points) apa yang harus mereka pelajari selanjutnya.
+          3. **Peta Jalan Belajar (Roadmap)**: Berikan 3 langkah konkret apa yang harus mereka pelajari selanjutnya. (Sebutkan rekomendasi modul dari sistem Collaborative Filtering kami: ${recommendedModule}).
           
           Gunakan bahasa Indonesia yang profesional namun tetap asyik dan tidak kaku. Gunakan emoji secukupnya. Jangan gunakan heading 1 (#), maksimal heading 2 (##) atau 3 (###).
         `;

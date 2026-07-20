@@ -273,6 +273,47 @@ export async function getTeacherAnalytics() {
   // Sort by average score ascending (lowest first)
   performanceList.sort((a, b) => a.average - b.average);
 
+  // --- K-MEANS CLUSTERING ALGORITHM ---
+  // Group students into 3 clusters based on average score
+  let clusters = [[], [], []] as typeof performanceList[];
+  if (performanceList.length >= 3) {
+    // Initialize centroids: min, median, max
+    let c1 = performanceList[0].average;
+    let c2 = performanceList[Math.floor(performanceList.length / 2)].average;
+    let c3 = performanceList[performanceList.length - 1].average;
+
+    for (let iter = 0; iter < 10; iter++) {
+      clusters = [[], [], []];
+      // Assign points to nearest centroid
+      for (const p of performanceList) {
+        const d1 = Math.abs(p.average - c1);
+        const d2 = Math.abs(p.average - c2);
+        const d3 = Math.abs(p.average - c3);
+        const minD = Math.min(d1, d2, d3);
+        if (minD === d1) clusters[0].push(p);
+        else if (minD === d2) clusters[1].push(p);
+        else clusters[2].push(p);
+      }
+      
+      // Recalculate centroids
+      const newC1 = clusters[0].length ? clusters[0].reduce((s, p) => s + p.average, 0) / clusters[0].length : c1;
+      const newC2 = clusters[1].length ? clusters[1].reduce((s, p) => s + p.average, 0) / clusters[1].length : c2;
+      const newC3 = clusters[2].length ? clusters[2].reduce((s, p) => s + p.average, 0) / clusters[2].length : c3;
+      
+      if (c1 === newC1 && c2 === newC2 && c3 === newC3) break;
+      c1 = newC1; c2 = newC2; c3 = newC3;
+    }
+  } else {
+    // Not enough data for 3 clusters
+    clusters[0] = performanceList.filter(p => p.average < 70);
+    clusters[1] = performanceList.filter(p => p.average >= 70 && p.average < 90);
+    clusters[2] = performanceList.filter(p => p.average >= 90);
+  }
+
+  const atRiskCluster = clusters[0].map(p => `${p.name} (Rata-rata: ${p.average})`);
+  const averageCluster = clusters[1].map(p => `${p.name} (Rata-rata: ${p.average})`);
+  const topCluster = clusters[2].map(p => `${p.name} (Rata-rata: ${p.average})`);
+
   let aiReport = "";
   if (performanceList.length > 0) {
     const geminiApiKey = process.env.GEMINI_API_KEY;
@@ -281,22 +322,21 @@ export async function getTeacherAnalytics() {
         const genAI = new GoogleGenerativeAI(geminiApiKey);
         const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
         
-        const strugglingStudents = performanceList.filter(p => p.average < 70).map(p => `${p.name} (Rata-rata: ${p.average})`);
-        const topStudents = performanceList.filter(p => p.average >= 90).map(p => `${p.name} (Rata-rata: ${p.average})`);
-        
         const prompt = `
           Kamu adalah AI Asisten Pengajar (Guru) Namsan Korean Course untuk pengajar bernama ${session.user.nama_lengkap}.
-          Tugasmu adalah menganalisis performa seluruh kelas yang diajarnya dan menyajikan laporan analitik pedagogik dalam format Markdown yang indah, rapi, dan mudah dibaca.
+          Kamu baru saja menjalankan algoritma **K-Means Clustering** untuk mengelompokkan kemampuan siswa di kelas secara dinamis.
+          Tugasmu adalah menyajikan laporan analitik pedagogik dalam format Markdown yang indah, rapi, dan mudah dibaca.
           
-          Data Kelas:
+          Data Clustering Kelas (K=3):
           - Total Evaluasi/Kuis Dikerjakan: ${attempts.length}
-          - Siswa Berisiko (Nilai < 70): ${strugglingStudents.length > 0 ? strugglingStudents.join(', ') : 'Tidak ada, semua di atas 70!'}
-          - Siswa Terbaik (Nilai >= 90): ${topStudents.length > 0 ? topStudents.join(', ') : 'Belum ada yang mencapai rata-rata 90.'}
+          - Cluster 1 (Berisiko / Butuh Bimbingan): ${atRiskCluster.length > 0 ? atRiskCluster.join(', ') : 'Kosong'}
+          - Cluster 2 (Menengah / Rata-rata): ${averageCluster.length > 0 ? averageCluster.join(', ') : 'Kosong'}
+          - Cluster 3 (Unggul / Mandiri): ${topCluster.length > 0 ? topCluster.join(', ') : 'Kosong'}
 
           Buatlah laporan analitik dengan struktur berikut:
-          1. **Evaluasi Performa Kelas**: Paragraf pembuka yang memberikan gambaran umum kelas.
-          2. **Identifikasi Masalah**: Analisis mengapa siswa berisiko mungkin kesulitan (berikan hipotesis).
-          3. **Rekomendasi Tindakan (Action Plan)**: Berikan 3 langkah konkret (bullet points) apa yang harus dilakukan pengajar di sesi berikutnya.
+          1. **Evaluasi Performa Berbasis Clustering**: Berikan gambaran umum mengenai distribusi siswa (sebutkan bahwa kita menggunakan algoritma Machine Learning K-Means).
+          2. **Analisis Tiap Cluster**: Jelaskan mengapa siswa berada di Cluster 1 mungkin kesulitan dan berikan pujian untuk Cluster 3.
+          3. **Rekomendasi Tindakan (Action Plan)**: Berikan langkah konkret apa yang harus dilakukan pengajar.
           
           Gunakan bahasa Indonesia yang profesional, empatik, namun ringkas dan *actionable*. Gunakan emoji secukupnya. Jangan gunakan heading 1 (#), maksimal heading 2 (##) atau 3 (###).
         `;
