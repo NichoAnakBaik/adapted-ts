@@ -633,7 +633,40 @@ export async function getStudentAnalytics() {
     timePreference
   };
 
-  return { attempts, recommendations, patterns };
+  let aiReport = "";
+  if (attempts.length > 0) {
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (geminiApiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        const prompt = `
+          Kamu adalah AI Penasihat Akademik (Mentor) Namsan Korean Course untuk siswa bernama ${session.user.nama_lengkap}.
+          Tugasmu adalah menganalisis data belajarnya dan menyajikan laporan akademik dalam format Markdown yang indah, rapi, dan mudah dibaca.
+          
+          Data Siswa:
+          - Total Kuis Dikerjakan: ${attempts.length}
+          - Tingkat Kehadiran: ${attendanceRate}%
+          - Total Waktu Belajar: ${totalDurationHours} Jam
+          - Waktu Belajar Favorit: ${timePreference}
+
+          Buatlah laporan komprehensif dengan struktur berikut:
+          1. **Ringkasan Performa**: Paragraf pembuka yang hangat dan memotivasi.
+          2. **Analisis Pola Belajar**: Evaluasi dedikasi belajar mereka berdasarkan kehadiran dan durasi.
+          3. **Peta Jalan Belajar (Roadmap)**: Berikan 3 langkah konkret (bullet points) apa yang harus mereka pelajari selanjutnya.
+          
+          Gunakan bahasa Indonesia yang profesional namun tetap asyik dan tidak kaku. Gunakan emoji secukupnya. Jangan gunakan heading 1 (#), maksimal heading 2 (##) atau 3 (###).
+        `;
+        const result = await model.generateContent(prompt);
+        aiReport = result.response.text();
+      } catch (e) {
+        console.error("AI Analytics Error:", e);
+        aiReport = "Gagal memuat analisis AI saat ini. Silakan coba beberapa saat lagi.";
+      }
+    }
+  }
+
+  return { attempts, recommendations, patterns, aiReport };
 }
 
 // Background Task for Audio Transcription

@@ -273,10 +273,47 @@ export async function getTeacherAnalytics() {
   // Sort by average score ascending (lowest first)
   performanceList.sort((a, b) => a.average - b.average);
 
+  let aiReport = "";
+  if (performanceList.length > 0) {
+    const geminiApiKey = process.env.GEMINI_API_KEY;
+    if (geminiApiKey) {
+      try {
+        const genAI = new GoogleGenerativeAI(geminiApiKey);
+        const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+        
+        const strugglingStudents = performanceList.filter(p => p.average < 70).map(p => `${p.name} (Rata-rata: ${p.average})`);
+        const topStudents = performanceList.filter(p => p.average >= 90).map(p => `${p.name} (Rata-rata: ${p.average})`);
+        
+        const prompt = `
+          Kamu adalah AI Asisten Pengajar (Guru) Namsan Korean Course untuk pengajar bernama ${session.user.nama_lengkap}.
+          Tugasmu adalah menganalisis performa seluruh kelas yang diajarnya dan menyajikan laporan analitik pedagogik dalam format Markdown yang indah, rapi, dan mudah dibaca.
+          
+          Data Kelas:
+          - Total Evaluasi/Kuis Dikerjakan: ${attempts.length}
+          - Siswa Berisiko (Nilai < 70): ${strugglingStudents.length > 0 ? strugglingStudents.join(', ') : 'Tidak ada, semua di atas 70!'}
+          - Siswa Terbaik (Nilai >= 90): ${topStudents.length > 0 ? topStudents.join(', ') : 'Belum ada yang mencapai rata-rata 90.'}
+
+          Buatlah laporan analitik dengan struktur berikut:
+          1. **Evaluasi Performa Kelas**: Paragraf pembuka yang memberikan gambaran umum kelas.
+          2. **Identifikasi Masalah**: Analisis mengapa siswa berisiko mungkin kesulitan (berikan hipotesis).
+          3. **Rekomendasi Tindakan (Action Plan)**: Berikan 3 langkah konkret (bullet points) apa yang harus dilakukan pengajar di sesi berikutnya.
+          
+          Gunakan bahasa Indonesia yang profesional, empatik, namun ringkas dan *actionable*. Gunakan emoji secukupnya. Jangan gunakan heading 1 (#), maksimal heading 2 (##) atau 3 (###).
+        `;
+        const result = await model.generateContent(prompt);
+        aiReport = result.response.text();
+      } catch (e) {
+        console.error("AI Analytics Error:", e);
+        aiReport = "Gagal memuat analisis AI kelas saat ini. Silakan coba beberapa saat lagi.";
+      }
+    }
+  }
+
   return { 
     attempts, 
     recommendations, 
-    performanceList 
+    performanceList,
+    aiReport
   };
 }
 

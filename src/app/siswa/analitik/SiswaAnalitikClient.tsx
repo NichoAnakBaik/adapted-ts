@@ -1,7 +1,8 @@
 "use client";
 
 import React from "react";
-import { LineChart, BrainCircuit, TrendingUp, TrendingDown, Target, BookOpen, Clock } from "lucide-react";
+import { LineChart, BrainCircuit, TrendingUp, TrendingDown, Target, BookOpen, Clock, Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
 
 export default function SiswaAnalitikClient({ data }: { data: any }) {
   const { attempts, recommendations } = data;
@@ -96,37 +97,29 @@ export default function SiswaAnalitikClient({ data }: { data: any }) {
               </div>
             </div>
           </div>
-          <div className="bg-namsan-dark rounded-2xl p-4 md:p-6 shadow-lg relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white opacity-5 rounded-bl-full -z-10"></div>
+          <div className="bg-[#151718] rounded-2xl p-4 md:p-8 shadow-lg relative overflow-hidden border border-white/5">
+            {/* Glossy gradient accent */}
+            <div className="absolute top-0 right-0 w-64 h-64 bg-namsan-primary/10 rounded-bl-full -z-10 blur-3xl mix-blend-screen"></div>
+            <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-500/10 rounded-tr-full -z-10 blur-2xl mix-blend-screen"></div>
             
-            <div className="flex items-center gap-3 mb-4 md:mb-6">
-              <div className="p-2 bg-namsan-primary/20 rounded-lg">
-                <BrainCircuit className="w-5 h-5 md:w-6 md:h-6 text-namsan-primary" />
+            <div className="flex items-center gap-3 mb-6 md:mb-8 border-b border-white/10 pb-4">
+              <div className="p-3 bg-gradient-to-br from-namsan-primary to-namsan-secondary rounded-xl shadow-[0_0_15px_rgba(255,199,20,0.4)]">
+                <Sparkles className="w-6 h-6 text-namsan-dark" />
               </div>
-              <h2 className="text-lg md:text-xl font-bold text-white">Rekomendasi AI</h2>
+              <div>
+                <h2 className="text-xl md:text-2xl font-black text-white tracking-tight">AI Academic Report</h2>
+                <p className="text-xs md:text-sm text-gray-400 font-medium">Dihasilkan secara real-time oleh Namsan Intelligence</p>
+              </div>
             </div>
 
-            {recommendations.length > 0 ? (
-              <div className="space-y-3 md:space-y-4">
-                {recommendations.map((rec: any) => (
-                  <div key={rec.id} className="bg-white/10 p-3 md:p-4 rounded-xl border border-white/10 flex flex-col sm:flex-row items-start gap-3">
-                    <div className="mt-0.5 text-namsan-primary shrink-0">
-                      {rec.recommendation_type === 'MODULE_SUGGESTION' ? <BookOpen className="w-5 h-5" /> : 
-                       rec.recommendation_type === 'PACE_WARNING' ? <Clock className="w-5 h-5" /> : 
-                       <BrainCircuit className="w-5 h-5" />}
-                    </div>
-                    <div>
-                      <span className="text-[10px] md:text-xs font-bold text-namsan-primary mb-1 block uppercase tracking-wider">{rec.recommendation_type.replace('_', ' ')}</span>
-                      <p className="text-xs md:text-sm text-gray-300 leading-relaxed">{rec.recommendation_text}</p>
-                      <span className="text-[10px] md:text-xs text-gray-500 mt-2 block">{new Date(rec.created_at).toLocaleDateString('id-ID')}</span>
-                    </div>
-                  </div>
-                ))}
+            {data.aiReport ? (
+              <div className="prose prose-invert prose-sm md:prose-base max-w-none prose-headings:text-white prose-p:text-gray-300 prose-strong:text-namsan-primary prose-ul:text-gray-300 prose-li:marker:text-namsan-primary">
+                <ReactMarkdown>{data.aiReport}</ReactMarkdown>
               </div>
             ) : (
-              <div className="p-6 md:p-8 text-center bg-white/5 rounded-xl border border-white/5 border-dashed">
-                <BrainCircuit className="w-8 h-8 md:w-10 md:h-10 text-gray-600 mx-auto mb-3" />
-                <p className="text-gray-400 text-xs md:text-sm">Belum ada rekomendasi AI saat ini. Terus kerjakan modul dan kuis agar AI dapat menganalisis pola belajar Anda.</p>
+              <div className="p-8 md:p-12 text-center flex flex-col items-center justify-center bg-white/5 rounded-2xl border border-white/5 border-dashed backdrop-blur-sm">
+                <BrainCircuit className="w-12 h-12 text-gray-600 mb-4 animate-pulse" />
+                <p className="text-gray-400 text-sm font-medium">Belum ada data yang cukup untuk dianalisis oleh AI. Ayo mulai kerjakan kuis!</p>
               </div>
             )}
           </div>
